@@ -1,6 +1,8 @@
 # Mario Maker 2 OCR
 This program will capture the level code, level creator & level name from a Mario Maker 2 game feed and write them to a JSON file. 
 
+Can be used in conjunction with [Mario Maker 2 Level Display](https://github.com/dram55/MarioMaker2LevelDisplay) to automatically display levels on stream.
+
 ## Dependecies
 The [OpenCV](https://opencv.org/) library is used for image processing and [Tesseract](https://opensource.google.com/projects/tesseract) library is used for OCR (Optical Character Recognition). [EmguCV](http://www.emgu.com/wiki/index.php/Main_Page) provides a .NET wrapper for both of these libraries and is directly used for this project. 
 
