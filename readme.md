@@ -3,35 +3,15 @@ This program will capture the level code, level creator & level name from a Mari
 
 Can be used in conjunction with [Mario Maker 2 Level Display](https://github.com/dram55/MarioMaker2LevelDisplay) to automatically display levels on stream.
 
-## Dependecies
-The [OpenCV](https://opencv.org/) library is used for image processing and [Tesseract](https://opensource.google.com/projects/tesseract) library is used for OCR (Optical Character Recognition). [EmguCV](http://www.emgu.com/wiki/index.php/Main_Page) provides a .NET wrapper for both of these libraries and is directly used for this project. 
 
-### NuGet Packages
-- DirectShowLib v1.0.0
-- EMGU CV v4.1.0.3420
-- Newtonsoft.Json v12.0.2
-- log4net v2.0.8
-
-
-## How To Use
-### Setup
-- If you are using OBS, download the [OBS-VirtualCam](https://obsproject.com/forum/resources/obs-virtualcam.539/) plugin to have OBS output a virtual cam which you can select in Mario Maker 2 OCR.
-    - This is needed because you can't access a capture card already in use by OBS.
-    - In the future, may implement a window capture system to get around this.
-- If you are not using OBS then you need a similar plugin for your streaming software.
-
-
-### Use
-1) Open OBS before this program to avoid conflict.
-2) Select the video device from the dropdown (use OBS VirtualCam from setup).
-3) Select a folder to write the output JSON file.
-4) Select the resolution.
-5) Press **Start** button.
-6) The bottom bar shows the status. When a level is matched it will display on screen and written to a JSON file. 
+### Screenshot
+![](screenshot.png)
 
 ### JSON Output
-This can be read in by a separate program or directly into OBS
+
 ``` JSON
+\ocrLevel.json
+
 {
   "level": {
     "author": "Valdio",
@@ -40,8 +20,28 @@ This can be read in by a separate program or directly into OBS
   }
 }
 ```
-### Screenshot
-![](screenshot.png)
+
+## How To Use
+### Setup
+- If you are using OBS, download the [OBS-VirtualCam](https://obsproject.com/forum/resources/obs-virtualcam.539/) plugin to have OBS output a virtual cam which you can select in Mario Maker 2 OCR.
+    - This is needed because you can't access a capture card already in use by OBS.
+    - In the future, may implement a window capture system to get around this.
+- If you are not using OBS then you need a similar plugin for your streaming software.
+
+### Use
+1) Open OBS before this program to avoid conflict.
+2) Select the video device with Mario Maker 2 gameplay from the dropdown (use OBS VirtualCam from setup).
+3) Select a folder to write the output JSON file.
+4) Select the resolution.
+5) Press **Start** button.
+6) The bottom status strip is updated.
+   - A green box indicates the program is running. 
+   - A percentage is displayed, representing the current video frame's similarity to a new level screen. 
+7) When a new level is detected:
+   - The values are read from the screen.
+   - The **OCR** textbox will display the level information. 
+   - The level information is written to `ocrLevel.json` file. 
+
 
 ## How It Works
 1) Every 1s the program reads a frame from the video feed.
@@ -58,6 +58,15 @@ This can be read in by a separate program or directly into OBS
     - Pass these images to the Tesseract library to perform the OCR.
         - For the level code, use the whitelist command to help with accuracy: `tessedit_char_whitelist ABCDEFGHJKLMNPQRSTUVWXYZ0123456789-`
     - Write the results to a JSON output file.
+
+## Dependecies
+The [OpenCV](https://opencv.org/) library is used for image processing and [Tesseract](https://opensource.google.com/projects/tesseract) library is used for OCR (Optical Character Recognition). [EmguCV](http://www.emgu.com/wiki/index.php/Main_Page) provides a .NET wrapper for both of these libraries and is directly used for this project. 
+
+### NuGet Packages
+- DirectShowLib v1.0.0
+- EMGU CV v4.1.0.3420
+- Newtonsoft.Json v12.0.2
+- log4net v2.0.8
 
 ## Known Issues
 - Silent errors thrown by library, need to restart program if it does not read correctly.
