@@ -15,7 +15,7 @@ namespace MarioMaker2OCR
 
         /// <summary>
         /// Get string from image using Tesserect Library for OCR
-        /// Only use eng language and a subset of characters representing MM2 Level Codes
+        /// Only use eng+jpn language
         /// </summary>
         public static string GetStringFromImage(Image<Gray, byte> image)
         {

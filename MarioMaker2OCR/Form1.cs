@@ -23,10 +23,10 @@ namespace MarioMaker2OCR
 
         private static bool ERROR_THROWN = false;
 
-        VideoCapture captureCard;
+        VideoCapture videoDevice;
         Size resolution720 = new Size(1280, 720);
         MCvScalar redRectangle = new MCvScalar(0, 0, 255);
-        System.Timers.Timer processVideoFramesTimer;
+        System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
         private Rectangle levelTitleArea;
@@ -45,7 +45,7 @@ namespace MarioMaker2OCR
             }
         }
 
-        public DsDevice SelectedCamera
+        public DsDevice SelectedDevice
         {
             get
             {
@@ -57,9 +57,9 @@ namespace MarioMaker2OCR
         {
             InitializeComponent();
 
-            processVideoFramesTimer = new System.Timers.Timer();
-            processVideoFramesTimer.Interval = 1500;
-            processVideoFramesTimer.Elapsed += new System.Timers.ElapsedEventHandler(readScreenTimer_Tick);
+            processVideoFrameTimer = new System.Timers.Timer();
+            processVideoFrameTimer.Interval = 1500;
+            processVideoFrameTimer.Elapsed += new System.Timers.ElapsedEventHandler(readScreenTimer_Tick);
 
             processStatusIcon.BackColor = Color.Red;
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
@@ -106,13 +106,13 @@ namespace MarioMaker2OCR
             Mat currentFrame = new Mat();
             try
             {
-                captureCard.Retrieve(currentFrame);
+                videoDevice.Retrieve(currentFrame);
                 if (currentFrame.Bitmap == null)
                 {
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
                 double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-                 BeginInvoke((MethodInvoker)delegate () { percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent); });
+                BeginInvoke((MethodInvoker)delegate () { percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent); });
                 
                 if (imageMatchPercent > .94)
                 {
@@ -178,10 +178,10 @@ namespace MarioMaker2OCR
 
         private void readScreenTimer_Tick(object sender, EventArgs e)
         {
-            processVideoFramesTimer.Stop();
+            processVideoFrameTimer.Stop();
             ProcessVideoFrame();
             if (!ERROR_THROWN)
-                processVideoFramesTimer.Start();
+                processVideoFrameTimer.Start();
         }
 
         private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
@@ -193,16 +193,23 @@ namespace MarioMaker2OCR
 
         private void WriteLevelToFile(Level level)
         {
-            LevelWrapper wrappedLevel = new LevelWrapper() { level = level };
-            string json = JsonConvert.SerializeObject(wrappedLevel);
-            File.WriteAllText(Path.Combine(outputFolderTextbox.Text, LEVEL_JSON_FILE), json);
+            try
+            {
+                LevelWrapper wrappedLevel = new LevelWrapper() { level = level };
+                string json = JsonConvert.SerializeObject(wrappedLevel);
+                File.WriteAllText(Path.Combine(outputFolderTextbox.Text, LEVEL_JSON_FILE), json);
+            }
+            catch (Exception ex)
+            {
+                ProcessException("Error writing to json file", ex);
+            }
         }
 
         private void startButton_Click(object sender, EventArgs e)
         {
             if (deviceComboBox.SelectedItem == null)
             {
-                MessageBox.Show("Please select a video source first.");
+                MessageBox.Show("Please select a video device first.");
                 return;
             }
             try
@@ -221,25 +228,25 @@ namespace MarioMaker2OCR
                 InitializeAndStartVideoDevice();
 
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem.ToString()}");
-                log.Info($"Using Resolution: {captureCard.Width}x{captureCard.Height}");
+                log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
             }
             catch (Exception ex)
             {
-                ProcessException("Error starting camera", ex);
+                ProcessException("Error starting video device", ex);
             }
         }
 
         private void InitializeAndStartVideoDevice()
         {
-            captureCard = new VideoCapture(deviceComboBox.SelectedIndex);
-            captureCard.SetCaptureProperty(CapProp.FrameHeight, SelectedResolution.Height);
-            captureCard.SetCaptureProperty(CapProp.FrameWidth, SelectedResolution.Width);
-            captureCard.Start();
+            videoDevice = new VideoCapture(deviceComboBox.SelectedIndex);
+            videoDevice.SetCaptureProperty(CapProp.FrameHeight, SelectedResolution.Height);
+            videoDevice.SetCaptureProperty(CapProp.FrameWidth, SelectedResolution.Width);
+            videoDevice.Start();
         }
 
         private void LockForm()
         {
-            processVideoFramesTimer.Start();
+            processVideoFrameTimer.Start();
             deviceComboBox.Enabled = false;
             startButton.Enabled = false;
             stopButton.Enabled = true;
@@ -252,7 +259,7 @@ namespace MarioMaker2OCR
 
         private void UnlockForm()
         {
-            processVideoFramesTimer.Stop();
+            processVideoFrameTimer.Stop();
             processStatusIcon.BackColor = Color.Red;
             percentMatchLabel.Text = "";
             deviceComboBox.Enabled = true;
@@ -263,8 +270,8 @@ namespace MarioMaker2OCR
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            captureCard.Stop();
-            captureCard.Dispose();
+            videoDevice.Stop();
+            videoDevice.Dispose();
             BeginInvoke(new MethodInvoker(delegate (){ UnlockForm();}));
         }
 
@@ -272,16 +279,16 @@ namespace MarioMaker2OCR
         {
             if (deviceComboBox.SelectedItem == null)
             {
-                MessageBox.Show("Please select a video source first.");
+                MessageBox.Show("Please select a video device first.");
                 return;
             }
             try
             {
-                DirectShowLibrary.DisplayPropertyPage(SelectedCamera.Mon, this.Handle);
+                DirectShowLibrary.DisplayPropertyPage(SelectedDevice.Mon, this.Handle);
             }
             catch (Exception ex)
             {
-                ProcessException("Error displaying camera properties", ex);
+                ProcessException("Error displaying device properties", ex);
             }
         }
 
@@ -292,7 +299,7 @@ namespace MarioMaker2OCR
 
             ERROR_THROWN = true;
             stopButton_Click(null, null);
-            BeginInvoke((MethodInvoker)delegate () { MessageBox.Show(ex.Message, "Error Processing Video", MessageBoxButtons.OK, MessageBoxIcon.Error); });
+            MessageBox.Show(ex.Message, "Error Processing Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void selectFolderButton_Click(object sender, EventArgs e)
