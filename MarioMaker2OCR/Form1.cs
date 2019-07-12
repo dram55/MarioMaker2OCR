@@ -108,7 +108,6 @@ namespace MarioMaker2OCR
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
                 double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-                Console.WriteLine(imageMatchPercent);
                 BeginInvoke((MethodInvoker)delegate () { percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent); });
                 
                 if (imageMatchPercent > .94)
