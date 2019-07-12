@@ -103,6 +103,7 @@ namespace MarioMaker2OCR
             Mat currentFrame = new Mat();
             try
             {
+                if (!videoDevice.IsOpened) return;
                 videoDevice.Retrieve(currentFrame);
                 if (currentFrame.Bitmap == null)
                 {
