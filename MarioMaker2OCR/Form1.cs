@@ -20,10 +20,8 @@ namespace MarioMaker2OCR
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         string LEVEL_JSON_FILE = "ocrLevel.json";
-
         VideoCapture videoDevice;
         Size resolution720 = new Size(1280, 720);
-        MCvScalar redRectangle = new MCvScalar(0, 0, 255);
         System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
@@ -61,11 +59,11 @@ namespace MarioMaker2OCR
             processVideoFrameTimer = new System.Timers.Timer(800);
             processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
 
-            LoadVideoDevices();
-            LoadResolutions();
+            loadVideoDevices();
+            loadResolutions();
         }
 
-        private void LoadResolutions()
+        private void loadResolutions()
         {
             resolutionsCombobox.DisplayMember = "Name";
             resolutionsCombobox.ValueMember = "Value";
@@ -81,7 +79,7 @@ namespace MarioMaker2OCR
             resolutionsCombobox.Items.Add(new { Name = $"{res.Width} x{res.Height}", Value = res });
         }
 
-        private void LoadVideoDevices()
+        private void loadVideoDevices()
         {
             deviceComboBox.DisplayMember = "Name";
             deviceComboBox.ValueMember = "Value";
@@ -98,7 +96,7 @@ namespace MarioMaker2OCR
             }
         }
 
-        private void ProcessVideoFrame()
+        private void processVideoFrame()
         {
             Mat currentFrame = new Mat();
             try
@@ -114,14 +112,14 @@ namespace MarioMaker2OCR
                 
                 if (imageMatchPercent > .94)
                 {
-                    Level level = GetLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
-                    WriteLevelToFile(level);
+                    Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
+                    writeLevelToFile(level);
                     BeginInvoke((MethodInvoker)delegate () { ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name; });
                 }
             }
             catch (Exception ex)
             {
-                ProcessException("Error Processing Video Frame", ex);
+                processException("Error Processing Video Frame", ex);
             }
             finally
             {
@@ -129,7 +127,7 @@ namespace MarioMaker2OCR
             }
         }
 
-        private Level GetLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
+        private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
         {
             try
             {
@@ -137,21 +135,21 @@ namespace MarioMaker2OCR
 
                 // Level Code
                 currentFrame.ROI = levelCodeArea;
-                ocrLevel.code = GetStringFromLevelCodeImage(currentFrame);
+                ocrLevel.code = getStringFromLevelCodeImage(currentFrame);
 
                 // Level Title
                 currentFrame.ROI = levelTitleArea;
-                ocrLevel.name = GetStringFromImage(currentFrame);
+                ocrLevel.name = getStringFromImage(currentFrame);
 
                 // Creator Name
                 currentFrame.ROI = creatorNameArea;
-                ocrLevel.author = GetStringFromImage(currentFrame);
+                ocrLevel.author = getStringFromImage(currentFrame);
 
                 return ocrLevel;
             }
             catch(Exception ex)
             {
-                ProcessException("Error Performing OCR", ex);
+                processException("Error Performing OCR", ex);
             }
 
             return null;
@@ -162,13 +160,13 @@ namespace MarioMaker2OCR
             Application.Exit();
         }
 
-        private string GetStringFromImage(Image<Bgr, byte> image)
+        private static string getStringFromImage(Image<Bgr, byte> image)
         {
             Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
             return OCRLibrary.GetStringFromImage(ocrReadyImage);
         }
 
-        private string GetStringFromLevelCodeImage(Image<Bgr, byte> image)
+        private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
         {
             Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
             return OCRLibrary.GetStringFromLevelCodeImage(ocrReadyImage);
@@ -185,7 +183,7 @@ namespace MarioMaker2OCR
                 Monitor.TryEnter(lockObject, ref hasLock);
                 if (!hasLock) return;
 
-                ProcessVideoFrame();
+                processVideoFrame();
             }
             finally
             {
@@ -199,11 +197,10 @@ namespace MarioMaker2OCR
         private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             Level emptyLevel = new Level();
-            LevelWrapper jsonCurrentLevel = new LevelWrapper() { level=emptyLevel };
-            WriteLevelToFile(emptyLevel);
+            writeLevelToFile(emptyLevel);
         }
 
-        private void WriteLevelToFile(Level level)
+        private void writeLevelToFile(Level level)
         {
             try
             {
@@ -213,7 +210,7 @@ namespace MarioMaker2OCR
             }
             catch (Exception ex)
             {
-                ProcessException("Error writing to json file", ex);
+                processException("Error writing to json file", ex);
             }
         }
 
@@ -227,7 +224,7 @@ namespace MarioMaker2OCR
             try
             {
                 // Set Capture Card Resolution
-                InitializeAndStartVideoDevice();
+                initializeAndStartVideoDevice();
 
                 // resize reference image based on current resolution
                 levelSelectScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
@@ -240,15 +237,15 @@ namespace MarioMaker2OCR
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem.ToString()}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
 
-                LockForm();
+                lockForm();
             }
             catch (Exception ex)
             {
-                ProcessException("Error starting video device", ex);
+                processException("Error starting video device", ex);
             }
         }
 
-        private void InitializeAndStartVideoDevice()
+        private void initializeAndStartVideoDevice()
         {
             videoDevice = new VideoCapture(deviceComboBox.SelectedIndex);
             videoDevice.SetCaptureProperty(CapProp.FrameHeight, SelectedResolution.Height);
@@ -256,7 +253,7 @@ namespace MarioMaker2OCR
             videoDevice.Start();
         }
 
-        private void LockForm()
+        private void lockForm()
         {
             processVideoFrameTimer.Start();
             deviceComboBox.Enabled = false;
@@ -269,7 +266,7 @@ namespace MarioMaker2OCR
             processStatusIcon.BackColor = Color.Green;
         }
 
-        private void UnlockForm()
+        private void unlockForm()
         {
             processVideoFrameTimer.Stop();
             processStatusIcon.BackColor = Color.Red;
@@ -284,7 +281,7 @@ namespace MarioMaker2OCR
         {
             videoDevice.Stop();
             videoDevice.Dispose();
-            BeginInvoke(new MethodInvoker(delegate (){ UnlockForm();}));
+            BeginInvoke(new MethodInvoker(delegate (){ unlockForm();}));
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
@@ -300,11 +297,11 @@ namespace MarioMaker2OCR
             }
             catch (Exception ex)
             {
-                ProcessException("Error displaying device properties", ex);
+                processException("Error displaying device properties", ex);
             }
         }
 
-        private void ProcessException(string caption, Exception ex)
+        private void processException(string caption, Exception ex)
         {
             log.Error($"{caption}: {ex.Message}");
             log.Debug(ex.StackTrace);
@@ -325,7 +322,7 @@ namespace MarioMaker2OCR
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.OutputFolder = outputFolderTextbox.Text;
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic).Name;
