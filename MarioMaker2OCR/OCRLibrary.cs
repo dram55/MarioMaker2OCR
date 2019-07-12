@@ -11,7 +11,7 @@ namespace MarioMaker2OCR
 {
     public static class OCRLibrary
     {
-        private static string tesserectLibrary = "tessdata";
+        private const string tesserectLibrary = "tessdata";
 
         /// <summary>
         /// Get string from image using Tesserect Library for OCR

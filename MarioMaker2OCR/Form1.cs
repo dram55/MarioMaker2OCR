@@ -19,7 +19,7 @@ namespace MarioMaker2OCR
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        string LEVEL_JSON_FILE = "ocrLevel.json";
+        private const string LEVEL_JSON_FILE = "ocrLevel.json";
         VideoCapture videoDevice;
         Size resolution720 = new Size(1280, 720);
         System.Timers.Timer processVideoFrameTimer;
@@ -53,14 +53,22 @@ namespace MarioMaker2OCR
         {
             InitializeComponent();
 
-            processStatusIcon.BackColor = Color.Red;
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
 
             processVideoFrameTimer = new System.Timers.Timer(800);
             processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
 
+            initializeToolTips();
             loadVideoDevices();
             loadResolutions();
+        }
+
+        private void initializeToolTips()
+        {
+            new ToolTip().SetToolTip(ocrLabel, "Last level information read in.");
+            new ToolTip().SetToolTip(outputFolderLabel, $"Folder to save {LEVEL_JSON_FILE}");
+            new ToolTip().SetToolTip(deviceLabel, "Available capture devices.");
+            new ToolTip().SetToolTip(propertiesButton, "Properties for the selected capture device.");
         }
 
         private void loadResolutions()
@@ -112,6 +120,8 @@ namespace MarioMaker2OCR
                 
                 if (imageMatchPercent > .94)
                 {
+                    BeginInvoke((MethodInvoker)delegate () { processingLevelLabel.Visible = true; });
+                    
                     Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
                     writeLevelToFile(level);
                     BeginInvoke((MethodInvoker)delegate () { ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name; });
@@ -121,6 +131,7 @@ namespace MarioMaker2OCR
 
                     // Read to clear buffer & return to most recent frame
                     videoDevice.Retrieve(currentFrame);
+                    BeginInvoke((MethodInvoker)delegate () { processingLevelLabel.Visible = false; });
                 }
             }
             catch (Exception ex)
@@ -281,6 +292,7 @@ namespace MarioMaker2OCR
             resolutionsCombobox.Enabled = true;
             startButton.Enabled = true;
             stopButton.Enabled = false;
+            processingLevelLabel.Visible = false;
         }
 
         private void stopButton_Click(object sender, EventArgs e)
