@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -20,8 +20,6 @@ namespace MarioMaker2OCR
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         string LEVEL_JSON_FILE = "ocrLevel.json";
-
-        private static bool ERROR_THROWN = false;
 
         VideoCapture videoDevice;
         Size resolution720 = new Size(1280, 720);
@@ -57,12 +55,11 @@ namespace MarioMaker2OCR
         {
             InitializeComponent();
 
-            processVideoFrameTimer = new System.Timers.Timer();
-            processVideoFrameTimer.Interval = 1500;
-            processVideoFrameTimer.Elapsed += new System.Timers.ElapsedEventHandler(readScreenTimer_Tick);
-
             processStatusIcon.BackColor = Color.Red;
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
+
+            processVideoFrameTimer = new System.Timers.Timer(800);
+            processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
 
             LoadVideoDevices();
             LoadResolutions();
@@ -176,12 +173,26 @@ namespace MarioMaker2OCR
             return OCRLibrary.GetStringFromLevelCodeImage(ocrReadyImage);
         }
 
-        private void readScreenTimer_Tick(object sender, EventArgs e)
+        private static object lockObject = new object();
+        private void readScreenTimer_Tick(object o, EventArgs e)
         {
-            processVideoFrameTimer.Stop();
-            ProcessVideoFrame();
-            if (!ERROR_THROWN)
-                processVideoFrameTimer.Start();
+            var hasLock = false;
+
+            try
+            {
+                // If process is not locked process frame, else skip.
+                Monitor.TryEnter(lockObject, ref hasLock);
+                if (!hasLock) return;
+
+                ProcessVideoFrame();
+            }
+            finally
+            {
+                if (hasLock)
+                {
+                    Monitor.Exit(lockObject);
+                }
+            }
         }
 
         private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
@@ -214,7 +225,8 @@ namespace MarioMaker2OCR
             }
             try
             {
-                LockForm();
+                // Set Capture Card Resolution
+                InitializeAndStartVideoDevice();
 
                 // resize reference image based on current resolution
                 levelSelectScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
@@ -224,11 +236,10 @@ namespace MarioMaker2OCR
                 creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
                 levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
 
-                // Set Capture Card Resolution
-                InitializeAndStartVideoDevice();
-
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem.ToString()}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
+
+                LockForm();
             }
             catch (Exception ex)
             {
@@ -297,7 +308,6 @@ namespace MarioMaker2OCR
             log.Error($"{caption}: {ex.Message}");
             log.Debug(ex.StackTrace);
 
-            ERROR_THROWN = true;
             stopButton_Click(null, null);
             MessageBox.Show(ex.Message, "Error Processing Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
