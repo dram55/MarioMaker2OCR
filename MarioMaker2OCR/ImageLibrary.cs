@@ -10,9 +10,8 @@ namespace MarioMaker2OCR
     public static class ImageLibrary
     {
         /// <summary>
-        /// Grayscale, increase gamma and size of the image.
-        /// 
-        /// Read on a google forum it was good practice to increase OCR accuracy
+        /// <para>Grayscale, increase gamma and size of the image.</para>
+        /// <para>Read on a google forum it was good practice to increase OCR accuracy</para>
         /// </summary>
         public static Image<Gray, byte> PrepareImageForOCR(Image<Bgr, byte> image)
         {
@@ -48,7 +47,6 @@ namespace MarioMaker2OCR
             float widthDifference = (newResolution.Width) / (float)oldResolution.Width;
             float heightDifference = (newResolution.Height) / (float)oldResolution.Height;
 
-
             Rectangle newRectangle = new Rectangle(rectangle.Location, rectangle.Size);
             newRectangle.Height = (int)(newRectangle.Height * heightDifference);
             newRectangle.Y = (int)(newRectangle.Y * heightDifference);
@@ -57,7 +55,6 @@ namespace MarioMaker2OCR
             newRectangle.X = (int)(newRectangle.X*widthDifference);
 
             return newRectangle;
-
         }
 
         public static Mat ChangeSize(Mat image, Size oldResolution, Size newResolution)
@@ -71,7 +68,6 @@ namespace MarioMaker2OCR
             CvInvoke.Resize(image, newImage, new Size(), widthDifference, heightDifference);
 
             return newImage;
-
         }
     }
 }

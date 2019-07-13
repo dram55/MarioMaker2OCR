@@ -20,34 +20,21 @@ namespace MarioMaker2OCR
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
-        VideoCapture videoDevice;
-        Size resolution720 = new Size(1280, 720);
-        System.Timers.Timer processVideoFrameTimer;
+        private VideoCapture videoDevice;
+        private Size resolution720 = new Size(1280, 720);
+        private readonly System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
         private Rectangle levelTitleArea;
-        Rectangle levelCodeArea720p = new Rectangle(81, 178, 190, 25); // based on 1280x720
-        Rectangle creatorNameArea720 = new Rectangle(641, 173, 422, 39); // based on 1280x720
-        Rectangle levelTitleArea720 = new Rectangle(100, 92, 1080, 43); // based on 1280x720
+        private Rectangle levelCodeArea720p = new Rectangle(81, 178, 190, 25); // based on 1280x720
+        private Rectangle creatorNameArea720 = new Rectangle(641, 173, 422, 39); // based on 1280x720
+        private Rectangle levelTitleArea720 = new Rectangle(100, 92, 1080, 43); // based on 1280x720
 
-        Mat levelSelectScreen;
-        Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
+        private Mat levelSelectScreen;
+        private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
-        public Size SelectedResolution
-        {
-            get
-            {
-                return (resolutionsCombobox.SelectedItem as dynamic).Value;
-            }
-        }
-
-        public DsDevice SelectedDevice
-        {
-            get
-            {
-                return (deviceComboBox.SelectedItem as dynamic).Value;
-            }
-        }
+        public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
+        public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
 
         public Form1()
         {
@@ -116,22 +103,22 @@ namespace MarioMaker2OCR
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
                 double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-                BeginInvoke((MethodInvoker)delegate () { percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent); });
-                
+                BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
+
                 if (imageMatchPercent > .94)
                 {
-                    BeginInvoke((MethodInvoker)delegate () { processingLevelLabel.Visible = true; });
-                    
+                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+
                     Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
                     writeLevelToFile(level);
-                    BeginInvoke((MethodInvoker)delegate () { ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name; });
+                    BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
 
                     // Sleep 4 seconds to prevent processing same frame twice
                     Thread.Sleep(4000);
 
                     // Read to clear buffer & return to most recent frame
                     videoDevice.Retrieve(currentFrame);
-                    BeginInvoke((MethodInvoker)delegate () { processingLevelLabel.Visible = false; });
+                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
                 }
             }
             catch (Exception ex)
@@ -189,7 +176,7 @@ namespace MarioMaker2OCR
             return OCRLibrary.GetStringFromLevelCodeImage(ocrReadyImage);
         }
 
-        private static object lockObject = new object();
+        private static readonly object lockObject = new object();
         private void readScreenTimer_Tick(object o, EventArgs e)
         {
             var hasLock = false;
@@ -251,7 +238,7 @@ namespace MarioMaker2OCR
                 creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
                 levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
 
-                log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem.ToString()}");
+                log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
 
                 lockForm();
@@ -299,7 +286,7 @@ namespace MarioMaker2OCR
         {
             videoDevice.Stop();
             videoDevice.Dispose();
-            BeginInvoke(new MethodInvoker(delegate (){ unlockForm();}));
+            BeginInvoke(new MethodInvoker(() => unlockForm()));
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
@@ -343,7 +330,7 @@ namespace MarioMaker2OCR
         private void form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.OutputFolder = outputFolderTextbox.Text;
-            Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic).Name;
+            Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
             Properties.Settings.Default.Save();
         }

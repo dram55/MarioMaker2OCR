@@ -9,7 +9,6 @@ namespace MarioMaker2OCR
 {
     public static class DirectShowLibrary
     {
-
         public static List<DsDevice> GetCaptureDevices()
         {
             return new List<DsDevice>(DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice));
@@ -32,24 +31,19 @@ namespace MarioMaker2OCR
             int dwReserved,
             IntPtr lpvReserved);
 
-
-
         private static void _DisplayPropertyPage(object filter_or_pin, IntPtr hwndOwner)
         {
             if (filter_or_pin == null)
                 return;
 
             //Get the ISpecifyPropertyPages for the filter
-            ISpecifyPropertyPages pProp = filter_or_pin as ISpecifyPropertyPages;
             int hr = 0;
 
-            if (pProp == null)
+            if (!(filter_or_pin is ISpecifyPropertyPages pProp))
             {
                 //If the filter doesn't implement ISpecifyPropertyPages, try displaying IAMVfwCompressDialogs instead!
-                IAMVfwCompressDialogs compressDialog = filter_or_pin as IAMVfwCompressDialogs;
-                if (compressDialog != null)
+                if (filter_or_pin is IAMVfwCompressDialogs compressDialog)
                 {
-
                     hr = compressDialog.ShowDialog(VfwCompressDialogs.Config, IntPtr.Zero);
                     DsError.ThrowExceptionForHR(hr);
                 }
@@ -125,5 +119,4 @@ namespace MarioMaker2OCR
 
         #endregion
     }
-
 }
