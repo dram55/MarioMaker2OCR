@@ -36,6 +36,8 @@ namespace MarioMaker2OCR
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
 
+        private FormPreview previewer = new FormPreview();
+
         public Form1()
         {
             InitializeComponent();
@@ -102,6 +104,9 @@ namespace MarioMaker2OCR
                 {
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
+
+                previewer.SetLiveFrame(currentFrame.Clone());
+
                 double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
                 BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
 
@@ -112,6 +117,8 @@ namespace MarioMaker2OCR
                     Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
                     writeLevelToFile(level);
                     BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
+
+                    previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[]{ levelCodeArea, creatorNameArea, levelTitleArea });
 
                     // Sleep 4 seconds to prevent processing same frame twice
                     Thread.Sleep(4000);
@@ -333,6 +340,16 @@ namespace MarioMaker2OCR
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
             Properties.Settings.Default.Save();
+        }
+
+        private void ShowPreviewWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (previewer.IsDisposed)
+            {
+                previewer = new FormPreview();
+            }
+            previewer.Show();
+            previewer.BringToFront();
         }
     }
 }
