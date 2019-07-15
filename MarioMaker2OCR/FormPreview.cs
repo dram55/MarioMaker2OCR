@@ -23,7 +23,6 @@ namespace MarioMaker2OCR
         {
             if (!this.Disposing && this.Visible)
             {
-                imgLiveFrame.Image?.Dispose();
                 imgLiveFrame.Image = frame;
             }
         }

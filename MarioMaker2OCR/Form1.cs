@@ -42,6 +42,8 @@ namespace MarioMaker2OCR
         private bool WasBlack = false;
         private bool WasClear = false;
 
+        private Mat[] FrameBuffer = { null, null, null, null, null };
+
         public Form1()
         {
             InitializeComponent();
@@ -97,6 +99,22 @@ namespace MarioMaker2OCR
             }
         }
 
+        /// <summary>
+        /// Add a frame to the FrameBuffer, acts like a very limited Ring Buffer of sorts.
+        /// Frames are Disposed once they leave the buffer.
+        /// </summary>
+        /// <param name="frame">Frame to be added to the buffer</param>
+        private void addFrameToBuffer(Mat frame)
+        {
+            (FrameBuffer[FrameBuffer.Length - 1])?.Dispose();
+            for (int i = FrameBuffer.Length-1; i > 0; i--)
+            {
+                //if(FrameBuffer[i-1] == null)
+                FrameBuffer[i] = FrameBuffer[i - 1];
+            }
+            FrameBuffer[0] = frame;
+        }
+
         private void processVideoFrame()
         {
             Mat currentFrame = new Mat();
@@ -109,75 +127,91 @@ namespace MarioMaker2OCR
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
 
-                previewer.SetLiveFrame(currentFrame.Clone());
+                addFrameToBuffer(currentFrame); //frame will be disposed when it leaves the buffer.
+                previewer.SetLiveFrame(FrameBuffer[0]);
 
                 Image<Bgr, byte> imgFrame = currentFrame.ToImage<Bgr, byte>();
                 Rectangle clearRegion = new Rectangle(0, (imgFrame.Height / 5) * 4, imgFrame.Width, (imgFrame.Height / 5));
 
-                if (!WasBlack && ImageLibrary.IsRegionSolid(imgFrame, new Rectangle(0, 0, imgFrame.Width, imgFrame.Height)))
-                {
-                    // Solid screen, should be black but we'll check it to be sure
+
+                if(ImageLibrary.IsRegionSolid(imgFrame, new Rectangle(0, 0, imgFrame.Width, imgFrame.Height))) {
+                    WasClear = false;
                     Bgr color = imgFrame[0, 0];
                     if (color.Red <= 20 && color.Green <= 20 && color.Blue <= 20)
                     {
-                        WasBlack = true;
-                        OnBlackScreen();
+                        if (!WasBlack)
+                        {
+                            WasBlack = true;
+                            OnBlackScreen();
+                            
+                        }
                     }
-                } else if (!WasClear && ImageLibrary.IsRegionSolid(imgFrame, clearRegion))
-                {
-                    // Not an entirely solid screen, but top fifth is solid, probably the clear screen, check for Yellow
-                    Bgr color = imgFrame[0, 0];
-                    if(color.Red > 220 && color.Green > 200 && color.Blue < 30)
-                    {
-                        WasClear = true;
-                        OnClearScreen();
-                    }
-                } else
-                {
-                    // Reset the flags since this is neither clear nor black screen.
-                    WasBlack = false;
-                    WasClear = false;
                 }
-
-                double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-                BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
-
-                if (imageMatchPercent > .94)
+                else
                 {
-                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                    WasBlack = false;
+                    if (ImageLibrary.IsRegionSolid(imgFrame, clearRegion))
+                    {
+                        // Not an entirely solid screen, but top fifth is solid, probably the clear screen, check for Yellow
+                        Bgr color = imgFrame[0, 0];
+                        if (color.Red > 220 && color.Green > 200 && color.Blue < 30)
+                        {
+                            if(!WasClear)
+                            {
+                                WasClear = true;
+                                OnClearScreen();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        WasClear = false;
+                    }
 
-                    Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
-                    writeLevelToFile(level);
-                    BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
-
-                    previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[]{ levelCodeArea, creatorNameArea, levelTitleArea });
-
-                    // Sleep 4 seconds to prevent processing same frame twice
-                    Thread.Sleep(4000);
-
-                    // Read to clear buffer & return to most recent frame
-                    videoDevice.Retrieve(currentFrame);
-                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
                 }
             }
             catch (Exception ex)
             {
                 processException("Error Processing Video Frame", ex);
             }
-            finally
-            {
-                currentFrame.Dispose();
-            }
         }
 
-
+        /// <summary>
+        /// Handler that is called when a Black Screen is detected
+        /// </summary>
         private void OnBlackScreen()
         {
-            log.Info("[*] Black Screen");
+            log.Debug("Detected Black Screen");
+
+            // Check if this is the start of a new level
+            Mat currentFrame = FrameBuffer[FrameBuffer.Length - 2];
+            double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
+            BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
+            if (imageMatchPercent > .94)
+            {
+                log.Debug("New Level being started, running OCR");
+
+                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
+                writeLevelToFile(level);
+                BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
+                previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
+                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
+            }
+            else
+            {
+                // Not a new level, see if we can detect a template.
+                // TODO: Run template matching
+            }
+
         }
+
+        /// <summary>
+        /// Handler that is called when a "Course Clear" screen is detected
+        /// </summary>
         private void OnClearScreen()
         {
-            log.Info("[*] Clear Screen");
+            log.Debug("Detected Clear Screen");
         }
         private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
         {
