@@ -38,13 +38,17 @@ namespace MarioMaker2OCR
 
         private FormPreview previewer = new FormPreview();
 
+        // Flags so we only run once every time a key frame is detected
+        private bool WasBlack = false;
+        private bool WasClear = false;
+
         public Form1()
         {
             InitializeComponent();
 
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
 
-            processVideoFrameTimer = new System.Timers.Timer(800);
+            processVideoFrameTimer = new System.Timers.Timer(500);
             processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
 
             initializeToolTips();
@@ -107,6 +111,34 @@ namespace MarioMaker2OCR
 
                 previewer.SetLiveFrame(currentFrame.Clone());
 
+                Image<Bgr, byte> imgFrame = currentFrame.ToImage<Bgr, byte>();
+                Rectangle clearRegion = new Rectangle(0, (imgFrame.Height / 5) * 4, imgFrame.Width, (imgFrame.Height / 5));
+
+                if (!WasBlack && ImageLibrary.IsRegionSolid(imgFrame, new Rectangle(0, 0, imgFrame.Width, imgFrame.Height)))
+                {
+                    // Solid screen, should be black but we'll check it to be sure
+                    Bgr color = imgFrame[0, 0];
+                    if (color.Red <= 20 && color.Green <= 20 && color.Blue <= 20)
+                    {
+                        WasBlack = true;
+                        OnBlackScreen();
+                    }
+                } else if (!WasClear && ImageLibrary.IsRegionSolid(imgFrame, clearRegion))
+                {
+                    // Not an entirely solid screen, but top fifth is solid, probably the clear screen, check for Yellow
+                    Bgr color = imgFrame[0, 0];
+                    if(color.Red > 220 && color.Green > 200 && color.Blue < 30)
+                    {
+                        WasClear = true;
+                        OnClearScreen();
+                    }
+                } else
+                {
+                    // Reset the flags since this is neither clear nor black screen.
+                    WasBlack = false;
+                    WasClear = false;
+                }
+
                 double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
                 BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
 
@@ -138,6 +170,15 @@ namespace MarioMaker2OCR
             }
         }
 
+
+        private void OnBlackScreen()
+        {
+            log.Info("[*] Black Screen");
+        }
+        private void OnClearScreen()
+        {
+            log.Info("[*] Clear Screen");
+        }
         private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
         {
             try

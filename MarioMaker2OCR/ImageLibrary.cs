@@ -69,5 +69,32 @@ namespace MarioMaker2OCR
 
             return newImage;
         }
+
+        /// <summary>
+        /// Loops over the given region checking if it is a solid color
+        /// </summary>
+        /// <param name="frame">The frame to be examined</param>
+        /// <param name="region">A rectangle specify the area to search</param>
+        /// <param name="threshold">A pixel value is considered to match if every channel value is within +/- the threshold of the starting color</param>
+        /// <param name="skip">Number of pixels to skip over while looping. By default is checks every 5 pixels</param>
+        /// <returns></returns>
+        public static bool IsRegionSolid(Image<Bgr, byte> frame, Rectangle region, int threshold = 10, int skip = 5)
+        {
+            Bgr start = frame[region.Y, region.X];
+            Bgr current;
+            //Console.WriteLine(String.Format("{0} {1} -- {2} {3} [{4} {5}]", region.Left, region.Right, region.Top, region.Bottom, region.X, region.Y));
+            for (int x = region.Left; x < region.Right; x += skip)
+            {
+                for (int y = region.Top; y < region.Bottom; y += skip)
+                {
+                    current = frame[y, x];
+                    if(Math.Abs(start.Red-current.Red) > threshold || Math.Abs(start.Green - current.Green) > threshold || Math.Abs(start.Blue - current.Blue) > threshold)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
 }
