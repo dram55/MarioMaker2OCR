@@ -23,7 +23,15 @@ namespace MarioMaker2OCR
         {
             if (!this.Disposing && this.Visible)
             {
-                imgLiveFrame.Image = frame;
+                try
+                {
+                    //Live Frames are refs to the Form1 copy, it disposes of them once they leave the FrameBuffer
+                    imgLiveFrame.Image = frame;
+                }
+                catch(ObjectDisposedException)
+                {
+                    // Happens if the window is closed while the ImageBox is processes the Mat
+                }
             }
         }
 
@@ -36,9 +44,19 @@ namespace MarioMaker2OCR
                 {
                     Emgu.CV.CvInvoke.Rectangle(frame, r, borderColor, 2);
                 }
-                imgLastMatch.Image?.Dispose();
-                imgLastMatch.Image = frame;
-            }
+
+                //frame.Save("match_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-positives.
+
+                try
+                {
+                    imgLastMatch.Image?.Dispose();
+                    imgLastMatch.Image = frame;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Happens if the window is closed while the ImageBox is processes the Mat
+                }
+        }
         }
 
     }
