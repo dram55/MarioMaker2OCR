@@ -69,5 +69,47 @@ namespace MarioMaker2OCR
 
             return newImage;
         }
+
+        /// <summary>
+        /// Loops over the given region checking if it is a solid color
+        /// </summary>
+        /// <param name="frame">The frame to be examined</param>
+        /// <param name="region">A rectangle specify the area to search</param>
+        /// <param name="threshold">A pixel value is considered to match if every channel value is within +/- the threshold of the starting color</param>
+        /// <param name="skip">Number of pixels to skip over while looping. By default is checks every 5 pixels</param>
+        /// <returns>Boolean indicating if the given region is a solid color</returns>
+        public static bool IsRegionSolid(Image<Bgr, byte> frame, Rectangle region, int threshold = 10, int skip = 5)
+        {
+            Bgr start = frame[region.Y, region.X];
+            Bgr current;
+            for (int x = region.Left; x < region.Right; x += skip)
+            {
+                for (int y = region.Top; y < region.Bottom; y += skip)
+                {
+                    current = frame[y, x];
+                    if(Math.Abs(start.Red-current.Red) > threshold || Math.Abs(start.Green - current.Green) > threshold || Math.Abs(start.Blue - current.Blue) > threshold)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Scans th provided frame for the template.
+        /// </summary>
+        /// <param name="frame">Grayscale Image that potentially contains the template</param>
+        /// <param name="template">Grayscale template to be scanned for</param>
+        /// <param name="threshold">Minimum match percent required to match (0.0-1.0)</param>
+        /// <returns>The Top-Left point of the location the template matched, or null of no acceptable match was found.</returns>
+        public static Point? IsTemplatePresent(Image<Gray, byte> frame, Image<Gray, byte> template, double threshold=0.9)
+        {
+            Image<Gray, float> match = frame.MatchTemplate(template, Emgu.CV.CvEnum.TemplateMatchingType.CcoeffNormed);
+            match.MinMax(out _, out double[] max, out _, out Point[] maxLoc);
+            if (max[0] < threshold) return null;
+            return maxLoc[0];
+        }
+
     }
 }

@@ -22,6 +22,7 @@ namespace MarioMaker2OCR
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
         private VideoCapture videoDevice;
         private Size resolution720 = new Size(1280, 720);
+        private Size resolution1080 = new Size(1920, 1080);
         private readonly System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
@@ -33,10 +34,30 @@ namespace MarioMaker2OCR
         private Mat levelSelectScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
+        private Image<Gray, byte> tmplDeathBig;
+        private Image<Gray, byte> tmplDeathPartial;
+        private Image<Gray, byte> tmplDeathSmall;
+        private Image<Gray, byte> tmplRestart;
+        private Image<Gray, byte> tmplExit;
+        private readonly Image<Gray, byte> tmplDeathBig1080 = new Image<Gray, byte>("./templates/death_big.png");         // Primary death bubble, larger than past death bubbles
+        private readonly Image<Gray, byte> tmplDeathPartial1080 = new Image<Gray, byte>("./templates/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
+        private readonly Image<Gray, byte> tmplDeathSmall1080 = new Image<Gray, byte>("./templates/death_small.png");     // Death bubbles caused by past deaths/other players
+        private readonly Image<Gray, byte> tmplRestart1080 = new Image<Gray, byte>("./templates/startover.png");
+        private readonly Image<Gray, byte> tmplExit1080 = new Image<Gray, byte>("./templates/exit.png");
+
+
+
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
 
         private FormPreview previewer = new FormPreview();
+
+        // Flags so we only run once every time a key frame is detected
+        private bool WasBlack = false;
+        private bool WasClear = false;
+
+        // Simple fixed-size buffer that holds the most recent frames 0 is the current frame.
+        private Mat[] FrameBuffer = { null, null, null, null, null, null, null, null, null, null };
 
         public Form1()
         {
@@ -44,7 +65,7 @@ namespace MarioMaker2OCR
 
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
 
-            processVideoFrameTimer = new System.Timers.Timer(800);
+            processVideoFrameTimer = new System.Timers.Timer(250);
             processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
 
             initializeToolTips();
@@ -93,6 +114,21 @@ namespace MarioMaker2OCR
             }
         }
 
+        /// <summary>
+        /// Add a frame to the FrameBuffer, acts like a very limited Ring Buffer of sorts.
+        /// Frames are Disposed once they leave the buffer.
+        /// </summary>
+        /// <param name="frame">Frame to be added to the buffer</param>
+        private void addFrameToBuffer(Mat frame)
+        {
+            (FrameBuffer[FrameBuffer.Length - 1])?.Dispose();
+            for (int i = FrameBuffer.Length-1; i > 0; i--)
+            {
+                FrameBuffer[i] = FrameBuffer[i - 1];
+            }
+            FrameBuffer[0] = frame;
+        }
+
         private void processVideoFrame()
         {
             Mat currentFrame = new Mat();
@@ -105,37 +141,154 @@ namespace MarioMaker2OCR
                     throw new Exception("Unable to retrieve the current video frame. Device could be in use by another program.");
                 }
 
-                previewer.SetLiveFrame(currentFrame.Clone());
+                addFrameToBuffer(currentFrame); //frame will be automatically disposed when it leaves the FrameBuffer.
+                previewer.SetLiveFrame(FrameBuffer[0]);
 
-                double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-                BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
+                Image<Bgr, byte> imgFrame = currentFrame.ToImage<Bgr, byte>();
 
-                if (imageMatchPercent > .94)
+                // Scan for a solid color screen, likely Black
+                if(ImageLibrary.IsRegionSolid(imgFrame, new Rectangle(0, 0, imgFrame.Width, imgFrame.Height))) {
+                    WasClear = false;
+                    Bgr color = imgFrame[0, 0];
+                    if (color.Red <= 20 && color.Green <= 20 && color.Blue <= 20) //Black
+                    {
+                        if (!WasBlack)
+                        {
+                            WasBlack = true;
+                            OnBlackScreen();
+                        }
+                    }
+                }
+                else
                 {
-                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                    WasBlack = false;
+                    // Scan just the bottom fifth of the frame, if its solid but the entire frame isn't, its likely the clear screen.
+                    Rectangle clearRegion = new Rectangle(0, (imgFrame.Height / 5) * 4, imgFrame.Width, (imgFrame.Height / 5));
+                    if (ImageLibrary.IsRegionSolid(imgFrame, clearRegion))
+                    {
+                        Bgr color = imgFrame[0, 0];
+                        if (color.Red > 220 && color.Green > 200 && color.Blue < 30) //Yellow-ish
+                        {
+                            if(!WasClear)
+                            {
+                                WasClear = true;
+                                OnClearScreen();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        WasClear = false;
+                    }
 
-                    Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
-                    writeLevelToFile(level);
-                    BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
-
-                    previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[]{ levelCodeArea, creatorNameArea, levelTitleArea });
-
-                    // Sleep 4 seconds to prevent processing same frame twice
-                    Thread.Sleep(4000);
-
-                    // Read to clear buffer & return to most recent frame
-                    videoDevice.Retrieve(currentFrame);
-                    BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
                 }
             }
             catch (Exception ex)
             {
                 processException("Error Processing Video Frame", ex);
             }
-            finally
+        }
+
+        /// <summary>
+        /// Handler that is called when a Black Screen is detected
+        /// </summary>
+        private void OnBlackScreen()
+        {
+            log.Debug("Detected Black Screen");
+
+            // Check if this is the start of a new level
+            Mat currentFrame = FrameBuffer[FrameBuffer.Length - 2];
+            double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
+            BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
+            if (imageMatchPercent > .94)
             {
-                currentFrame.Dispose();
+                log.Info("Detected new level.");
+
+                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                Level level = getLevelFromCurrentFrame(currentFrame.ToImage<Bgr, byte>());
+                writeLevelToFile(level);
+                BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
+                previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
+                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
             }
+            else
+            {
+                // Not a new level, see if we can detect a template.
+                Dictionary<String, bool> events = new Dictionary<String, bool>();
+                events.Add("death", false);
+                events.Add("restart", false);
+                events.Add("exit", false);
+
+                foreach (Mat f in FrameBuffer)
+                {
+                    Image<Gray, byte> grayscaleFrame = f.ToImage<Gray, byte>();
+                    Image<Gray, byte>[] deathTemplates = new Image<Gray, byte>[] { tmplDeathBig, tmplDeathSmall, tmplDeathPartial };
+
+                    //grayscaleFrame.Save(DateTime.Now.ToString("frame_yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
+
+                    //Once we have found a death, don't scan the rest of the frames for one
+                    if (!events["death"])
+                    {
+                        List<Rectangle> boundaries = new List<Rectangle>();
+                        foreach (Image<Gray, byte> tmpl in deathTemplates)
+                        {
+                            // FIXME: Better solution would be to map templates to their settings (threshold, fn, etc.) and their triggered event rather than doing this special case here.
+                            double thresh = 0.8;
+                            if (tmpl == tmplDeathPartial) thresh = 0.9;
+
+                            Point? loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmpl, thresh);
+                            if (loc.HasValue)
+                            {
+                                events["death"] = true;
+                                boundaries.Add(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3));
+                            }
+                        }
+                        if(events["death"])
+                        {
+                            previewer.SetLastMatch(f.Clone(), boundaries.ToArray());
+                        }
+
+
+                    }
+
+                    //Just in case a user hoved one then changed to the other button, only the last one counts, so don't look after one has been found.
+                    if(!events["restart"] && !events["exit"])
+                    {
+                        Point? loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplRestart, 0.8);
+                        if (loc.HasValue)
+                        {
+                            events["restart"] = true;
+                            previewer.SetLastMatch(f.Clone(), new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height) });
+                        }
+                        else
+                        {
+                            // Really shouldn't happen but popped this in `else` just to prevent one frame from detecting both.
+                            loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplExit, 0.7);
+                            if (loc.HasValue)
+                            {
+                                events["exit"] = true;
+                                previewer.SetLastMatch(f.Clone(), new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height) });
+                            }
+                        }
+                    }
+                }
+
+
+                // TODO: Publish events.
+                if (events["death"]) log.Info("Detected death");
+                if (events["restart"]) log.Info("Detected restart");
+                if (events["exit"]) log.Info("Detected exit");
+            }
+
+        }
+
+        /// <summary>
+        /// Handler that is called when a "Course Clear" screen is detected
+        /// </summary>
+        private void OnClearScreen()
+        {
+            // TODO: Publish clear event
+            log.Info("Detected Level Clear");
         }
 
         private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
@@ -244,6 +397,25 @@ namespace MarioMaker2OCR
                 levelCodeArea = ImageLibrary.ChangeSize(levelCodeArea720p, resolution720, SelectedResolution);
                 creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
                 levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
+
+                // resize templates based on current resolution
+                if(SelectedResolution.Height != 1080)
+                {
+                    log.Info("Resizing templates");
+                    tmplDeathBig = tmplDeathBig1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplDeathPartial = tmplDeathPartial1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplDeathSmall = tmplDeathSmall1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplRestart = tmplRestart1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplExit = tmplExit1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                }
+                else
+                {
+                    tmplDeathBig = tmplDeathBig1080;
+                    tmplDeathPartial = tmplDeathPartial1080;
+                    tmplDeathSmall = tmplDeathSmall1080;
+                    tmplRestart = tmplRestart1080;
+                    tmplExit = tmplExit1080;
+                }
 
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
