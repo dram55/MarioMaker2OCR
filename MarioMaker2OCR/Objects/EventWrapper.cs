@@ -8,6 +8,6 @@ namespace MarioMaker2OCR.Objects
 {
     public class EventWrapper
     {
-        public String type { get; set; }
+        public string type { get; set; }
     }
 }

@@ -83,9 +83,8 @@
     <Compile Include="FormPreview.Designer.cs">
       <DependentUpon>FormPreview.cs</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Objects\JsonEvent.cs" />
-    <Compile Include="Objects\JsonLevel.cs" />
+    <Compile Include="Objects\EventWrapper.cs" />
+    <Compile Include="Objects\LevelWrapper.cs" />
     <Compile Include="Objects\Level.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
