@@ -198,7 +198,7 @@ namespace MarioMaker2OCR
             log.Debug("Detected Black Screen");
 
             // Check if this is the start of a new level
-            Mat currentFrame = FrameBuffer[FrameBuffer.Length - 2];
+            Mat currentFrame = FrameBuffer[FrameBuffer.Length - 5];
             double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
             BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
             if (imageMatchPercent > .94)
