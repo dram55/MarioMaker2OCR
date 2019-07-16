@@ -1,0 +1,48 @@
+<html>
+<head>
+<style>
+</style>
+<script src="main.js"></script>
+<script type="text/javascript">
+function death(event) {
+
+}
+
+function restart(event) {
+
+}
+
+function exit(event) {
+
+}
+
+function clear(event) {
+
+}
+
+function newLevel(event) {
+  console.log("New level");
+
+}
+
+
+connectToSMM(function(event) {
+  console.log(event);
+  if(event.type !== undefined) {
+    switch(event.data) {
+      case 'death':   death(event);   break;
+      case 'restart': restart(event); break;
+      case 'exit':    exit(event);    break;
+      case 'clear':   clear(event);   break;
+    }
+  }
+  if (event.level !== undefined) {
+    level(event)
+  }
+});
+</script>
+</head>
+<body>
+  You probably want <a href="smmbar.html">smmbar.html</a>
+</body>
+</html>
