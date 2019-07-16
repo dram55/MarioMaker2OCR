@@ -103,9 +103,9 @@ function restart(data) {
 
 function exit(data) {
   console.log("Level Exited");
-  document.getElementById("levelName") = "Not currently playing a level.";
-  document.getElementById("levelCode") = "";
-  document.getElementById("levelAuthor") = "";
+  document.getElementById("levelName").innerHTML = "Not currently playing a level.";
+  document.getElementById("levelCode").innerHTML = "";
+  document.getElementById("levelAuthor").innerHTML = "";
   setDeaths(0);
 }
 
@@ -115,7 +115,7 @@ function clear(data) {
 
 function newLevel(data) {
   document.getElementById("levelName").innerHTML = data['level']['name']
-  document.getElementById("levelCode") = "";innerHTML = data['level']['code']
+  document.getElementById("levelCode").innerHTML = data['level']['code']
   document.getElementById("levelAuthor").innerHTML = '(' + data['level']['author'] + ')'
   console.log(data);
 }
