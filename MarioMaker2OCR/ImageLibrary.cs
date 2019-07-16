@@ -107,7 +107,6 @@ namespace MarioMaker2OCR
         {
             Image<Gray, float> match = frame.MatchTemplate(template, Emgu.CV.CvEnum.TemplateMatchingType.CcoeffNormed);
             match.MinMax(out _, out double[] max, out _, out Point[] maxLoc);
-            Console.WriteLine("<[{0}]>", max[0]);
             if (max[0] < threshold) return null;
             return maxLoc[0];
         }

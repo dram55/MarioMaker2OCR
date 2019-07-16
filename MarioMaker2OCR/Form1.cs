@@ -22,6 +22,7 @@ namespace MarioMaker2OCR
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
         private VideoCapture videoDevice;
         private Size resolution720 = new Size(1280, 720);
+        private Size resolution1080 = new Size(1920, 1080);
         private readonly System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
@@ -33,11 +34,18 @@ namespace MarioMaker2OCR
         private Mat levelSelectScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
-        private readonly Image<Gray, byte> tmplDeathBig = new Image<Gray, byte>("./templates/death_big.png");         // Primary death bubble, larger than past death bubbles
-        private readonly Image<Gray, byte> tmplDeathPartial = new Image<Gray, byte>("./templates/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
-        private readonly Image<Gray, byte> tmplDeathSmall = new Image<Gray, byte>("./templates/death_small.png");     // Death bubbles caused by past deaths/other players
-        private readonly Image<Gray, byte> tmplRestart = new Image<Gray, byte>("./templates/startover.png");
-        private readonly Image<Gray, byte> tmplExit = new Image<Gray, byte>("./templates/exit.png");
+        private Image<Gray, byte> tmplDeathBig;
+        private Image<Gray, byte> tmplDeathPartial;
+        private Image<Gray, byte> tmplDeathSmall;
+        private Image<Gray, byte> tmplRestart;
+        private Image<Gray, byte> tmplExit;
+        private readonly Image<Gray, byte> tmplDeathBig1080 = new Image<Gray, byte>("./templates/death_big.png");         // Primary death bubble, larger than past death bubbles
+        private readonly Image<Gray, byte> tmplDeathPartial1080 = new Image<Gray, byte>("./templates/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
+        private readonly Image<Gray, byte> tmplDeathSmall1080 = new Image<Gray, byte>("./templates/death_small.png");     // Death bubbles caused by past deaths/other players
+        private readonly Image<Gray, byte> tmplRestart1080 = new Image<Gray, byte>("./templates/startover.png");
+        private readonly Image<Gray, byte> tmplExit1080 = new Image<Gray, byte>("./templates/exit.png");
+
+
 
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
@@ -255,7 +263,7 @@ namespace MarioMaker2OCR
                         else
                         {
                             // Really shouldn't happen but popped this in `else` just to prevent one frame from detecting both.
-                            loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplExit, 0.8);
+                            loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplExit, 0.7);
                             if (loc.HasValue)
                             {
                                 events["exit"] = true;
@@ -389,6 +397,25 @@ namespace MarioMaker2OCR
                 levelCodeArea = ImageLibrary.ChangeSize(levelCodeArea720p, resolution720, SelectedResolution);
                 creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
                 levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
+
+                // resize templates based on current resolution
+                if(SelectedResolution.Height != 1080)
+                {
+                    log.Info("Resizing templates");
+                    tmplDeathBig = tmplDeathBig1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplDeathPartial = tmplDeathPartial1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplDeathSmall = tmplDeathSmall1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplRestart = tmplRestart1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                    tmplExit = tmplExit1080.Resize(0.6666, Emgu.CV.CvEnum.Inter.Nearest);
+                }
+                else
+                {
+                    tmplDeathBig = tmplDeathBig1080;
+                    tmplDeathPartial = tmplDeathPartial1080;
+                    tmplDeathSmall = tmplDeathSmall1080;
+                    tmplRestart = tmplRestart1080;
+                    tmplExit = tmplExit1080;
+                }
 
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
