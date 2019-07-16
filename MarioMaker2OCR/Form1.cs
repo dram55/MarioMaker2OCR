@@ -22,7 +22,6 @@ namespace MarioMaker2OCR
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
         private VideoCapture videoDevice;
         private Size resolution720 = new Size(1280, 720);
-        private Size resolution1080 = new Size(1920, 1080);
         private readonly System.Timers.Timer processVideoFrameTimer;
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
@@ -64,6 +63,7 @@ namespace MarioMaker2OCR
             InitializeComponent();
 
             outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
+            numPort.Value = Properties.Settings.Default.SelectedPort;
 
             processVideoFrameTimer = new System.Timers.Timer(250);
             processVideoFrameTimer.Elapsed += readScreenTimer_Tick;
@@ -79,6 +79,7 @@ namespace MarioMaker2OCR
             new ToolTip().SetToolTip(outputFolderLabel, $"Folder to save {LEVEL_JSON_FILE}");
             new ToolTip().SetToolTip(deviceLabel, "Available capture devices.");
             new ToolTip().SetToolTip(propertiesButton, "Properties for the selected capture device.");
+            new ToolTip().SetToolTip(numPortLabel, "Port to run the Web Server on (used for OBS Browser Source)");
         }
 
         private void loadResolutions()
@@ -210,6 +211,7 @@ namespace MarioMaker2OCR
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
                 previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
                 BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
+                SMMServer.BroadcastLevel(level);
             }
             else
             {
@@ -273,11 +275,21 @@ namespace MarioMaker2OCR
                     }
                 }
 
-
-                // TODO: Publish events.
-                if (events["death"]) log.Info("Detected death");
-                if (events["restart"]) log.Info("Detected restart");
-                if (events["exit"]) log.Info("Detected exit");
+                if (events["death"])
+                {
+                    log.Info("Detected death");
+                    SMMServer.BroadcastEvent("death");
+                }
+                if (events["restart"])
+                {
+                    log.Info("Detected restart");
+                    SMMServer.BroadcastEvent("restart");
+                }
+                if (events["exit"])
+                {
+                    log.Info("Detected exit");
+                    SMMServer.BroadcastEvent("exit");
+                }
             }
 
         }
@@ -287,8 +299,8 @@ namespace MarioMaker2OCR
         /// </summary>
         private void OnClearScreen()
         {
-            // TODO: Publish clear event
             log.Info("Detected Level Clear");
+            SMMServer.BroadcastEvent("clear");
         }
 
         private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
@@ -417,14 +429,18 @@ namespace MarioMaker2OCR
                     tmplExit = tmplExit1080;
                 }
 
+                SMMServer.port = Decimal.ToUInt16(numPort.Value);
+                log.Info(String.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
+                SMMServer.Start();
+
                 log.Info($"Connecting to {deviceComboBox.SelectedIndex} - {deviceComboBox.SelectedItem}");
                 log.Info($"Using Resolution: {videoDevice.Width}x{videoDevice.Height}");
-
                 lockForm();
             }
             catch (Exception ex)
             {
                 processException("Error starting video device", ex);
+                throw ex;
             }
         }
 
@@ -446,6 +462,7 @@ namespace MarioMaker2OCR
             propertiesButton.Enabled = false;
             ocrTextBox.Text = "";
             percentMatchLabel.Text = "";
+            numPort.Enabled = false;
             processStatusIcon.BackColor = Color.Green;
         }
 
@@ -459,6 +476,7 @@ namespace MarioMaker2OCR
             startButton.Enabled = true;
             stopButton.Enabled = false;
             processingLevelLabel.Visible = false;
+            numPort.Enabled = true;
         }
 
         private void stopButton_Click(object sender, EventArgs e)
@@ -466,6 +484,7 @@ namespace MarioMaker2OCR
             videoDevice.Stop();
             videoDevice.Dispose();
             BeginInvoke(new MethodInvoker(() => unlockForm()));
+            SMMServer.Stop();
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
@@ -511,6 +530,7 @@ namespace MarioMaker2OCR
             Properties.Settings.Default.OutputFolder = outputFolderTextbox.Text;
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
+            Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
             Properties.Settings.Default.Save();
         }
 

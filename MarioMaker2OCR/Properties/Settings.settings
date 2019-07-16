@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WebcamOCR.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MarioMaker2OCR.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="OutputFolder" Type="System.String" Scope="User">
@@ -10,6 +10,9 @@
     </Setting>
     <Setting Name="SelectedResolutionIndex" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SelectedPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

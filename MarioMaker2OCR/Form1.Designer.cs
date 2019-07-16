@@ -33,6 +33,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearLevelFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showPreviewWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ocrTextBox = new System.Windows.Forms.TextBox();
@@ -52,9 +53,11 @@
             this.processingLevelLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.showPreviewWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.numPortLabel = new System.Windows.Forms.Label();
+            this.numPort = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -87,6 +90,13 @@
             this.clearLevelFileToolStripMenuItem.Text = "Clear Level File";
             this.clearLevelFileToolStripMenuItem.Click += new System.EventHandler(this.clearLevelFileToolStripMenuItem_Click_1);
             // 
+            // showPreviewWindowToolStripMenuItem
+            // 
+            this.showPreviewWindowToolStripMenuItem.Name = "showPreviewWindowToolStripMenuItem";
+            this.showPreviewWindowToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
+            this.showPreviewWindowToolStripMenuItem.Text = "Show Preview Window";
+            this.showPreviewWindowToolStripMenuItem.Click += new System.EventHandler(this.ShowPreviewWindowToolStripMenuItem_Click);
+            // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
@@ -102,7 +112,7 @@
             // ocrTextBox
             // 
             this.ocrTextBox.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrTextBox.Location = new System.Drawing.Point(15, 288);
+            this.ocrTextBox.Location = new System.Drawing.Point(15, 336);
             this.ocrTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ocrTextBox.Name = "ocrTextBox";
             this.ocrTextBox.ReadOnly = true;
@@ -113,7 +123,7 @@
             // 
             this.ocrLabel.AutoSize = true;
             this.ocrLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrLabel.Location = new System.Drawing.Point(26, 254);
+            this.ocrLabel.Location = new System.Drawing.Point(26, 302);
             this.ocrLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ocrLabel.Name = "ocrLabel";
             this.ocrLabel.Size = new System.Drawing.Size(59, 31);
@@ -143,7 +153,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(170, 371);
+            this.startButton.Location = new System.Drawing.Point(170, 419);
             this.startButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(112, 35);
@@ -155,7 +165,7 @@
             // stopButton
             // 
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(318, 371);
+            this.stopButton.Location = new System.Drawing.Point(318, 419);
             this.stopButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(112, 35);
@@ -189,7 +199,7 @@
             // 
             this.outputFolderLabel.AutoSize = true;
             this.outputFolderLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outputFolderLabel.Location = new System.Drawing.Point(40, 148);
+            this.outputFolderLabel.Location = new System.Drawing.Point(40, 196);
             this.outputFolderLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.outputFolderLabel.Name = "outputFolderLabel";
             this.outputFolderLabel.Size = new System.Drawing.Size(87, 62);
@@ -199,7 +209,7 @@
             // outputFolderTextbox
             // 
             this.outputFolderTextbox.Enabled = false;
-            this.outputFolderTextbox.Location = new System.Drawing.Point(134, 154);
+            this.outputFolderTextbox.Location = new System.Drawing.Point(134, 202);
             this.outputFolderTextbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.outputFolderTextbox.Multiline = true;
             this.outputFolderTextbox.Name = "outputFolderTextbox";
@@ -208,7 +218,7 @@
             // 
             // selectFolderButton
             // 
-            this.selectFolderButton.Location = new System.Drawing.Point(502, 154);
+            this.selectFolderButton.Location = new System.Drawing.Point(502, 202);
             this.selectFolderButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.selectFolderButton.Name = "selectFolderButton";
             this.selectFolderButton.Size = new System.Drawing.Size(100, 35);
@@ -225,7 +235,7 @@
             this.processStatusIcon,
             this.percentMatchLabel,
             this.processingLevelLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 444);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 470);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
             this.statusStrip1.ShowItemToolTips = true;
@@ -282,18 +292,46 @@
             this.toolTip1.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.toolTip1.ToolTipTitle = "Tool Tip";
             // 
-            // showPreviewWindowToolStripMenuItem
+            // numPortLabel
             // 
-            this.showPreviewWindowToolStripMenuItem.Name = "showPreviewWindowToolStripMenuItem";
-            this.showPreviewWindowToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
-            this.showPreviewWindowToolStripMenuItem.Text = "Show Preview Window";
-            this.showPreviewWindowToolStripMenuItem.Click += new System.EventHandler(this.ShowPreviewWindowToolStripMenuItem_Click);
+            this.numPortLabel.AutoSize = true;
+            this.numPortLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numPortLabel.Location = new System.Drawing.Point(75, 142);
+            this.numPortLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.numPortLabel.Name = "numPortLabel";
+            this.numPortLabel.Size = new System.Drawing.Size(55, 31);
+            this.numPortLabel.TabIndex = 22;
+            this.numPortLabel.Text = "Port";
+            // 
+            // numPort
+            // 
+            this.numPort.Location = new System.Drawing.Point(135, 149);
+            this.numPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numPort.Minimum = new decimal(new int[] {
+            1025,
+            0,
+            0,
+            0});
+            this.numPort.Name = "numPort";
+            this.numPort.Size = new System.Drawing.Size(126, 26);
+            this.numPort.TabIndex = 23;
+            this.numPort.Value = new decimal(new int[] {
+            1025,
+            0,
+            0,
+            0});
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(622, 466);
+            this.ClientSize = new System.Drawing.Size(622, 492);
+            this.Controls.Add(this.numPort);
+            this.Controls.Add(this.numPortLabel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.selectFolderButton);
@@ -320,6 +358,7 @@
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numPort)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -349,6 +388,8 @@
         private System.Windows.Forms.ToolStripStatusLabel processingLevelLabel;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolStripMenuItem showPreviewWindowToolStripMenuItem;
+        private System.Windows.Forms.Label numPortLabel;
+        private System.Windows.Forms.NumericUpDown numPort;
     }
 }
 
