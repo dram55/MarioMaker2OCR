@@ -44,8 +44,6 @@ namespace MarioMaker2OCR
         private readonly Image<Gray, byte> tmplRestart1080 = new Image<Gray, byte>("./templates/startover.png");
         private readonly Image<Gray, byte> tmplExit1080 = new Image<Gray, byte>("./templates/exit.png");
 
-
-
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
 
@@ -156,7 +154,7 @@ namespace MarioMaker2OCR
                         if (!WasBlack)
                         {
                             WasBlack = true;
-                            OnBlackScreen();
+                            onBlackScreen();
                         }
                     }
                 }
@@ -164,7 +162,7 @@ namespace MarioMaker2OCR
                 {
                     WasBlack = false;
                     // Scan just the bottom fifth of the frame, if its solid but the entire frame isn't, its likely the clear screen.
-                    Rectangle clearRegion = new Rectangle(0, (imgFrame.Height / 5) * 4, imgFrame.Width, (imgFrame.Height / 5));
+                    Rectangle clearRegion = new Rectangle(0, (imgFrame.Height / 5) * 4, imgFrame.Width, imgFrame.Height / 5);
                     if (ImageLibrary.IsRegionSolid(imgFrame, clearRegion))
                     {
                         Bgr color = imgFrame[0, 0];
@@ -173,7 +171,7 @@ namespace MarioMaker2OCR
                             if(!WasClear)
                             {
                                 WasClear = true;
-                                OnClearScreen();
+                                onClearScreen();
                             }
                         }
                     }
@@ -181,7 +179,6 @@ namespace MarioMaker2OCR
                     {
                         WasClear = false;
                     }
-
                 }
             }
             catch (Exception ex)
@@ -193,7 +190,7 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Handler that is called when a Black Screen is detected
         /// </summary>
-        private void OnBlackScreen()
+        private void onBlackScreen()
         {
             log.Debug("Detected Black Screen");
 
@@ -211,6 +208,7 @@ namespace MarioMaker2OCR
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
                 previewer.SetLastMatch(currentFrame.Clone(), new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
                 BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
+
                 SMMServer.BroadcastLevel(level);
             }
             else
@@ -249,8 +247,6 @@ namespace MarioMaker2OCR
                         {
                             previewer.SetLastMatch(f.Clone(), boundaries.ToArray());
                         }
-
-
                     }
 
                     //Just in case a user hoved one then changed to the other button, only the last one counts, so don't look after one has been found.
@@ -291,13 +287,12 @@ namespace MarioMaker2OCR
                     SMMServer.BroadcastEvent("exit");
                 }
             }
-
         }
 
         /// <summary>
         /// Handler that is called when a "Course Clear" screen is detected
         /// </summary>
-        private void OnClearScreen()
+        private void onClearScreen()
         {
             log.Info("Detected Level Clear");
             SMMServer.BroadcastEvent("clear");
@@ -534,7 +529,7 @@ namespace MarioMaker2OCR
             Properties.Settings.Default.Save();
         }
 
-        private void ShowPreviewWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        private void showPreviewWindowToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (previewer.IsDisposed)
             {

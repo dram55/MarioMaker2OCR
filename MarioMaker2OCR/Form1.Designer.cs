@@ -95,7 +95,7 @@
             this.showPreviewWindowToolStripMenuItem.Name = "showPreviewWindowToolStripMenuItem";
             this.showPreviewWindowToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
             this.showPreviewWindowToolStripMenuItem.Text = "Show Preview Window";
-            this.showPreviewWindowToolStripMenuItem.Click += new System.EventHandler(this.ShowPreviewWindowToolStripMenuItem_Click);
+            this.showPreviewWindowToolStripMenuItem.Click += new System.EventHandler(this.showPreviewWindowToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 

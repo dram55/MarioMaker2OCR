@@ -28,7 +28,7 @@ namespace MarioMaker2OCR
                     //Live Frames are refs to the Form1 copy, it disposes of them once they leave the FrameBuffer
                     imgLiveFrame.Image = frame;
                 }
-                catch(ObjectDisposedException)
+                catch (ObjectDisposedException)
                 {
                     // Happens if the window is closed while the ImageBox is processes the Mat
                 }
@@ -40,7 +40,7 @@ namespace MarioMaker2OCR
             if (!this.Disposing && this.Visible)
             {
                 MCvScalar borderColor = new Bgr(Color.Red).MCvScalar;
-                foreach(Rectangle r in boundaries)
+                foreach (Rectangle r in boundaries)
                 {
                     Emgu.CV.CvInvoke.Rectangle(frame, r, borderColor, 2);
                 }
@@ -56,8 +56,7 @@ namespace MarioMaker2OCR
                 {
                     // Happens if the window is closed while the ImageBox is processes the Mat
                 }
+            }
         }
-        }
-
     }
 }

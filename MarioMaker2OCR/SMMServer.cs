@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using MarioMaker2OCR.Objects;
 namespace MarioMaker2OCR
 {
-    class SMMServer
+    internal static class SMMServer
     {
         private static WebServer server;
         private static SMMWebSocketServer wss;
@@ -23,7 +23,7 @@ namespace MarioMaker2OCR
         {
             if (server != null) return;
             server = new WebServer(String.Format("http://localhost:{0}/", port));
-           
+
             // FIXME: Apparently StaticFilesModule is obsolete, but its claimed replacement FileModule doesn't exist, no mention anywhere in EmbedIO documentation either.
             server.RegisterModule(new StaticFilesModule(webPath));
 
@@ -53,8 +53,7 @@ namespace MarioMaker2OCR
         /// <param name="eventType">Event name</param>
         public static void BroadcastEvent(String eventType)
         {
-
-            String json = JsonConvert.SerializeObject(new EventWrapper() { type = eventType });
+            string json = JsonConvert.SerializeObject(new EventWrapper() { type = eventType });
             Broadcast(json);
         }
 
@@ -64,7 +63,7 @@ namespace MarioMaker2OCR
         /// <param name="newLevel">Level information to be published</param>
         public static void BroadcastLevel(Level newLevel)
         {
-            String json = JsonConvert.SerializeObject(new LevelWrapper() { level = newLevel });
+            string json = JsonConvert.SerializeObject(new LevelWrapper() { level = newLevel });
             Broadcast(json);
         }
         public static void Broadcast(string message)
@@ -76,8 +75,7 @@ namespace MarioMaker2OCR
         }
     }
 
-
-    class SMMWebSocketServer : WebSocketsServer
+    internal class SMMWebSocketServer : WebSocketsServer
     {
         public SMMWebSocketServer() : base(true)
         {
@@ -107,6 +105,5 @@ namespace MarioMaker2OCR
         {
             // Do Nothing
         }
-
     }
 }
