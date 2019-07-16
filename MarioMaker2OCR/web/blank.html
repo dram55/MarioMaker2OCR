@@ -1,0 +1,51 @@
+<html>
+<head>
+<style>
+</style>
+<script src="smm.js"></script>
+<script type="text/javascript">
+function death(data) {
+  console.log("Player died.");
+}
+
+function restart(data) {
+  console.log("Restarted Level");
+}
+
+function exit(data) {
+  console.log("Level Exited");
+}
+
+function clear(data) {
+  console.log("Level Cleared");
+
+}
+
+function newLevel(data) {
+  console.log("New level");
+  console.log(data);
+}
+
+
+connectToSMM(function(event) {
+  if(event['data'] === undefined) return;
+  var data = JSON.parse(event.data);
+  if(data['type'] !== undefined) {
+    switch(data.type) {
+      case 'death':   death(data);   break;
+      case 'restart': restart(data); break;
+      case 'exit':    exit(data);    break;
+      case 'clear':   clear(data);   break;
+    }
+  }
+
+  if (data['level'] !== undefined) {
+    newLevel(data)
+  }
+});
+</script>
+</head>
+<body>
+A Blank Canvas for with all the boilerplate code already provided. Remember to set the port in smm.js.
+</body>
+</html>
