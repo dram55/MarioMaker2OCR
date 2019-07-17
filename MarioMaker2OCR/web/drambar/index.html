@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <title>Drambar</title>
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
+   <script src="https://cdn.rawgit.com/AngularClass/angular-websocket/v2.0.0/dist/angular-websocket.js"></script>
+   <script src="/drambar/drambar.js"></script>
+   
+   <link rel="stylesheet" href="/drambar/style.css">
+</head>
+<body ng-app="dramBarApp">
+   <div ng-controller="dramBarController as ctrl">
+      <div ng-if="ctrl.smm.level.code" class="level-card"
+         ng-class="(ctrl.smm.changeInProgress) ? 'slide-out' : 'slide-in'">
+         <h4 ng-if="ctrl.smm.level.author" class="user-name">{{ctrl.smm.level.author}}</h4>
+         <p class="level-name">{{ctrl.smm.level.name}}</p>
+         <code ng-if="ctrl.smm.level.code" class="level-code text-uppercase">{{ctrl.smm.level.code}}</code>
+      </div>
+   </div>
+</body>
+</html>

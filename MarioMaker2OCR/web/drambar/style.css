@@ -1,0 +1,67 @@
+/* Element Styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.5;
+}
+
+h4 {
+   margin: 0 0 -3px 0;
+   font-size: 1.5rem;
+   font-weight: 500;
+   line-height: 1.2;
+ }
+
+ p { margin: 0; }
+
+ /* Animations */
+.slide-in {
+  opacity: 0;
+  left: -500px;
+  animation: fade-in 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+.slide-out {
+  opacity: 1;
+  left: 0px;
+  animation: fade-out 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes fade-in {
+  100% {
+    left: 0px;
+    opacity: 1
+  }
+}
+
+@keyframes fade-out {
+  100% {
+    left: -600px;
+    opacity: 0
+  }
+}
+
+/* Class Styles */
+.level-card {
+  position: absolute;
+  padding: 9px 13px 3px 13px;
+  background-color: rgba(0, 0, 0, 0.77);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, .125);
+  color: whitesmoke;
+  max-width: 350px;
+  bottom:0;
+  margin-left:5px;
+}
+
+.level-code {
+  color: #ff49ad;
+  margin-bottom: .5rem;
+  font-size: 180%;
+  line-height: 1.2;
+  text-transform: uppercase!important;
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+
+.level-name { color: #dedede; }
