@@ -443,7 +443,6 @@ namespace MarioMaker2OCR
             videoDevice = new VideoCapture(deviceComboBox.SelectedIndex);
             videoDevice.SetCaptureProperty(CapProp.FrameHeight, SelectedResolution.Height);
             videoDevice.SetCaptureProperty(CapProp.FrameWidth, SelectedResolution.Width);
-            videoDevice.Start();
         }
 
         private void lockForm()
