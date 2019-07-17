@@ -1,154 +1,98 @@
+<!doctype html>
 <html>
 <head>
-<style>
-</style>
-<script src="/smmbar/smm.js"></script>
-<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Press+Start+2P' type='text/css'>
-<style>
-  body, html { padding:0px; margin:0px; }
-  .smmbar {
-    width:100%;
-    border-color: black;
-    border-radius: 15px;
-    border-width:1px;
-    border-style:solid;
+  <meta charset="utf-8">
+  <title></title>
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Press+Start+2P' type='text/css'>
+  <style>
+  	body, html { padding:0px; margin:0px; }
+  	.smmbar {
+	    width:100%;
+	    max-width:100%;
+	    border-color: black;
+	    border-radius: 10px;
+	    border-width:1px;
+	    border-style:solid;
+	    font-family: "Press Start 2P";
+	    height: 30px;
+	    background-color: rgb(249, 255, 50);
+	    align-content: center;
+	 }
+  	.flex-container {
+  		display:flex;
+	    flex-wrap: nowrap;
+	    flex-direction: row;
+	    justify-content: space-between;
+  	}
+  	.container {
+	    padding-left:10px;
+	    padding-right:10px;
+	    top: 50%;
+    	transform: translateY(-50%);
+    	position: relative;
+  	}
+  	.container * img {
+  	}
+  	.container div {
+  		padding-right:20px;
+  	}
+  	.deaths {
+  		white-space: nowrap;
+  	}
+  	.deaths span::before {
 
-    font-family: "Press Start 2P";
+  	}
+  	.timer {
 
-    text-shadow: rgba(0, 0, 0, 0) -1px -1px 0px, rgba(0, 0, 0, 0) 1px -1px 0px, rgba(0, 0, 0, 0) -1px 1px 0px, rgba(0, 0, 0, 0) 1px 1px 0px;
-
-  }
-
-  .leftSide {
-    float:left;
-    top: 50%;
-    transform: translateY(-50%);
-    position: relative;
-    margin-top: 1px;
-    margin-left:15px;
-  }
-
-  .rightSide {
-    float:right;
-    top: 50%;
-    transform: translateY(-50%);
-    position: relative;
-    margin-top: 1px;
-    margin-right:15px;
-  }
-
-  .overflow {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .smmbar div {
-    display:inline-block;
-  }
-
-</style>
-<script type="text/javascript">
-var colors = {
-  barBackground: "rgb(249, 255, 50)",
-  barBorder: "rgb(0, 0, 0)",
-  fontColor: "rgb(0, 0, 0)",
-  fontBorder: "rgba(0, 0, 0, 0)",
-}
-
-var barSize = "50px"
-var barBorderRadius = "10px"
-var fontSize = "20px"
-var displayLevelCode = true;
-var displayLevelAuthor = true;
-var displayLevelName = true;
-var displayDeaths = true;
-
-
-function stylePage() {
-  var smmbar = document.querySelector(".smmbar")
-  smmbar.style.backgroundColor = colors['barBackground'];
-  smmbar.style.borderColor = colors['barBorder'];
-  smmbar.style.fontColor = colors['fontColor'];
-  smmbar.style.textShadow = colors['fontBorder'] + ' -1px -1px 0px, ' + colors['fontBorder'] + ' 1px -1px 0px, ' + colors['fontBorder'] + ' -1px 1px 0px, ' + colors['fontBorder'] + ' 1px 1px 0px'; 
-
-  smmbar.style.height = barSize;
-  smmbar.style.borderRadius = barBorderRadius;
-  smmbar.style.fontSize = fontSize;
-
-  if(!displayLevelCode) document.getElementById("levelCode").style.display = "none";
-  if(!displayLevelAuthor) document.getElementById("levelAuthor").style.display = "none";
-  if(!displayLevelName) document.getElementById("levelName").style.display = "none";
-  if(!displayDeaths) document.getElementById("deaths").style.display = "none";
-}
-
-var deaths = 0;
-var lastDeath = 0;
-function setDeaths(newval) {
-  deaths = newval;
-  document.getElementById("deaths").innerHTML = newval;
-  lastDeath = Date.now()
-}
-
-
-function death(data) {
-  console.log("Player died.");
-  if(Date.now()-lastDeath >= 750) setDeaths(deaths+1);
-}
-
-function restart(data) {
-  console.log("Restarted Level");
-  if(Date.now()-lastDeath >= 750) setDeaths(deaths+1);
-}
-
-function exit(data) {
-  console.log("Level Exited");
-  document.getElementById("levelName").innerHTML = "Not currently playing a level.";
-  document.getElementById("levelCode").innerHTML = "";
-  document.getElementById("levelAuthor").innerHTML = "";
-  setDeaths(0);
-}
-
-function clear(data) {
-  console.log("Level Cleared");
-}
-
-function newLevel(data) {
-  document.getElementById("levelName").innerHTML = data['level']['name']
-  document.getElementById("levelCode").innerHTML = data['level']['code']
-  document.getElementById("levelAuthor").innerHTML = '(' + data['level']['author'] + ')'
-  console.log(data);
-}
-
-
-connectToSMM(function(event) {
-  if(event['data'] === undefined) return;
-  var data = JSON.parse(event.data);
-  if(data['type'] !== undefined) {
-    switch(data.type) {
-      case 'death':   death(data);   break;
-      case 'restart': restart(data); break;
-      case 'exit':    exit(data);    break;
-      case 'clear':   clear(data);   break;
-    }
-  }
-
-  if (data['level'] !== undefined) {
-    newLevel(data)
-  }
-});
-</script>
+  	}
+  	.levelname {
+  		text-overflow: ellipsis;
+  		white-space: nowrap;
+  		overflow: hidden;
+  	}
+  	.levelcode {
+  		text-align:right;
+  		white-space:nowrap;
+  	}
+  </style>
+  <script src="settings.js"></script>
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/knockout-3.5.0.js"></script>
+  <script src="js/main.js"></script>
 </head>
-<body onload="stylePage()">
-  <div class="smmbar">
-    <div class="leftSide">
-      <div id="levelName" class="overflow">Not currently playing a level.</div>
-      <div id="levelAuthor" class="overflow"></div>
-    </div>
-    <div class="rightSide">
-      Deaths:<div id="deaths">0</div>
-      <div id="levelCode"></div>
-    </div>
-  </div>
+
+<body>
+
+<div class="smmbar" 
+     data-bind="style: { 
+     	color: settings.style.color,
+        backgroundColor: settings.style.backgroundColor,
+        fontSize: settings.style.fontSize,
+        fontFamily: settings.style.fontFamily,
+        borderRadius: settings.style.borderRadius,
+        borderColor: settings.style.borderColor,
+        borderWidth: settings.style.borderWidth,
+        height: settings.style.height,
+        textShadow: 
+           '-1px -1px 0 '+settings.style.textOutlineColor+', '+
+           '1px -1px 0 '+settings.style.textOutlineColor+', '+
+           '-1px 1px 0 '+settings.style.textOutlineColor+', '+
+           '1px 1px 0 '+settings.style.textOutlineColor
+     }">
+
+	<div class="container flex-container" data-bind='fadeVisible: isPlaying'>
+		<div class="levelname"><span data-bind='fadeVisible: state.hasCleared'><img height=20 src="./images/clear_flag.png"/>&nbsp;</span><span data-bind='text: level.name'></span></div>
+		<div class="timer" data-bind='visible: settings.timer.show'><span data-bind="html: settings.messages.label_timer"></span><span data-bind="text: state.displayTimer"></span></div>
+		<div class="deaths"><span data-bind="html: settings.messages.label_deaths"></span><span data-bind="text: state.deaths"></span></div>
+		<div class="levelcode"><span data-bind="html: settings.messages.label_levelcode"></span><span data-bind='text: level.code'></span></div>
+	</div>
+	<div class="container flex-container" data-bind='fadeHidden: isPlaying, text: settings.messages.no_level_active'>Test</div>
+</div>
+<audio id="timerAudio">
+  <source src="timer.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 </body>
+
 </html>
