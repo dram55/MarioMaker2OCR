@@ -133,7 +133,7 @@ namespace MarioMaker2OCR
             Mat currentFrame = new Mat();
             try
             {
-                if (!videoDevice.IsOpened) return;
+                if (videoDevice==null) return;
                 videoDevice.Retrieve(currentFrame);
                 if (currentFrame.Bitmap == null)
                 {
@@ -197,7 +197,6 @@ namespace MarioMaker2OCR
             // Check if this is the start of a new level
             Mat currentFrame = FrameBuffer[FrameBuffer.Length - 5];
             double imageMatchPercent = ImageLibrary.CompareImages(currentFrame, levelSelectScreen);
-            BeginInvoke((MethodInvoker)(() => percentMatchLabel.Text = String.Format("{0:P2}", imageMatchPercent)));
             if (imageMatchPercent > .94)
             {
                 log.Info("Detected new level.");
@@ -456,22 +455,22 @@ namespace MarioMaker2OCR
             resolutionsCombobox.Enabled = false;
             propertiesButton.Enabled = false;
             ocrTextBox.Text = "";
-            percentMatchLabel.Text = "";
             numPort.Enabled = false;
             processStatusIcon.BackColor = Color.Green;
+            webServerAddressStatusLabel.Text = $"http://localhost:{numPort.Value}";
         }
 
         private void unlockForm()
         {
             processVideoFrameTimer.Stop();
             processStatusIcon.BackColor = Color.Red;
-            percentMatchLabel.Text = "";
             deviceComboBox.Enabled = true;
             resolutionsCombobox.Enabled = true;
             startButton.Enabled = true;
             stopButton.Enabled = false;
             processingLevelLabel.Visible = false;
             numPort.Enabled = true;
+            webServerAddressStatusLabel.Text = $"";
         }
 
         private void stopButton_Click(object sender, EventArgs e)
@@ -537,6 +536,11 @@ namespace MarioMaker2OCR
             }
             previewer.Show();
             previewer.BringToFront();
+        }
+
+        private void webServerAddressStatusLabel_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start($"http://localhost:{numPort.Value}");
         }
     }
 }
