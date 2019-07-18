@@ -55,11 +55,11 @@
   		white-space:nowrap;
   	}
   </style>
-  <script src="settings.js"></script>
-  <script src="js/jquery-3.4.1.min.js"></script>
-  <script src="js/plugins.js"></script>
-  <script src="js/knockout-3.5.0.js"></script>
-  <script src="js/main.js"></script>
+  <script src="/smmbar/settings.js"></script>
+  <script src="/smmbar/js/jquery-3.4.1.min.js"></script>
+  <script src="/smmbar/js/plugins.js"></script>
+  <script src="/smmbar/js/knockout-3.5.0.js"></script>
+  <script src="/smmbar/js/main.js"></script>
 </head>
 
 <body>
@@ -82,7 +82,7 @@
      }">
 
 	<div class="container flex-container" data-bind='fadeVisible: isPlaying'>
-		<div class="levelname"><span data-bind='fadeVisible: state.hasCleared'><img height=20 src="./images/clear_flag.png"/>&nbsp;</span><span data-bind='text: level.name'></span></div>
+		<div class="levelname"><span data-bind='fadeVisible: state.hasCleared'><img height=20 src="/smmbar/images/clear_flag.png"/>&nbsp;</span><span data-bind='text: level.name'></span></div>
 		<div class="timer" data-bind='visible: settings.timer.show'><span data-bind="html: settings.messages.label_timer"></span><span data-bind="text: state.displayTimer"></span></div>
 		<div class="deaths"><span data-bind="html: settings.messages.label_deaths"></span><span data-bind="text: state.deaths"></span></div>
 		<div class="levelcode"><span data-bind="html: settings.messages.label_levelcode"></span><span data-bind='text: level.code'></span></div>
