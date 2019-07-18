@@ -49,18 +49,6 @@ namespace MarioMaker2OCR.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SelectedResolutionIndex {
-            get {
-                return ((int)(this["SelectedResolutionIndex"]));
-            }
-            set {
-                this["SelectedResolutionIndex"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("3000")]
         public int SelectedPort {
             get {

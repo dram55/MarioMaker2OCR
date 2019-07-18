@@ -8,9 +8,6 @@
     <Setting Name="SelectedDevice" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="SelectedResolutionIndex" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
     <Setting Name="SelectedPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3000</Value>
     </Setting>
