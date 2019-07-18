@@ -55,7 +55,7 @@
          var event = JSON.parse(message.data);
 
          switch(event.type) {
-            case 'death':   death(event);   break;
+            case 'death':   death(event);
             case 'restart': restart(event); break;
             case 'exit':    exit(event);    break;
             case 'clear':   clear(event);   break;
