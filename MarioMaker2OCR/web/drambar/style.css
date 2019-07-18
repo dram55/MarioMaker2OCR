@@ -65,3 +65,25 @@ h4 {
 }
 
 .level-name { color: #dedede; }
+
+.death-count {float: right;}
+
+.timer-death-bar {
+   font-size: 125%;
+   margin-top: -2px;
+}
+
+.timer-death-bar img {
+   width: 20px;
+   margin-right: 6px;
+   -webkit-transition: -webkit-transform .3s;
+   -o-transition: transform .3s;
+   transition: transform .3s;
+   transition: transform .3s,-webkit-transform .3s;
+}
+
+.death-count img.pulse {
+   -webkit-transform: scale(1.15);
+   -ms-transform: scale(1.15);
+   transform: scale(1.15);
+}
