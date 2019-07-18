@@ -238,7 +238,7 @@ namespace MarioMaker2OCR
             Image<Bgr, byte>[] cloned = new Image<Bgr, byte>[frameBufferLength];
             for(int i=0;i<frameBuffer.Length; i++)
             {
-                cloned[i] = frameBuffer[i].Clone();
+                cloned[i] = frameBuffer[i]?.Clone();
             }
             return cloned;
 
