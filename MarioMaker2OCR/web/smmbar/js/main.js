@@ -5,7 +5,7 @@ function connectToWSS(callback) {
   ws.onclose = function(e) {
     console.log('Socket is closed. Reconnect will be attempted in 3 second.', e.reason);
     setTimeout(function() {
-      connectToSMM(callback);
+      connectToWSS(callback);
     }, 3000);
   };
   ws.onerror = function(err) {

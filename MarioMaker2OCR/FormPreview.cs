@@ -19,14 +19,15 @@ namespace MarioMaker2OCR
             InitializeComponent();
         }
 
-        public void SetLiveFrame(Mat frame)
+        public void SetLiveFrame(Image<Bgr, byte> frame)
         {
             if (!this.Disposing && this.Visible)
             {
                 try
                 {
                     //Live Frames are refs to the Form1 copy, it disposes of them once they leave the FrameBuffer
-                    imgLiveFrame.Image = frame;
+                    imgLiveFrame.Image?.Dispose();
+                    imgLiveFrame.Image = frame.Clone();
                 }
                 catch (ObjectDisposedException)
                 {
@@ -35,7 +36,7 @@ namespace MarioMaker2OCR
             }
         }
 
-        public void SetLastMatch(Mat frame, Rectangle[] boundaries)
+        public void SetLastMatch(Image<Bgr, byte> frame, Rectangle[] boundaries)
         {
             if (!this.Disposing && this.Visible)
             {
@@ -50,7 +51,7 @@ namespace MarioMaker2OCR
                 try
                 {
                     imgLastMatch.Image?.Dispose();
-                    imgLastMatch.Image = frame;
+                    imgLastMatch.Image = frame.Clone();
                 }
                 catch (ObjectDisposedException)
                 {
