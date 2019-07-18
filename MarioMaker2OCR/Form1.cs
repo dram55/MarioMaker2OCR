@@ -259,7 +259,7 @@ namespace MarioMaker2OCR
                     Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>();
                     Image<Gray, byte>[] deathTemplates = new Image<Gray, byte>[] { tmplDeathBig, tmplDeathSmall, tmplDeathPartial };
 
-                    grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
+                    //grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
 
                     //Once we have found a death, don't scan the rest of the frames for one
                     if (!events["death"])
