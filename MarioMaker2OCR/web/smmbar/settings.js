@@ -2,8 +2,8 @@ var settings = {
   messages: {
     "no_level_active": "No level active",
     "unknown_level_name": "(Unknown Level)",
-    "label_deaths": '<img height=18px style="margin-right:5px" src="./images/mario_dead.png"/>',
-    'label_timer': '<img height=18px style="margin-right:5px" src="./images/clock.png"/>',
+    "label_deaths": '<img height=18px style="margin-right:5px" src="/smmbar/images/mario_dead.png"/>',
+    'label_timer': '<img height=18px style="margin-right:5px" src="/smmbar/images/clock.png"/>',
   },
   timer: {
     show: true,

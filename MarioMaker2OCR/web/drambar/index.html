@@ -18,6 +18,12 @@
          <h4 ng-if="ctrl.smm.level.author" class="user-name">{{ctrl.smm.level.author}}</h4>
          <p class="level-name">{{ctrl.smm.level.name}}</p>
          <code ng-if="ctrl.smm.level.code" class="level-code text-uppercase">{{ctrl.smm.level.code}}</code>
+         <div class="timer-death-bar">
+            <span class="level-timer"><img src="/drambar/images/smw_clock.png">{{ctrl.smm.levelTimer}}</span>
+            <span class="death-count">
+               <img src="/drambar/images/mario_dead.png" ng-class="ctrl.smm.deathInProgress ? 'pulse' : ''">{{ctrl.smm.deathCount}}
+            </span>
+         </div>
       </div>
    </div>
 </body>
