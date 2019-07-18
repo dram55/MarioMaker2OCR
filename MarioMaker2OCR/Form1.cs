@@ -24,7 +24,7 @@ namespace MarioMaker2OCR
         private Rectangle levelCodeArea;
         private Rectangle creatorNameArea;
         private Rectangle levelTitleArea;
-        private Rectangle levelCodeArea720p = new Rectangle(81, 178, 190, 25); // based on 1280x720
+        private Rectangle levelCodeArea720p = new Rectangle(78, 175, 191, 33); // based on 1280x720
         private Rectangle creatorNameArea720 = new Rectangle(641, 173, 422, 39); // based on 1280x720
         private Rectangle levelTitleArea720 = new Rectangle(100, 92, 1080, 43); // based on 1280x720
 
