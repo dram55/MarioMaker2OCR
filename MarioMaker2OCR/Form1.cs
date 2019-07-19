@@ -31,14 +31,15 @@ namespace MarioMaker2OCR
         private Mat levelSelectScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
-        private readonly Image<Gray, byte> tmplDeathBig = new Image<Gray, byte>("./templates/death_big.png");         // Primary death bubble, larger than past death bubbles
-        private readonly Image<Gray, byte> tmplDeathPartial = new Image<Gray, byte>("./templates/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
-        private readonly Image<Gray, byte> tmplDeathSmall = new Image<Gray, byte>("./templates/death_small.png");     // Death bubbles caused by past deaths/other players
-        private readonly Image<Gray, byte> tmplExit = new Image<Gray, byte>("./templates/exit.png");
-        private readonly Image<Gray, byte> tmplRestart = new Image<Gray, byte>("./templates/startover.png");
-        private readonly Image<Gray, byte> tmplQuit = new Image<Gray, byte>("./templates/quit.png");
+        private readonly Image<Gray, byte> tmplDeathBig = new Image<Gray, byte>("./templates/480/death_big.png");         // Primary death bubble, larger than past death bubbles
+        private readonly Image<Gray, byte> tmplDeathPartial = new Image<Gray, byte>("./templates/480/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
+        private readonly Image<Gray, byte> tmplDeathSmall = new Image<Gray, byte>("./templates/480/death_small.png");     // Death bubbles caused by past deaths/other players
+        private readonly Image<Gray, byte> tmplExit = new Image<Gray, byte>("./templates/480/exit.png");
+        private readonly Image<Gray, byte> tmplRestart = new Image<Gray, byte>("./templates/480/startover.png");
+        private readonly Image<Gray, byte> tmplQuit = new Image<Gray, byte>("./templates/480/quit.png");
 
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
+        public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
 
         private FormPreview previewer = new FormPreview();
         private VideoProcessor processor;
@@ -52,6 +53,7 @@ namespace MarioMaker2OCR
 
             initializeToolTips();
             loadVideoDevices();
+            loadResolutions();
         }
 
         private void initializeToolTips()
@@ -78,6 +80,19 @@ namespace MarioMaker2OCR
                 if (Properties.Settings.Default.SelectedDevice == videoDevices[i].Name)
                     deviceComboBox.SelectedIndex = i;
             }
+        }
+
+        private void loadResolutions()
+        {
+            resolutionsCombobox.DisplayMember = "Name";
+            resolutionsCombobox.ValueMember = "Value";
+
+
+            resolutionsCombobox.Items.Add(new { Name = "640x480", Value = new Size(640, 480) });
+            resolutionsCombobox.Items.Add(new { Name = "1280x720", Value = new Size(1280, 720) });
+            resolutionsCombobox.Items.Add(new { Name = "1920x1080", Value = new Size(1920, 1080) });
+
+            resolutionsCombobox.SelectedIndex = Properties.Settings.Default.SelectedResolutionIndex;
         }
 
         private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
@@ -154,21 +169,19 @@ namespace MarioMaker2OCR
             }
             try
             {
-                // TODO: Convert these AOT
                 // resize reference image based on current resolution
-
-                levelSelectScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, resolution480);
+                levelSelectScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
 
                 // resize rectangles based on current resolution
-                levelCodeArea = ImageLibrary.ChangeSize(levelCodeArea720p, resolution720, resolution480);
-                creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, resolution480);
-                levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, resolution480);
+                levelCodeArea = ImageLibrary.ChangeSize(levelCodeArea720p, resolution720, SelectedResolution);
+                creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
+                levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
 
                 SMMServer.port = Decimal.ToUInt16(numPort.Value);
                 log.Info(String.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
                 SMMServer.Start();
 
-                processor = new VideoProcessor(deviceComboBox.SelectedIndex);
+                processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
                 processor.BlackScreen += VideoProcessor_BlackScreen;
                 processor.ClearScreen += VideoProcessor_ClearScreen;
                 processor.NewFrame += VideoProcessor_NewFrame;
@@ -178,7 +191,6 @@ namespace MarioMaker2OCR
             catch (Exception ex)
             {
                 processException("Error starting video device", ex);
-                throw ex;
             }
         }
 
@@ -198,11 +210,14 @@ namespace MarioMaker2OCR
         private void lockForm()
         {
             deviceComboBox.Enabled = false;
+            resolutionsCombobox.Enabled = false;
             startButton.Enabled = false;
             stopButton.Enabled = true;
             propertiesButton.Enabled = false;
             ocrTextBox.Text = "";
             numPort.Enabled = false;
+            processingLabel.Text = "";
+            processingLabel.Visible = true;
             processStatusIcon.BackColor = Color.Green;
             webServerAddressStatusLabel.Text = $"http://localhost:{numPort.Value}";
         }
@@ -211,9 +226,10 @@ namespace MarioMaker2OCR
         {
             processStatusIcon.BackColor = Color.Red;
             deviceComboBox.Enabled = true;
+            resolutionsCombobox.Enabled = true;
             startButton.Enabled = true;
             stopButton.Enabled = false;
-            processingLevelLabel.Visible = false;
+            processingLabel.Visible = false;
             numPort.Enabled = true;
             webServerAddressStatusLabel.Text = $"";
         }
@@ -233,30 +249,33 @@ namespace MarioMaker2OCR
         private void VideoProcessor_BlackScreen(object sender, VideoProcessor.VideoEventArgs e)
         {
             log.Debug("Detected a black screen");
+            BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing black screen..."));
             Image<Bgr, byte> frame = e.frameBuffer[e.frameBuffer.Length - 5];
             double imageMatchPercent = ImageLibrary.CompareImages(frame, levelSelectScreen);
             if(imageMatchPercent > 0.94)
             {
                 log.Info("Detected new level.");
                 previewer.SetLastMatch(frame, new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
-                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
                 Level level = getLevelFromCurrentFrame(frame);
                 writeLevelToFile(level);
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
-                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
                 SMMServer.BroadcastLevel(level);
             }
             else
             {
                 // Not a new level, see if we can detect a template.
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
                 Dictionary<String, bool> events = new Dictionary<String, bool>();
                 events.Add("death", false);
                 events.Add("restart", false);
                 events.Add("exit", false);
+                Size frameSize = new Size(e.frameBuffer[0].Width, e.frameBuffer[0].Height);
 
                 foreach (Image<Bgr, byte> f in e.frameBuffer)
                 {
-                    Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>();
+                    Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640,480, Inter.Cubic);
                     Image<Gray, byte>[] deathTemplates = new Image<Gray, byte>[] { tmplDeathBig, tmplDeathSmall, tmplDeathPartial };
 
                     //grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
@@ -275,7 +294,7 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["death"] = true;
-                                boundaries.Add(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3));
+                                boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3), resolution480, frameSize));
                             }
                         }
                         if (events["death"])
@@ -291,7 +310,8 @@ namespace MarioMaker2OCR
                         if (loc.HasValue)
                         {
                             events["restart"] = true;
-                            previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height) });
+                            Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height), resolution480, frameSize);
+                            previewer.SetLastMatch(f, new Rectangle[] { match });
                         }
                         else
                         {
@@ -300,7 +320,8 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["exit"] = true;
-                                previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height) });
+                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height), resolution480, frameSize);
+                                previewer.SetLastMatch(f, new Rectangle[] { match });
                             }
 
                             //Quit button in Endless runs instead of exit.
@@ -308,12 +329,14 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["exit"] = true;
-                                previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplQuit.Width, tmplQuit.Height) });
+                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplQuit.Width, tmplQuit.Height), resolution480, frameSize);
+                                previewer.SetLastMatch(f, new Rectangle[] { match });
                             }
                         }
                     }
                 }
 
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
                 if (events["death"])
                 {
                     log.Info("Detected death");
@@ -377,6 +400,7 @@ namespace MarioMaker2OCR
             Properties.Settings.Default.OutputFolder = outputFolderTextbox.Text;
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
+            Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
             Properties.Settings.Default.Save();
         }
 

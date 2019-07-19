@@ -11,5 +11,8 @@
     <Setting Name="SelectedPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">3000</Value>
     </Setting>
+    <Setting Name="SelectedResolutionIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
