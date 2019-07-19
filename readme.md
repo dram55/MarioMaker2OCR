@@ -31,7 +31,6 @@ ocrLevel.json
 1) Open the Mario Maker 2 OCR program.
 1) Select the capture device with Mario Maker 2 gameplay from the dropdown (use OBS VirtualCam from setup).
 1) Select a port number to host the web server.
-1) Select a folder to write the output JSON file.
 1) Select the resolution.
 1) Press **Start** button.
 1) The bottom status strip is updated.
