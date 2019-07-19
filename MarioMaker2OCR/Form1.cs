@@ -44,11 +44,13 @@ namespace MarioMaker2OCR
         private FormPreview previewer = new FormPreview();
         private VideoProcessor processor;
 
+        private string jsonOutputFolder = "";
+
         public Form1()
         {
             InitializeComponent();
 
-            outputFolderTextbox.Text = Properties.Settings.Default.OutputFolder;
+            jsonOutputFolder = Properties.Settings.Default.OutputFolder;
             numPort.Value = Properties.Settings.Default.SelectedPort;
 
             initializeToolTips();
@@ -59,7 +61,6 @@ namespace MarioMaker2OCR
         private void initializeToolTips()
         {
             new ToolTip().SetToolTip(ocrLabel, "Last level information read in.");
-            new ToolTip().SetToolTip(outputFolderLabel, $"Folder to save {LEVEL_JSON_FILE}");
             new ToolTip().SetToolTip(deviceLabel, "Available capture devices.");
             new ToolTip().SetToolTip(propertiesButton, "Properties for the selected capture device.");
             new ToolTip().SetToolTip(numPortLabel, "Port to run the Web Server on (used for OBS Browser Source)");
@@ -148,11 +149,13 @@ namespace MarioMaker2OCR
 
         private void writeLevelToFile(Level level)
         {
+            // Do not save JSON if folder is not selected
+            if (string.IsNullOrWhiteSpace(jsonOutputFolder)) return;
             try
             {
                 LevelWrapper wrappedLevel = new LevelWrapper() { level = level };
                 string json = JsonConvert.SerializeObject(wrappedLevel);
-                File.WriteAllText(Path.Combine(outputFolderTextbox.Text, LEVEL_JSON_FILE), json);
+                File.WriteAllText(Path.Combine(jsonOutputFolder, LEVEL_JSON_FILE), json);
             }
             catch (Exception ex)
             {
@@ -384,20 +387,13 @@ namespace MarioMaker2OCR
 
         private void selectFolderButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog dialog = new FolderBrowserDialog();
-            dialog.Description = "Select a location to save the output file.";
 
-            DialogResult result = dialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                outputFolderTextbox.Text = dialog.SelectedPath;
-            }
         }
 
         private void form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             processor?.Stop();
-            Properties.Settings.Default.OutputFolder = outputFolderTextbox.Text;
+            Properties.Settings.Default.OutputFolder = jsonOutputFolder;
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
             Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
@@ -417,6 +413,18 @@ namespace MarioMaker2OCR
         private void webServerAddressStatusLabel_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start($"http://localhost:{numPort.Value}");
+        }
+
+        private void jSONFileLocationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "Select a location to save the JSON output file.";
+
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                jsonOutputFolder = dialog.SelectedPath;
+            }
         }
     }
 }
