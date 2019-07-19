@@ -56,8 +56,8 @@
          var event = JSON.parse(message.data);
 
          switch(event.type) {
-            case 'death':   death(event);
-            case 'restart': restart(event); break;
+            case 'death':   death(event); break;
+            case 'restart': death(event); break;
             case 'exit':    exit(event);    break;
             case 'clear':   clear(event);   break;
             case 'level':   newLevel(event);   break;
@@ -68,10 +68,10 @@
 
       function death() {
          console.log('death');
-         status.deathCount = status.deathCount + 1;
          if (!status.deathInProgress) {
             status.deathInProgress = true;
             $timeout(function() {
+               status.deathCount = status.deathCount + 1;
                status.deathInProgress = false;
             }, 500);
          }
