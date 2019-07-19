@@ -24,7 +24,7 @@ namespace MarioMaker2OCR
             if (server != null) return;
             server = new WebServer(String.Format("http://localhost:{0}/", port));
 
-            // FIXME: Apparently StaticFilesModule is obsolete, but its claimed replacement FileModule doesn't exist, no mention anywhere in EmbedIO documentation either.
+            // FIXME: EmbedIO 3.0 is moving to a more general FileModule in-place of this one
             server.RegisterModule(new StaticFilesModule(webPath));
 
             wss = new SMMWebSocketServer();

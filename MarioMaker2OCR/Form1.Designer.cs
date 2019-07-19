@@ -16,6 +16,13 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
+                tmplDeathBig.Dispose();
+                tmplDeathPartial.Dispose();
+                tmplDeathSmall.Dispose();
+                tmplExit.Dispose();
+                tmplRestart.Dispose();
+                tmplQuit.Dispose();
+                if(processor != null) processor.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -54,6 +61,8 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.numPortLabel = new System.Windows.Forms.Label();
             this.numPort = new System.Windows.Forms.NumericUpDown();
+            this.resolutionsCombobox = new System.Windows.Forms.ComboBox();
+            this.lblResolution = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -111,7 +120,7 @@
             // ocrTextBox
             // 
             this.ocrTextBox.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrTextBox.Location = new System.Drawing.Point(15, 292);
+            this.ocrTextBox.Location = new System.Drawing.Point(15, 333);
             this.ocrTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ocrTextBox.Name = "ocrTextBox";
             this.ocrTextBox.ReadOnly = true;
@@ -122,7 +131,7 @@
             // 
             this.ocrLabel.AutoSize = true;
             this.ocrLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrLabel.Location = new System.Drawing.Point(26, 259);
+            this.ocrLabel.Location = new System.Drawing.Point(26, 300);
             this.ocrLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ocrLabel.Name = "ocrLabel";
             this.ocrLabel.Size = new System.Drawing.Size(59, 31);
@@ -133,7 +142,7 @@
             // 
             this.deviceLabel.AutoSize = true;
             this.deviceLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.deviceLabel.Location = new System.Drawing.Point(48, 52);
+            this.deviceLabel.Location = new System.Drawing.Point(43, 52);
             this.deviceLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.deviceLabel.Name = "deviceLabel";
             this.deviceLabel.Size = new System.Drawing.Size(82, 31);
@@ -152,7 +161,7 @@
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(170, 375);
+            this.startButton.Location = new System.Drawing.Point(170, 416);
             this.startButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(112, 35);
@@ -164,7 +173,7 @@
             // stopButton
             // 
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(318, 375);
+            this.stopButton.Location = new System.Drawing.Point(318, 416);
             this.stopButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(112, 35);
@@ -188,7 +197,7 @@
             // 
             this.outputFolderLabel.AutoSize = true;
             this.outputFolderLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.outputFolderLabel.Location = new System.Drawing.Point(40, 152);
+            this.outputFolderLabel.Location = new System.Drawing.Point(38, 199);
             this.outputFolderLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.outputFolderLabel.Name = "outputFolderLabel";
             this.outputFolderLabel.Size = new System.Drawing.Size(87, 62);
@@ -198,7 +207,7 @@
             // outputFolderTextbox
             // 
             this.outputFolderTextbox.Enabled = false;
-            this.outputFolderTextbox.Location = new System.Drawing.Point(134, 159);
+            this.outputFolderTextbox.Location = new System.Drawing.Point(133, 199);
             this.outputFolderTextbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.outputFolderTextbox.Multiline = true;
             this.outputFolderTextbox.Name = "outputFolderTextbox";
@@ -207,7 +216,7 @@
             // 
             // selectFolderButton
             // 
-            this.selectFolderButton.Location = new System.Drawing.Point(502, 159);
+            this.selectFolderButton.Location = new System.Drawing.Point(502, 199);
             this.selectFolderButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.selectFolderButton.Name = "selectFolderButton";
             this.selectFolderButton.Size = new System.Drawing.Size(100, 35);
@@ -225,7 +234,7 @@
             this.webServerAddressStatusLabel,
             this.toolStripStatusLabel1,
             this.processingLevelLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 425);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 476);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
             this.statusStrip1.ShowItemToolTips = true;
@@ -284,7 +293,7 @@
             // 
             this.numPortLabel.AutoSize = true;
             this.numPortLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numPortLabel.Location = new System.Drawing.Point(75, 99);
+            this.numPortLabel.Location = new System.Drawing.Point(70, 158);
             this.numPortLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.numPortLabel.Name = "numPortLabel";
             this.numPortLabel.Size = new System.Drawing.Size(55, 31);
@@ -293,7 +302,7 @@
             // 
             // numPort
             // 
-            this.numPort.Location = new System.Drawing.Point(135, 106);
+            this.numPort.Location = new System.Drawing.Point(134, 158);
             this.numPort.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -313,11 +322,34 @@
             0,
             0});
             // 
+            // resolutionsCombobox
+            // 
+            this.resolutionsCombobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.resolutionsCombobox.FormattingEnabled = true;
+            this.resolutionsCombobox.Location = new System.Drawing.Point(134, 106);
+            this.resolutionsCombobox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.resolutionsCombobox.Name = "resolutionsCombobox";
+            this.resolutionsCombobox.Size = new System.Drawing.Size(360, 28);
+            this.resolutionsCombobox.TabIndex = 25;
+            // 
+            // lblResolution
+            // 
+            this.lblResolution.AutoSize = true;
+            this.lblResolution.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblResolution.Location = new System.Drawing.Point(4, 106);
+            this.lblResolution.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblResolution.Name = "lblResolution";
+            this.lblResolution.Size = new System.Drawing.Size(121, 31);
+            this.lblResolution.TabIndex = 24;
+            this.lblResolution.Text = "Resolution";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(622, 447);
+            this.ClientSize = new System.Drawing.Size(622, 498);
+            this.Controls.Add(this.resolutionsCombobox);
+            this.Controls.Add(this.lblResolution);
             this.Controls.Add(this.numPort);
             this.Controls.Add(this.numPortLabel);
             this.Controls.Add(this.statusStrip1);
@@ -375,6 +407,8 @@
         private System.Windows.Forms.NumericUpDown numPort;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel webServerAddressStatusLabel;
+        private System.Windows.Forms.ComboBox resolutionsCombobox;
+        private System.Windows.Forms.Label lblResolution;
     }
 }
 

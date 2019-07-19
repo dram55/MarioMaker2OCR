@@ -13,10 +13,11 @@ using System.Drawing;
 
 namespace MarioMaker2OCR
 {
-    class VideoProcessor
+    class VideoProcessor : IDisposable
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private int deviceId;
+        private Size resolution;
         private VideoCapture cap;
         private const int frameBufferLength = 10;
         private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength];
@@ -24,10 +25,37 @@ namespace MarioMaker2OCR
         private Size frameSize; //frameBuffer_tick needs to know this
         private Thread processorThread;
 
-        
-        public VideoProcessor(int device)
+        bool disposed = false;
+
+        /// <summary>
+        /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed) return;
+
+            if (disposing)
+            {
+                if(frameBufferTimer != null) frameBufferTimer.Dispose();
+                if(cap != null) cap.Dispose();
+            }
+            disposed = true;
+        }
+
+        public VideoProcessor(int device, Size resolution)
         {
             this.deviceId = device;
+            this.resolution = resolution;
         }
         /// <summary>
         /// Starts the main video processing loop
@@ -84,6 +112,8 @@ namespace MarioMaker2OCR
         public void processingLoop()
         {
             cap = new VideoCapture(deviceId);
+            cap.SetCaptureProperty(CapProp.FrameHeight, resolution.Height);
+            cap.SetCaptureProperty(CapProp.FrameWidth, resolution.Width);
 
             //Capture a first frame to get the basic information so we can allocate the data array
             Mat tmp = new Mat();
@@ -110,11 +140,11 @@ namespace MarioMaker2OCR
 
             bool WasBlack = false;
             bool WasClear = false;
-            while(true)
+            int skip = frameSize.Width / 50;
+            while (true)
             {
                 cap.Retrieve(currentFrame);
-                Dictionary<int, int> hues = getHues(data, frameSize);
-
+                Dictionary<int, int> hues = getHues(data, frameSize, skip);
 
                 if(WasBlack)
                 {
@@ -125,7 +155,7 @@ namespace MarioMaker2OCR
                 if(WasClear)
                 {
                     int primary = getPrimaryColor(hues);
-                    WasClear = (hues[primary] > 95 && Math.Abs(50 - primary) < 5);
+                    WasClear = (hues[primary] > 95 && Math.Abs(50 - primary) < 10);
                     continue;
                 }
 
