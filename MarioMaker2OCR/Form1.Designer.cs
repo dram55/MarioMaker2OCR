@@ -57,7 +57,7 @@
             this.processStatusIcon = new System.Windows.Forms.ToolStripStatusLabel();
             this.webServerAddressStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.processingLevelLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.processingLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.numPortLabel = new System.Windows.Forms.Label();
             this.numPort = new System.Windows.Forms.NumericUpDown();
@@ -233,12 +233,12 @@
             this.processStatusIcon,
             this.webServerAddressStatusLabel,
             this.toolStripStatusLabel1,
-            this.processingLevelLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 476);
+            this.processingLabel});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 463);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
             this.statusStrip1.ShowItemToolTips = true;
-            this.statusStrip1.Size = new System.Drawing.Size(622, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(622, 35);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
@@ -252,7 +252,7 @@
             this.processStatusIcon.Margin = new System.Windows.Forms.Padding(4, 3, 0, 2);
             this.processStatusIcon.Name = "processStatusIcon";
             this.processStatusIcon.Padding = new System.Windows.Forms.Padding(0, 0, 17, 0);
-            this.processStatusIcon.Size = new System.Drawing.Size(17, 17);
+            this.processStatusIcon.Size = new System.Drawing.Size(17, 30);
             this.processStatusIcon.ToolTipText = "Process status";
             // 
             // webServerAddressStatusLabel
@@ -263,26 +263,26 @@
             this.webServerAddressStatusLabel.IsLink = true;
             this.webServerAddressStatusLabel.Margin = new System.Windows.Forms.Padding(5, 3, 0, 2);
             this.webServerAddressStatusLabel.Name = "webServerAddressStatusLabel";
-            this.webServerAddressStatusLabel.Size = new System.Drawing.Size(0, 17);
+            this.webServerAddressStatusLabel.Size = new System.Drawing.Size(0, 30);
             this.webServerAddressStatusLabel.Click += new System.EventHandler(this.webServerAddressStatusLabel_Click);
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(573, 15);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(361, 28);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // processingLevelLabel
+            // processingLabel
             // 
-            this.processingLevelLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.processingLevelLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.processingLevelLabel.Name = "processingLevelLabel";
-            this.processingLevelLabel.Size = new System.Drawing.Size(166, 28);
-            this.processingLevelLabel.Text = "Processing Level...";
-            this.processingLevelLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.processingLevelLabel.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
-            this.processingLevelLabel.Visible = false;
+            this.processingLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.processingLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.processingLabel.Name = "processingLabel";
+            this.processingLabel.Size = new System.Drawing.Size(166, 28);
+            this.processingLabel.Text = "Processing Level...";
+            this.processingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.processingLabel.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.processingLabel.Visible = false;
             // 
             // toolTip1
             // 
@@ -400,7 +400,7 @@
         private System.Windows.Forms.Button selectFolderButton;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel processStatusIcon;
-        private System.Windows.Forms.ToolStripStatusLabel processingLevelLabel;
+        private System.Windows.Forms.ToolStripStatusLabel processingLabel;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolStripMenuItem showPreviewWindowToolStripMenuItem;
         private System.Windows.Forms.Label numPortLabel;

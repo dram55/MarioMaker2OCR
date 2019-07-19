@@ -216,6 +216,8 @@ namespace MarioMaker2OCR
             propertiesButton.Enabled = false;
             ocrTextBox.Text = "";
             numPort.Enabled = false;
+            processingLabel.Text = "";
+            processingLabel.Visible = true;
             processStatusIcon.BackColor = Color.Green;
             webServerAddressStatusLabel.Text = $"http://localhost:{numPort.Value}";
         }
@@ -227,7 +229,7 @@ namespace MarioMaker2OCR
             resolutionsCombobox.Enabled = true;
             startButton.Enabled = true;
             stopButton.Enabled = false;
-            processingLevelLabel.Visible = false;
+            processingLabel.Visible = false;
             numPort.Enabled = true;
             webServerAddressStatusLabel.Text = $"";
         }
@@ -247,30 +249,32 @@ namespace MarioMaker2OCR
         private void VideoProcessor_BlackScreen(object sender, VideoProcessor.VideoEventArgs e)
         {
             log.Debug("Detected a black screen");
+            BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing black screen..."));
             Image<Bgr, byte> frame = e.frameBuffer[e.frameBuffer.Length - 5];
             double imageMatchPercent = ImageLibrary.CompareImages(frame, levelSelectScreen);
             if(imageMatchPercent > 0.94)
             {
                 log.Info("Detected new level.");
                 previewer.SetLastMatch(frame, new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
-                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = true));
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
                 Level level = getLevelFromCurrentFrame(frame);
                 writeLevelToFile(level);
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
-                BeginInvoke((MethodInvoker)(() => processingLevelLabel.Visible = false));
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
                 SMMServer.BroadcastLevel(level);
             }
             else
             {
                 // Not a new level, see if we can detect a template.
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
                 Dictionary<String, bool> events = new Dictionary<String, bool>();
                 events.Add("death", false);
                 events.Add("restart", false);
                 events.Add("exit", false);
+                Size frameSize = new Size(e.frameBuffer[0].Width, e.frameBuffer[0].Height);
 
                 foreach (Image<Bgr, byte> f in e.frameBuffer)
                 {
-
                     Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640,480, Inter.Cubic);
                     Image<Gray, byte>[] deathTemplates = new Image<Gray, byte>[] { tmplDeathBig, tmplDeathSmall, tmplDeathPartial };
 
@@ -290,7 +294,7 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["death"] = true;
-                                boundaries.Add(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3));
+                                boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3), resolution480, frameSize));
                             }
                         }
                         if (events["death"])
@@ -306,7 +310,8 @@ namespace MarioMaker2OCR
                         if (loc.HasValue)
                         {
                             events["restart"] = true;
-                            previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height) });
+                            Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height), resolution480, frameSize);
+                            previewer.SetLastMatch(f, new Rectangle[] { match });
                         }
                         else
                         {
@@ -315,7 +320,8 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["exit"] = true;
-                                previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height) });
+                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height), resolution480, frameSize);
+                                previewer.SetLastMatch(f, new Rectangle[] { match });
                             }
 
                             //Quit button in Endless runs instead of exit.
@@ -323,12 +329,14 @@ namespace MarioMaker2OCR
                             if (loc.HasValue)
                             {
                                 events["exit"] = true;
-                                previewer.SetLastMatch(f, new Rectangle[] { new Rectangle(loc.Value.X, loc.Value.Y, tmplQuit.Width, tmplQuit.Height) });
+                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplQuit.Width, tmplQuit.Height), resolution480, frameSize);
+                                previewer.SetLastMatch(f, new Rectangle[] { match });
                             }
                         }
                     }
                 }
 
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
                 if (events["death"])
                 {
                     log.Info("Detected death");
