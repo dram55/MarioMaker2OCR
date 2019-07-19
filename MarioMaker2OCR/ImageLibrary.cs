@@ -10,14 +10,18 @@ namespace MarioMaker2OCR
     public static class ImageLibrary
     {
         /// <summary>
-        /// <para>Grayscale, increase gamma and size of the image.</para>
-        /// <para>Read on a google forum it was good practice to increase OCR accuracy</para>
+        /// <para>Grayscale, increase gamma, binarization & size of the image.</para>
+        /// <para>https://github.com/tesseract-ocr/tesseract/wiki/ImproveQuality</para>
+        /// 
+        /// <para>Optimal pixel height, depends on font & tess version but somewhere between 30px - 70px</para>
+        /// <para>https://groups.google.com/forum/#!msg/tesseract-ocr/Wdh_JJwnw94/24JHDYQbBQAJ</para>
         /// </summary>
         public static Image<Gray, byte> PrepareImageForOCR(Image<Bgr, byte> image)
         {
             Image<Gray, byte> grayScaleImage = image.Convert<Gray, byte>();
-            grayScaleImage = grayScaleImage.Resize(2.2d + 4d, Inter.Cubic); 
+            grayScaleImage = grayScaleImage.Resize(3d, Inter.Cubic);
             grayScaleImage._GammaCorrect(3.5d);
+            grayScaleImage._ThresholdBinary(new Gray(50), new Gray(255));
             return grayScaleImage;
         }
 

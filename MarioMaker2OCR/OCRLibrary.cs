@@ -19,7 +19,7 @@ namespace MarioMaker2OCR
         /// </summary>
         public static string GetStringFromImage(Image<Gray, byte> image)
         {
-            using (Tesseract r = new Tesseract(tesserectLibrary, "eng+jpn", OcrEngineMode.TesseractOnly))
+            using (Tesseract r = new Tesseract(tesserectLibrary, "eng+jpn", OcrEngineMode.Default))
             {
                 r.SetImage(image);
                 r.Recognize();
@@ -33,7 +33,7 @@ namespace MarioMaker2OCR
         /// </summary>
         public static string GetStringFromLevelCodeImage(Image<Gray, byte> image)
         {
-            using (Tesseract r = new Tesseract(tesserectLibrary, "eng", OcrEngineMode.TesseractOnly))
+            using (Tesseract r = new Tesseract(tesserectLibrary, "eng", OcrEngineMode.Default))
             {
                 r.SetVariable("tessedit_char_whitelist", "-0123456789ABCDEFGHJKLMNPQRSTUVWXY");
                 r.SetImage(image);
