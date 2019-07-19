@@ -5,16 +5,17 @@
    app.controller('dramBarController',dramBarController);
    app.factory('smmFactory', smmFactory);
 
-   dramBarController.inject = ['smmFactory'];
-   function dramBarController(smmFactory) {
+   dramBarController.inject = ['smmFactory', 'dramBarSettings'];
+   function dramBarController(smmFactory, dramBarSettings) {
       var ctrl = this;
       ctrl.smm = smmFactory;
+      ctrl.settings = dramBarSettings;
    }
 
    smmFactory.inject = ['$websocket', '$timeout', '$interval'];
    function smmFactory($websocket, $timeout, $interval) {
       var server = 'ws://localhost:3000/wss';
-      var socket = $websocket(server);
+      var socket = $websocket(server,null,{reconnectIfNotNormalClose: true});
 
       var levelStartTime;
 

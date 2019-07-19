@@ -8,6 +8,7 @@
    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
    <script src="https://cdn.rawgit.com/AngularClass/angular-websocket/v2.0.0/dist/angular-websocket.js"></script>
    <script src="/drambar/drambar.js"></script>
+   <script src="/drambar/settings.js"></script>
    
    <link rel="stylesheet" href="/drambar/style.css">
 </head>
@@ -19,8 +20,8 @@
          <p class="level-name">{{ctrl.smm.level.name}}</p>
          <code ng-if="ctrl.smm.level.code" class="level-code text-uppercase">{{ctrl.smm.level.code}}</code>
          <div class="timer-death-bar">
-            <span class="level-timer"><img src="/drambar/images/smw_clock.png">{{ctrl.smm.levelTimer}}</span>
-            <span class="death-count">
+            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer"><img src="/drambar/images/smw_clock.png">{{ctrl.smm.levelTimer}}</span>
+            <span ng-if="ctrl.settings.isDeathCountVisible" class="death-count">
                <img src="/drambar/images/mario_dead.png" ng-class="ctrl.smm.deathInProgress ? 'pulse' : ''">{{ctrl.smm.deathCount}}
             </span>
          </div>

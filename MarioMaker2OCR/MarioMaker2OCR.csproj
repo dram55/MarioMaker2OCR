@@ -197,6 +197,9 @@
     <Content Include="web\drambar\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="web\drambar\settings.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="web\drambar\style.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
