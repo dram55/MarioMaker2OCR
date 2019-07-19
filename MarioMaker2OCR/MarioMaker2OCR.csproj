@@ -39,7 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -158,22 +158,22 @@
     <Content Include="referenceImage.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\death_big.png">
+    <Content Include="templates\480\death_big.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\death_partial.png">
+    <Content Include="templates\480\death_partial.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\death_small.png">
+    <Content Include="templates\480\death_small.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\exit.png">
+    <Content Include="templates\480\exit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\quit.png">
+    <Content Include="templates\480\quit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="templates\startover.png">
+    <Content Include="templates\480\startover.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="web\blank.html">
