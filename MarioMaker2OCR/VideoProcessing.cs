@@ -62,11 +62,20 @@ namespace MarioMaker2OCR
         /// </summary>
         public void Start()
         {
-            frameBufferTimer = new System.Threading.Timer(frameBuffer_tick);
-            frameBufferTimer.Change(0, 250);
+            // Reset the state
+            for(int i = 0; i < frameBuffer.Length; i++)
+            {
+                frameBuffer[i]?.Dispose();
+                frameBuffer[i] = null;
+            }
+            cap?.Dispose();
+            cap = null;
 
             processorThread = new Thread(new ThreadStart(processingLoop));
             processorThread.Start();
+
+            frameBufferTimer = new System.Threading.Timer(frameBuffer_tick);
+            frameBufferTimer.Change(0, 250);
         }
 
         /// <summary>
@@ -74,12 +83,10 @@ namespace MarioMaker2OCR
         /// </summary>
         public void Stop()
         {
-            frameBufferTimer.Change(0, 0);
+            frameBufferTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             frameBufferTimer = null;
             processorThread?.Abort();
             processorThread = null;
-            cap.Dispose();
-            cap = null;
         }
 
 
@@ -92,6 +99,10 @@ namespace MarioMaker2OCR
 
             Image<Bgr, byte> frame = new Image<Bgr, byte>(frameSize);
             cap.Retrieve(frame);
+
+
+            // XXX: The tick can happen after the device .IsOpened but still not actually ready for use so make sure we got a real image
+            if (frame.Cols == 0) return;
 
             (frameBuffer[frameBuffer.Length - 1])?.Dispose();
             for (int i = frameBuffer.Length - 1; i > 0; i--)
@@ -277,6 +288,7 @@ namespace MarioMaker2OCR
         public event EventHandler<VideoEventArgs> BlackScreen;
         protected virtual void onBlackScreen(VideoEventArgs e)
         {
+            if (frameBuffer[frameBuffer.Length - 1] == null) return;
             BlackScreen?.Invoke(this, e);
             for (int i = 0; i < e.frameBuffer.Length; i++)
             {
@@ -286,6 +298,7 @@ namespace MarioMaker2OCR
         public event EventHandler<VideoEventArgs> ClearScreen;
         protected virtual void onClearScreen(VideoEventArgs e)
         {
+            if (frameBuffer[frameBuffer.Length - 1] == null) return;
             ClearScreen?.Invoke(this, e);
             for (int i = 0; i < e.frameBuffer.Length; i++)
             {
