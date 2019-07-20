@@ -1,21 +1,17 @@
 # Mario Maker 2 OCR
 This program will capture level information & events from a Mario Maker 2 game feed and display on a locally hosted web app. 
 
-### Screenshot
-![](screenshot.png)
+## [Video Instructions - https://youtu.be/HsQZIANz1Yc](https://youtu.be/HsQZIANz1Yc)
 
-### JSON Output
+## OCR Program
+![](screenshots/screenshot.jpg) ![](screenshots/preview.jpg)
 
-``` JSON
-ocrLevel.json
-{
-  "level": {
-    "author": "Valdio",
-    "code": "8DY-1WC-FQG",
-    "name": "Thwomping Grounds"
-  }
-}
-```
+## Web Overlays
+![](screenshots/smmbar.png) 
+
+![](screenshots/drambar.png)
+
+
 
 ## How To Use
 ### Setup
@@ -71,6 +67,13 @@ ocrLevel.json
             - Broadcast this event thru the Websockets server.
             - Break from logic.
 
+### Create your own overlays
+In the `\web` directory you will see 2 overlays to use/modify as an example. This directory is where the web server will be hosted from, any web apps created here can be used as a stream overlay. 
+
+The apps can read in the broadcasted websockets listed below and display the information as desired.
+
+![](screenshots/web.jpg)
+
 ### Websocket Message API
 ``` JSON
 On new level
@@ -94,6 +97,7 @@ On exit
 On gameover
 { "type" : "gameover" }
 ```
+
 
 ### Dependecies
 The [OpenCV](https://opencv.org/) library is used for image processing and [Tesseract](https://opensource.google.com/projects/tesseract) library is used for OCR (Optical Character Recognition). [EmguCV](http://www.emgu.com/wiki/index.php/Main_Page) provides a .NET wrapper for both of these libraries and is directly used for this project. [EmbedIO](https://github.com/unosquare/embedio) for Websocket and HTTP server.
