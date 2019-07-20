@@ -426,5 +426,23 @@ namespace MarioMaker2OCR
                 jsonOutputFolder = dialog.SelectedPath;
             }
         }
+
+        private void numPort_ValueChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
+            Properties.Settings.Default.Save();
+        }
+
+        private void resolutionsCombobox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
+            Properties.Settings.Default.Save();
+        }
+
+        private void deviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name ?? "";
+            Properties.Settings.Default.Save();
+        }
     }
 }

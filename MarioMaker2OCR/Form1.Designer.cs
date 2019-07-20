@@ -43,6 +43,8 @@
             this.showPreviewWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.jSONFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ocrTextBox = new System.Windows.Forms.TextBox();
             this.ocrLabel = new System.Windows.Forms.Label();
             this.deviceLabel = new System.Windows.Forms.Label();
@@ -60,8 +62,6 @@
             this.numPort = new System.Windows.Forms.NumericUpDown();
             this.resolutionsCombobox = new System.Windows.Forms.ComboBox();
             this.lblResolution = new System.Windows.Forms.Label();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.jSONFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -116,6 +116,21 @@
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.jSONFileLocationToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // jSONFileLocationToolStripMenuItem
+            // 
+            this.jSONFileLocationToolStripMenuItem.Name = "jSONFileLocationToolStripMenuItem";
+            this.jSONFileLocationToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.jSONFileLocationToolStripMenuItem.Text = "JSON File Location...";
+            this.jSONFileLocationToolStripMenuItem.Click += new System.EventHandler(this.jSONFileLocationToolStripMenuItem_Click);
+            // 
             // ocrTextBox
             // 
             this.ocrTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -155,6 +170,7 @@
             this.deviceComboBox.Name = "deviceComboBox";
             this.deviceComboBox.Size = new System.Drawing.Size(241, 21);
             this.deviceComboBox.TabIndex = 12;
+            this.deviceComboBox.SelectedIndexChanged += new System.EventHandler(this.deviceComboBox_SelectedIndexChanged);
             // 
             // startButton
             // 
@@ -265,7 +281,7 @@
             // numPort
             // 
             this.numPort.Location = new System.Drawing.Point(89, 103);
-            this.numPort.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.numPort.Margin = new System.Windows.Forms.Padding(2);
             this.numPort.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -284,6 +300,7 @@
             0,
             0,
             0});
+            this.numPort.ValueChanged += new System.EventHandler(this.numPort_ValueChanged);
             // 
             // resolutionsCombobox
             // 
@@ -293,6 +310,7 @@
             this.resolutionsCombobox.Name = "resolutionsCombobox";
             this.resolutionsCombobox.Size = new System.Drawing.Size(241, 21);
             this.resolutionsCombobox.TabIndex = 25;
+            this.resolutionsCombobox.SelectedIndexChanged += new System.EventHandler(this.resolutionsCombobox_SelectedIndexChanged);
             // 
             // lblResolution
             // 
@@ -303,21 +321,6 @@
             this.lblResolution.Size = new System.Drawing.Size(79, 20);
             this.lblResolution.TabIndex = 24;
             this.lblResolution.Text = "Resolution";
-            // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.jSONFileLocationToolStripMenuItem});
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.settingsToolStripMenuItem.Text = "Settings";
-            // 
-            // jSONFileLocationToolStripMenuItem
-            // 
-            this.jSONFileLocationToolStripMenuItem.Name = "jSONFileLocationToolStripMenuItem";
-            this.jSONFileLocationToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.jSONFileLocationToolStripMenuItem.Text = "JSON File Location...";
-            this.jSONFileLocationToolStripMenuItem.Click += new System.EventHandler(this.jSONFileLocationToolStripMenuItem_Click);
             // 
             // Form1
             // 
