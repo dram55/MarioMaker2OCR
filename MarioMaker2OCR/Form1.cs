@@ -204,10 +204,14 @@ namespace MarioMaker2OCR
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            BeginInvoke(new MethodInvoker(() => unlockForm()));
             SMMServer.Stop();
-            processor?.Stop();
-            processor = null;
+            if(processor != null)
+            {
+                processor.Stop();
+                processor.Dispose();
+                processor = null;
+            }
+            BeginInvoke(new MethodInvoker(() => unlockForm()));
         }
 
         private void lockForm()
