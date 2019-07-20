@@ -1,7 +1,7 @@
 # Mario Maker 2 OCR
 This program will capture level information & events from a Mario Maker 2 game feed and display on a locally hosted web app. 
 
-## [Video Instructions - https://youtu.be/HsQZIANz1Yc](https://youtu.be/HsQZIANz1Yc)
+### [Video Instructions - https://youtu.be/HsQZIANz1Yc](https://youtu.be/HsQZIANz1Yc)
 
 ## OCR Program
 ![](screenshots/screenshot.jpg) ![](screenshots/preview.jpg)
@@ -68,9 +68,9 @@ This program will capture level information & events from a Mario Maker 2 game f
             - Break from logic.
 
 ### Create your own overlays
-In the `\web` directory you will see 2 overlays to use/modify as an example. This directory is where the web server will be hosted from, any web apps created here can be used as a stream overlay. 
+In the `\web` directory you will see 2 overlays to use/modify as an example. This directory is where the web server will be hosted, any web apps created here can be used as a stream overlay. 
 
-The apps can read in the broadcasted websockets listed below and display the information as desired.
+The apps can read in the broadcasted websocket messages listed below and display the information as desired.
 
 ![](screenshots/web.jpg)
 
