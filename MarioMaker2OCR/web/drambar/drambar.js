@@ -17,6 +17,11 @@
       var server = 'ws://localhost:3000/wss';
       var socket = $websocket(server,null,{reconnectIfNotNormalClose: true});
 
+      // put a query out for the current level status - on websocket open.
+      socket.onOpen(function(message) {
+         socket.send({ type: 'currentlevelquery' });
+        });
+
       var levelStartTime;
 
       var status = {

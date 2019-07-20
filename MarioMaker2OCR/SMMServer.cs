@@ -16,6 +16,9 @@ namespace MarioMaker2OCR
         public static ushort port = 3001;
         public static string webPath = "./web/";
 
+        public static LevelWrapper LastLevelTransmitted { get; private set; }
+
+
         /// <summary>
         /// Starts the primary Web server and Web Socket Server
         /// </summary>
@@ -55,6 +58,9 @@ namespace MarioMaker2OCR
         {
             string json = JsonConvert.SerializeObject(new EventWrapper() { type = eventType });
             Broadcast(json);
+
+            // last level is invalid if exitted.
+            if (eventType == "exit") LastLevelTransmitted = null; 
         }
 
         /// <summary>
@@ -63,8 +69,12 @@ namespace MarioMaker2OCR
         /// <param name="newLevel">Level information to be published</param>
         public static void BroadcastLevel(Level newLevel)
         {
-            string json = JsonConvert.SerializeObject(new LevelWrapper() { level = newLevel });
+            LevelWrapper levelWrapper = new LevelWrapper() { level = newLevel };
+            string json = JsonConvert.SerializeObject(levelWrapper);
             Broadcast(json);
+
+            // track last level submitted
+            LastLevelTransmitted = levelWrapper;
         }
         public static void Broadcast(string message)
         {
@@ -77,6 +87,8 @@ namespace MarioMaker2OCR
 
     internal class SMMWebSocketServer : WebSocketsServer
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public SMMWebSocketServer() : base(true)
         {
         }
@@ -88,6 +100,17 @@ namespace MarioMaker2OCR
             foreach (var ws in WebSockets)
             {
                 if (ws != context) Send(ws, rxBuffer.ToArray());
+            }
+
+            // read incoming message
+            string msg = Encoding.UTF8.GetString(rxBuffer);
+            EventWrapper incomingMessage = JsonConvert.DeserializeObject<EventWrapper>(msg);
+
+            // check if context requested a resend of latest level data
+            if (incomingMessage?.type == "currentlevelquery" && SMMServer.LastLevelTransmitted != null)
+            {
+                string message = JsonConvert.SerializeObject(SMMServer.LastLevelTransmitted);
+                Send(context, message);
             }
         }
 

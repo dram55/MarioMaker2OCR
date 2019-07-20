@@ -76,6 +76,7 @@ The apps can read in the broadcasted websocket messages listed below and display
 
 ### Websocket Message API
 ``` JSON
+-- Outgoing Message API --
 On new level
 {
   "level": {
@@ -96,6 +97,11 @@ On exit
 
 On gameover
 { "type" : "gameover" }
+
+
+-- Incoming Message API --
+Request a resend of last level from server
+{ "type" : "currentlevelquery" }
 ```
 
 
