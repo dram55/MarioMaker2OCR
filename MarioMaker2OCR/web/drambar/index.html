@@ -15,7 +15,7 @@
 <body ng-app="dramBarApp">
    <div ng-controller="dramBarController as ctrl">
       <div ng-if="ctrl.smm.level.code" class="level-card"
-         ng-class="(ctrl.smm.changeInProgress) ? 'slide-out' : 'slide-in'">
+         ng-class="((ctrl.smm.changeInProgress) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection">
          <h4 ng-if="ctrl.smm.level.author" class="user-name">{{ctrl.smm.level.author}}</h4>
          <p class="level-name">{{ctrl.smm.level.name}}</p>
          <code ng-if="ctrl.smm.level.code" class="level-code text-uppercase">{{ctrl.smm.level.code}}</code>
