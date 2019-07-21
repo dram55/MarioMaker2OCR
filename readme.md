@@ -68,9 +68,9 @@ This program will capture level information & events from a Mario Maker 2 game f
             - Break from logic.
 
 ### Create your own overlays
-In the `\web` directory you will see 2 overlays to use/modify as an example. This directory is where the web server will be hosted, any web apps created here can be used as a stream overlay. 
+In the `\web` directory you will see overlays to use/modify as an example. Check the `settings.js` in each project for customization. 
 
-The apps can read in the broadcasted websocket messages listed below and display the information as desired.
+This directory is where the web server will be hosted, any web apps created here can be used as a stream overlay. The apps can read in the broadcasted websocket messages listed below and display the information as desired.
 
 ![](screenshots/web.jpg)
 
@@ -98,10 +98,6 @@ On exit
 On gameover
 { "type" : "gameover" }
 
-
--- Incoming Message API --
-Request a resend of last level from server
-{ "type" : "currentlevelquery" }
 ```
 
 

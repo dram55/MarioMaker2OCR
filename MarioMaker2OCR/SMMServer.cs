@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Modules;
 using Newtonsoft.Json;
@@ -101,22 +99,16 @@ namespace MarioMaker2OCR
             {
                 if (ws != context) Send(ws, rxBuffer.ToArray());
             }
-
-            // read incoming message
-            string msg = Encoding.UTF8.GetString(rxBuffer);
-            EventWrapper incomingMessage = JsonConvert.DeserializeObject<EventWrapper>(msg);
-
-            // check if context requested a resend of latest level data
-            if (incomingMessage?.type == "currentlevelquery" && SMMServer.LastLevelTransmitted != null)
-            {
-                string message = JsonConvert.SerializeObject(SMMServer.LastLevelTransmitted);
-                Send(context, message);
-            }
         }
 
         protected override void OnClientConnected(IWebSocketContext context, System.Net.IPEndPoint localEndPoint, System.Net.IPEndPoint remoteEndPoint)
         {
-            // Do Nothing
+            // Send the cached level on connect - if available
+            if (SMMServer.LastLevelTransmitted != null)
+            {
+                string message = JsonConvert.SerializeObject(SMMServer.LastLevelTransmitted);
+                Send(context, message);
+            }
         }
 
         protected override void OnFrameReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
