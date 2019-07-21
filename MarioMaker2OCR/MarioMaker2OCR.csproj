@@ -203,6 +203,9 @@
     <Content Include="web\drambar\style.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="web\drambar\timer.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="web\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

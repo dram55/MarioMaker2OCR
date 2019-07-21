@@ -12,8 +12,8 @@
       ctrl.settings = dramBarSettings;
    }
 
-   smmFactory.inject = ['$websocket', '$timeout', '$interval'];
-   function smmFactory($websocket, $timeout, $interval) {
+   smmFactory.inject = ['$websocket', '$timeout', '$interval', 'dramBarSettings'];
+   function smmFactory($websocket, $timeout, $interval, dramBarSettings) {
       var server = 'ws://localhost:3000/wss';
       var socket = $websocket(server,null,{reconnectIfNotNormalClose: true});
 
@@ -54,6 +54,9 @@
          if (hours>0) status.levelTimer += hours.toString().padStart(2, '0') + ":";
          status.levelTimer += minutes.toString().padStart(2, '0');
          status.levelTimer += ":" + seconds.toString().padStart(2, '0');
+         if(dramBarSettings.playTimerWarning && (dramBarSettings.playTimerWarningAt * 60) == Math.floor(totalSeconds)) {
+            document.getElementById("timerAudio").play();
+         }
       }
       $interval(timerTick, 1000);
 
