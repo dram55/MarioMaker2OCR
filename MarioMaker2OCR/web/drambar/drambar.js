@@ -117,7 +117,7 @@
          function displayNewLevel(){
             status.changeInProgress = false;
             status.level = data.level;
-            deathCount: 0;
+            status.deathCount = 0;
             levelStartTime = new Date().getTime();
          }
        }

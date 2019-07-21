@@ -347,3 +347,6 @@ healthchecksdb
 
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
+
+# dram - local web project unrelated to MM2OCR 
+queuestatus/
