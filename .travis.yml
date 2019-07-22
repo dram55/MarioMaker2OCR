@@ -1,0 +1,19 @@
+language: csharp
+solution: MarioMaker2OCR.sln
+
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name $GITHUB_NAME
+  - git config --local user.email $GITHUB_EMAIL
+  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - git tag $TRAVIS_TAG
+  - cd MarioMaker2OCR/bin
+  - mv Release MarioMaker2OCR
+  - zip -r MarioMaker2OCR.zip MarioMaker2OCR
+  - cd ../../
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_KEY
+  file: "MarioMaker2OCR/bin/MarioMaker2OCR.zip"
+  skip_cleanup: true
