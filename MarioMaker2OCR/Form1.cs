@@ -31,12 +31,14 @@ namespace MarioMaker2OCR
         private Mat levelSelectScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
-        private readonly Image<Gray, byte> tmplDeathBig = new Image<Gray, byte>("./templates/480/death_big.png");         // Primary death bubble, larger than past death bubbles
-        private readonly Image<Gray, byte> tmplDeathPartial = new Image<Gray, byte>("./templates/480/death_partial.png"); // In area with a lot of deaths the bubble may be partially obscured
-        private readonly Image<Gray, byte> tmplDeathSmall = new Image<Gray, byte>("./templates/480/death_small.png");     // Death bubbles caused by past deaths/other players
-        private readonly Image<Gray, byte> tmplExit = new Image<Gray, byte>("./templates/480/exit.png");
-        private readonly Image<Gray, byte> tmplRestart = new Image<Gray, byte>("./templates/480/startover.png");
-        private readonly Image<Gray, byte> tmplQuit = new Image<Gray, byte>("./templates/480/quit.png");
+        private readonly EventTemplate[] templates = new EventTemplate[] {
+            new EventTemplate("./templates/480/death_big.png", "death", 0.8),
+            new EventTemplate("./templates/480/death_small.png", "death", 0.8),
+            new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
+            new EventTemplate("./templates/480/exit.png", "exit", 0.8),
+            new EventTemplate("./templates/480/quit.png", "exit", 0.9),
+            new EventTemplate("./templates/480/startover.png", "restart", 0.8),
+        };
 
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
@@ -257,6 +259,8 @@ namespace MarioMaker2OCR
         {
             log.Debug("Detected a black screen");
             BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing black screen..."));
+
+            // Is this a new level?
             Image<Bgr, byte> frame = e.frameBuffer[e.frameBuffer.Length - 5];
             double imageMatchPercent = ImageLibrary.CompareImages(frame, levelSelectScreen);
             if(imageMatchPercent > 0.94)
@@ -264,103 +268,56 @@ namespace MarioMaker2OCR
                 log.Info("Detected new level.");
                 previewer.SetLastMatch(frame, new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
+
                 Level level = getLevelFromCurrentFrame(frame);
                 writeLevelToFile(level);
+                SMMServer.BroadcastLevel(level);
+
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
-                SMMServer.BroadcastLevel(level);
             }
             else
             {
                 // Not a new level, see if we can detect a template.
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
-                Dictionary<String, bool> events = new Dictionary<String, bool>();
-                events.Add("death", false);
-                events.Add("restart", false);
-                events.Add("exit", false);
-                Size frameSize = new Size(e.frameBuffer[0].Width, e.frameBuffer[0].Height);
+                Dictionary<String, bool> events = new Dictionary<String, bool>
+                {
+                    { "death", false },
+                    { "restart", false },
+                    { "exit", false },
+                };
 
+
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
                 foreach (Image<Bgr, byte> f in e.frameBuffer)
                 {
-                    Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640,480, Inter.Cubic);
-                    Image<Gray, byte>[] deathTemplates = new Image<Gray, byte>[] { tmplDeathBig, tmplDeathSmall, tmplDeathPartial };
-
+                    Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
                     //grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
 
-                    //Once we have found a death, don't scan the rest of the frames for one
-                    if (!events["death"])
+                    List<Rectangle> boundaries = new List<Rectangle>();
+                    foreach (EventTemplate tmpl in templates)
                     {
-                        List<Rectangle> boundaries = new List<Rectangle>();
-                        foreach (Image<Gray, byte> tmpl in deathTemplates)
-                        {
-                            // FIXME: Better solution would be to map templates to their settings (threshold, fn, etc.) and their triggered event rather than doing this special case here.
-                            double thresh = 0.8;
-                            if (tmpl == tmplDeathPartial) thresh = 0.9;
-
-                            Point? loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmpl, thresh);
-                            if (loc.HasValue)
-                            {
-                                events["death"] = true;
-                                boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.Value.X - tmpl.Width, loc.Value.Y - tmpl.Height, tmpl.Width * 3, tmpl.Height * 3), resolution480, frameSize));
-                            }
-                        }
-                        if (events["death"])
-                        {
+                        if (events[tmpl.eventType]) continue;
+                        Point loc = tmpl.getLocation(grayscaleFrame);
+                        if (!loc.IsEmpty) { 
+                            events[tmpl.eventType] = true;
+                            boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.X, loc.Y, tmpl.template.Width, tmpl.template.Height), grayscaleFrame.Size, f.Size));
                             previewer.SetLastMatch(f, boundaries.ToArray());
                         }
                     }
+                }
+                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
 
-                    //Just in case a user hoved one then changed to the other button, only the last one counts, so don't look after one has been found.
-                    if (!events["restart"] && !events["exit"])
+                foreach (var evt in events)
+                {
+                    if (evt.Value)
                     {
-                        Point? loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplRestart, 0.8);
-                        if (loc.HasValue)
-                        {
-                            events["restart"] = true;
-                            Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplRestart.Width, tmplRestart.Height), resolution480, frameSize);
-                            previewer.SetLastMatch(f, new Rectangle[] { match });
-                        }
-                        else
-                        {
-                            // Really shouldn't happen but popped this in `else` just to prevent one frame from detecting both.
-                            loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplExit, 0.7);
-                            if (loc.HasValue)
-                            {
-                                events["exit"] = true;
-                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplExit.Width, tmplExit.Height), resolution480, frameSize);
-                                previewer.SetLastMatch(f, new Rectangle[] { match });
-                            }
-
-                            //Quit button in Endless runs instead of exit.
-                            loc = ImageLibrary.IsTemplatePresent(grayscaleFrame, tmplQuit, 0.9);
-                            if (loc.HasValue)
-                            {
-                                events["exit"] = true;
-                                Rectangle match = ImageLibrary.ChangeSize(new Rectangle(loc.Value.X, loc.Value.Y, tmplQuit.Width, tmplQuit.Height), resolution480, frameSize);
-                                previewer.SetLastMatch(f, new Rectangle[] { match });
-                            }
-                        }
+                        log.Info(String.Format("Detected {0}.", evt.Key));
+                        SMMServer.BroadcastEvent(evt.Key);
                     }
                 }
 
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
-                if (events["death"])
-                {
-                    log.Info("Detected death");
-                    SMMServer.BroadcastEvent("death");
-                }
-                if (events["restart"])
-                {
-                    log.Info("Detected restart");
-                    SMMServer.BroadcastEvent("restart");
-                }
-                if (events["exit"])
-                {
-                    log.Info("Detected exit");
-                    SMMServer.BroadcastEvent("exit");
-                }
-            }
 
+            }
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
