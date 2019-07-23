@@ -19,8 +19,9 @@ namespace MarioMaker2OCR
         /// </summary>
         public static string GetStringFromImage(Image<Gray, byte> image)
         {
-            using (Tesseract r = new Tesseract(tesserectLibrary, "eng+jpn", OcrEngineMode.Default))
+            using (Tesseract r = new Tesseract(tesserectLibrary, "eng+jpn", OcrEngineMode.TesseractLstmCombined))
             {
+                r.PageSegMode = PageSegMode.SingleLine;
                 r.SetImage(image);
                 r.Recognize();
                 return r.GetUTF8Text().Trim();
@@ -33,12 +34,18 @@ namespace MarioMaker2OCR
         /// </summary>
         public static string GetStringFromLevelCodeImage(Image<Gray, byte> image)
         {
-            using (Tesseract r = new Tesseract(tesserectLibrary, "eng", OcrEngineMode.Default))
+            using (Tesseract r = new Tesseract(tesserectLibrary, "eng", OcrEngineMode.TesseractLstmCombined))
             {
-                r.SetVariable("tessedit_char_whitelist", "-0123456789ABCDEFGHJKLMNPQRSTUVWXY");
+                r.SetVariable("tessedit_char_whitelist", "-0123456789ABCDEFGHJKLMNPQRSTUVWXY"); // only works for OcrEngineMode.TesseractOnly
+                r.PageSegMode = PageSegMode.SingleWord;
                 r.SetImage(image);
                 r.Recognize();
-                return r.GetUTF8Text().Trim().Replace(" ", "");
+                string levelCode = r.GetUTF8Text().Trim();
+
+                // manual replace for invalid chars that show up testing 480 resolution
+                levelCode = levelCode.Replace(" ", "").Replace("$", "S");
+
+                return levelCode;
             }
         }
     }

@@ -22,7 +22,11 @@ namespace MarioMaker2OCR
             Image<Gray, byte> grayScaleImage = image.Convert<Gray, byte>();
             grayScaleImage = grayScaleImage.Resize(scale, Inter.Cubic);
             grayScaleImage._GammaCorrect(3.5d);
-            grayScaleImage._ThresholdBinary(new Gray(50), new Gray(255));
+
+            // Invert image, then use an inverse binary threshold - this increases font weight and gives better OCR result
+            grayScaleImage._Not();
+            grayScaleImage._ThresholdBinaryInv(new Gray(180), new Gray(255));
+            
             return grayScaleImage;
         }
 
