@@ -9,17 +9,37 @@ using System.Drawing;
 
 namespace MarioMaker2OCR.Objects
 {
-    class EventTemplate
+    public class EventTemplate : IDisposable
     {
         public Image<Gray, byte> template { get; }
         public double threshold { get; }
         public string eventType { get; }
+        public string filename { get; }
 
-        public EventTemplate(string filename, string type, double thresh)
+        bool disposed = false; 
+        public void Dispose()
         {
-            template = new Image<Gray, byte>(filename);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed) return;
+
+            if (disposing)
+            {
+                template.Dispose();
+            }
+            disposed = true;
+        }
+
+        public EventTemplate(string fn, string type, double thresh)
+        {
+
+            template = new Image<Gray, byte>(fn);
             threshold = thresh;
             eventType = type;
+            filename = fn;
         }
 
         public Point getLocation(Image<Gray, byte> frame)
