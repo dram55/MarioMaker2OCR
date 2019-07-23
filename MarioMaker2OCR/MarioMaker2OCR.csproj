@@ -99,6 +99,7 @@
     <Compile Include="FormPreview.Designer.cs">
       <DependentUpon>FormPreview.cs</DependentUpon>
     </Compile>
+    <Compile Include="Objects\EventTemplate.cs" />
     <Compile Include="Objects\EventWrapper.cs" />
     <Compile Include="Objects\LevelWrapper.cs" />
     <Compile Include="Objects\Level.cs" />

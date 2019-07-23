@@ -16,12 +16,6 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
-                tmplDeathBig.Dispose();
-                tmplDeathPartial.Dispose();
-                tmplDeathSmall.Dispose();
-                tmplExit.Dispose();
-                tmplRestart.Dispose();
-                tmplQuit.Dispose();
                 if(processor != null) processor.Dispose();
             }
             base.Dispose(disposing);

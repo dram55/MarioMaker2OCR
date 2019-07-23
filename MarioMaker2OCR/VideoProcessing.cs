@@ -9,6 +9,7 @@ using Emgu.CV.Structure;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 
 namespace MarioMaker2OCR
@@ -16,17 +17,21 @@ namespace MarioMaker2OCR
     class VideoProcessor : IDisposable
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private int deviceId;
-        private Size resolution;
-        private VideoCapture cap;
-        private const int frameBufferLength = 10;
-        private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength];
-        private System.Threading.Timer frameBufferTimer;
-        private Size frameSize; //frameBuffer_tick needs to know this
-        private Thread processorThread;
-        private bool shouldStop = false;
 
-        bool disposed = false;
+        private VideoCapture cap;        // EmguCV VideoCapture device object
+        private int deviceId;            // Device id of the video capture device
+        private Size resolution;         // Resolution information to capture with
+
+        private Thread processorThread;  // The thread performing the main video processing
+
+        private Size frameSize;          // Contains the Size() object for the frame, needed for frameBuffer_tick to create the iamge
+        private bool shouldStop = false; // Flag to tell the processorThread to stop executing
+
+        private System.Threading.Timer frameBufferTimer; // Timer used to fill the frame buffer
+        private const int frameBufferLength = 10;        // Adjusts the size of the frameBuffer, at 250ms ticks, 10 frames = 5seconds of buffer
+        private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength]; // Frame buffer that is passed to events
+
+        bool disposed = false; //Flag to indicate the object has been disposed
 
         /// <summary>
         /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
@@ -63,15 +68,7 @@ namespace MarioMaker2OCR
         /// </summary>
         public void Start()
         {
-            // Reset the state
-            for(int i = 0; i < frameBuffer.Length; i++)
-            {
-                frameBuffer[i]?.Dispose();
-                frameBuffer[i] = null;
-            }
-            cap?.Dispose();
-            cap = null;
-
+            resetState();
             shouldStop = false;
             processorThread = new Thread(new ThreadStart(processingLoop));
             processorThread.Start();
@@ -105,14 +102,11 @@ namespace MarioMaker2OCR
         {
             try
             {
-                if (frameSize == null || cap == null) return;
+                if (cap == null) return;
 
                 Image<Bgr, byte> frame = new Image<Bgr, byte>(frameSize);
                 cap.Retrieve(frame);
-
-
-                // XXX: The tick can happen after the device .IsOpened but still not actually ready for use so make sure we got a real image
-                if (frame.Cols == 0) return;
+                if (frame.Cols == 0) return; // XXX: happens if the tick occures before device is ready
 
                 (frameBuffer[frameBuffer.Length - 1])?.Dispose();
                 for (int i = frameBuffer.Length - 1; i > 0; i--)
@@ -132,6 +126,54 @@ namespace MarioMaker2OCR
             }
         }
 
+        /// <summary>
+        /// Clears the existing framebuffer and disposes the current capture device
+        /// </summary>
+        private void resetState()
+        {
+            for (int i = 0; i < frameBuffer.Length; i++)
+            {
+                frameBuffer[i]?.Dispose();
+                frameBuffer[i] = null;
+            }
+            cap?.Dispose();
+            cap = null;
+
+        }
+
+
+        /// <summary>
+        /// Initializes the capture device and setups the object's state
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="captureResolution"></param>
+        private void initializeCaptureDevice(int device, Size captureResolution)
+        {
+            resetState();
+            cap = new VideoCapture(device);
+            cap.SetCaptureProperty(CapProp.FrameHeight, captureResolution.Height);
+            cap.SetCaptureProperty(CapProp.FrameWidth, captureResolution.Width);
+
+            //Capture a first frame to get the basic information so we can initalize the frameSize field
+            Mat tmp = new Mat();
+            cap.Retrieve(tmp);
+
+            if (tmp.Bitmap == null)
+            {
+                throw new Exception("Failed to get image from video device");
+            }
+
+            frameSize = new Size(tmp.Width, tmp.Height);
+
+            int channels = tmp.NumberOfChannels;
+            log.Debug(String.Format("Found resolution: {0}x{1} with {2} channels.", tmp.Width, tmp.Height, tmp.NumberOfChannels));
+            if (channels != 3)
+            {
+                throw new Exception(String.Format("Unexcepted channel count: {0}", tmp.NumberOfChannels));
+            }
+        }
+
+
 
         /// <summary>
         /// Main video processing loop
@@ -142,36 +184,7 @@ namespace MarioMaker2OCR
             {
                 try
                 {
-                    for (int i = 0; i < frameBuffer.Length; i++)
-                    {
-                        frameBuffer[i]?.Dispose();
-                        frameBuffer[i] = null;
-                    }
-                    cap?.Dispose();
-                    cap = null;
-
-
-                    cap = new VideoCapture(deviceId);
-                    cap.SetCaptureProperty(CapProp.FrameHeight, resolution.Height);
-                    cap.SetCaptureProperty(CapProp.FrameWidth, resolution.Width);
-
-                    //Capture a first frame to get the basic information so we can allocate the data array
-                    Mat tmp = new Mat();
-                    cap.Retrieve(tmp);
-                    frameSize = new Size(tmp.Width, tmp.Height);
-                    int channels = tmp.NumberOfChannels;
-
-                    if (tmp.Bitmap == null)
-                    {
-                        throw new Exception("Failed to get image from video device");
-                    }
-
-                    log.Debug(String.Format("Found resolution: {0}x{1} with {2} channels.", tmp.Width, tmp.Height, tmp.NumberOfChannels));
-                    if (channels != 3)
-                    {
-                        throw new Exception(String.Format("Unexcepted channel count: {0}", tmp.NumberOfChannels));
-                    }
-
+                    initializeCaptureDevice(deviceId, resolution);
 
                     //Initalize the currentFrame mat with a byte[] pointer so we can access its data directly without a conversion to Image<>
                     byte[] data = new byte[frameSize.Width * frameSize.Height * 3];
@@ -181,6 +194,7 @@ namespace MarioMaker2OCR
                     bool WasBlack = false;
                     bool WasClear = false;
                     int skip = frameSize.Width / 50;
+
                     while (true)
                     {
                         if (shouldStop) return;
@@ -189,35 +203,25 @@ namespace MarioMaker2OCR
 
                         if (WasBlack)
                         {
-                            WasBlack = (getColorCoverage(hues, 0) > 90);
-                            continue;
+                            WasBlack = isBlackFrame(hues);
                         }
-
-                        if (WasClear)
+                        else if (WasClear)
                         {
-                            int primary = getPrimaryColor(hues);
-                            WasClear = (hues[primary] > 95 && Math.Abs(50 - primary) < 10);
-                            continue;
+                            WasClear = isClearFrame(hues);
                         }
-
-                        if (getColorCoverage(hues, 0) > 90)
+                        else if (isBlackFrame(hues))
                         {
                             WasBlack = true;
                             VideoEventArgs args = new VideoEventArgs();
                             args.frameBuffer = copyFrameBuffer();
                             onBlackScreen(args);
                         }
-                        else
+                        else if (isClearFrame(hues))
                         {
-                            int primary = getPrimaryColor(hues);
-                            if (hues[primary] > 95 && Math.Abs(50 - primary) < 10) //the SMM clear screen is roughly hue(50)
-                            {
-                                WasClear = true;
-                                VideoEventArgs args = new VideoEventArgs();
-                                args.frameBuffer = copyFrameBuffer();
-                                onClearScreen(args);
-                            }
-                            // XXX: Might be useful to know that the clear screen with the timers is 48% Yellow
+                            WasClear = true;
+                            VideoEventArgs args = new VideoEventArgs();
+                            args.frameBuffer = copyFrameBuffer();
+                            onClearScreen(args);
                         }
                     }
                 }
@@ -237,7 +241,7 @@ namespace MarioMaker2OCR
         /// <param name="hue">Specific hue to look for</param>
         /// <param name="fuzzy">Performs a fuzzy search looking for hues with +/- this argument</param>
         /// <returns>The percentage of the screen covered by the hue</returns>
-        public int getColorCoverage(Dictionary<int,int> hues, int hue, int fuzzy=0)
+        public static int getColorCoverage(Dictionary<int,int> hues, int hue, int fuzzy=0)
         {
             int sum = 0;
             if (hues.ContainsKey(hue)) sum += hues[hue];
@@ -254,7 +258,7 @@ namespace MarioMaker2OCR
         /// </summary>
         /// <param name="hues">Hue dictionary from `getHues`</param>
         /// <returns>Returns the key to the most dominate hue</returns>
-        public int getPrimaryColor(Dictionary<int, int> hues)
+        public static int getPrimaryColor(Dictionary<int, int> hues)
         {
             int maxVal = -1;
             int maxHue = -1;
@@ -276,7 +280,7 @@ namespace MarioMaker2OCR
         /// <param name="frameSize">Size of the frame to be scanned</param>
         /// <param name="skip">Scans only every `skip` pixels.</param>
         /// <returns>Returns a dictionary containing the hue as a key and the percent of the pixeled scanned that matched that hue</returns>
-        public Dictionary<int, int> getHues(byte[] data, Size frameSize, int skip=20)
+        public static Dictionary<int, int> getHues(byte[] data, Size frameSize, int skip=20)
         {
             int offset;
             Color current;
@@ -320,9 +324,30 @@ namespace MarioMaker2OCR
                 cloned[i] = frameBuffer[i]?.Clone();
             }
             return cloned;
-
         }
 
+        /// <summary>
+        /// Determines if a given hue dictionary is from a black frame
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isBlackFrame(Dictionary<int, int> hues)
+        {
+            return getColorCoverage(hues, 0) > 98;
+        }
+
+        /// <summary>
+        /// Determines if a given hue dictionry is from a course cleared frame
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isClearFrame(Dictionary<int, int> hues)
+        {
+            int primary = getPrimaryColor(hues);
+            return hues[primary] > 95 && Math.Abs(50 - primary) < 10;
+        }
+
+        /// <summary>
+        /// Event that firces off whenever a black screen is detected
+        /// </summary>
         public event EventHandler<VideoEventArgs> BlackScreen;
         protected virtual void onBlackScreen(VideoEventArgs e)
         {
@@ -333,6 +358,10 @@ namespace MarioMaker2OCR
                 e.frameBuffer[i]?.Dispose();
             }
         }
+
+        /// <summary>
+        /// Event fires off whenever a clear screen is detected
+        /// </summary>
         public event EventHandler<VideoEventArgs> ClearScreen;
         protected virtual void onClearScreen(VideoEventArgs e)
         {
@@ -344,6 +373,9 @@ namespace MarioMaker2OCR
             }
         }
 
+        /// <summary>
+        /// Fires off every time the frameBuffer adds a new frame.
+        /// </summary>
         public event EventHandler<VideoEventArgs> NewFrame;
         protected virtual void onNewFrame(VideoEventArgs e)
         {
