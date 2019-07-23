@@ -101,6 +101,9 @@ On start over
 On exit
 { "type" : "exit" }
 
+On level clear
+{ "type" : "clear" }
+
 On gameover
 { "type" : "gameover" }
 
