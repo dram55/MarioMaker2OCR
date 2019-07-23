@@ -46,11 +46,31 @@ h4 {
 
 .timer-death-bar img {
    width: 20px;
-   margin-right: 6px;
+   margin-right: 4px;
+   margin-bottom: -2px;
    -webkit-transition: -webkit-transform .3s;
    -o-transition: transform .3s;
    transition: transform .3s;
    transition: transform .3s,-webkit-transform .3s;
+}
+
+img.clear-flag {
+    transform: scale(1.4);
+    animation-name: fade-in-then-pulse;
+    animation-duration: 1.5s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in-out;
+}
+@keyframes fade-in-then-pulse {
+    0%   {opacity: 0;}
+    25% {opacity: 1;}
+    30% {transform: scale(1.4);}
+    65% {transform: scale(1.65);}
+    100% {transform: scale(1.4);}
+}
+
+.level-cleared {
+   color:#10ff00;
 }
 
 .death-count img.pulse {

@@ -14,15 +14,19 @@
 </head>
 <body ng-app="dramBarApp">
    <div ng-controller="dramBarController as ctrl">
-      <div ng-if="ctrl.smm.level.code" class="level-card"
-         ng-class="((ctrl.smm.changeInProgress) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection">
-         <h4 ng-if="ctrl.smm.level.author" class="user-name">{{ctrl.smm.level.author}}</h4>
-         <p class="level-name">{{ctrl.smm.level.name}}</p>
-         <code ng-if="ctrl.smm.level.code" class="level-code text-uppercase">{{ctrl.smm.level.code}}</code>
+      <div ng-if="ctrl.state.level.code" class="level-card"
+         ng-class="((ctrl.state.hideCurrentLevel) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection">
+         <h4 ng-if="ctrl.state.level.author" class="user-name">{{ctrl.state.level.author}}</h4>
+         <p class="level-name">{{ctrl.state.level.name}}</p>
+         <code ng-if="ctrl.state.level.code" class="level-code text-uppercase">{{ctrl.state.level.code}}</code>
          <div class="timer-death-bar">
-            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer"><img src="/drambar/images/smw_clock.png">{{ctrl.smm.levelTimer}}</span>
+            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" ng-class="ctrl.state.levelCleared ? 'level-cleared' : ''">
+                <img src="/drambar/images/smw_clock.png">
+                {{ctrl.state.levelTimer}}
+                <img class="clear-flag" ng-if="ctrl.state.levelCleared" src="/drambar/images/clear_flag.png">
+            </span>
             <span ng-if="ctrl.settings.isDeathCountVisible" class="death-count">
-               <img src="/drambar/images/mario_dead.png" ng-class="ctrl.smm.deathInProgress ? 'pulse' : ''">{{ctrl.smm.deathCount}}
+               <img src="/drambar/images/mario_dead.png" ng-class="ctrl.state.deathInProgress ? 'pulse' : ''">{{ctrl.state.deathCount}}
             </span>
          </div>
       </div>
