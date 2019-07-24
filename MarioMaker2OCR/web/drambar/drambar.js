@@ -125,11 +125,11 @@
 
          function displayNewLevel(newLevel) {
             state.hideCurrentLevel = false;
-            state.levelCleared = false;
             state.level = newLevel;
             state.deathCount = 0;
 
             startTimer();
+            state.levelCleared = false;
          }
          return state;
       }
