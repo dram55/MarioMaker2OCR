@@ -69,6 +69,7 @@
                case 'death': death(event); break;
                case 'restart': restart(event); break;
                case 'exit': exit(event); break;
+               case 'gameover': gameover(event); break;
                case 'clear': clear(event); break;
                case 'level': newLevel(event); break;
             }
@@ -107,6 +108,11 @@
             console.log('clear');
             pauseTimer();
             state.levelCleared = true;
+         }
+
+         function gameover(data) {
+            console.log('gameover');
+            pauseTimer();
          }
 
          function newLevel(data) {

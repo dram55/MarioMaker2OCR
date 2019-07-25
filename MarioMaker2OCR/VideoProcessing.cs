@@ -94,7 +94,6 @@ namespace MarioMaker2OCR
             }
         }
 
-
         /// <summary>
         /// Grabs a frame for the frame buffer every tick.
         /// </summary>
@@ -141,7 +140,6 @@ namespace MarioMaker2OCR
 
         }
 
-
         /// <summary>
         /// Initializes the capture device and setups the object's state
         /// </summary>
@@ -172,8 +170,6 @@ namespace MarioMaker2OCR
                 throw new Exception(String.Format("Unexcepted channel count: {0}", tmp.NumberOfChannels));
             }
         }
-
-
 
         /// <summary>
         /// Main video processing loop

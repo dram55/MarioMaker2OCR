@@ -183,6 +183,9 @@
     <Content Include="templates\480\exit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="templates\480\gameover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="templates\480\quit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

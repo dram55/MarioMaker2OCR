@@ -31,7 +31,8 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/exit.png", "exit", 0.8),
             new EventTemplate("./templates/480/quit.png", "exit", 0.9),
             new EventTemplate("./templates/480/startover.png", "restart", 0.8),
-        };
+            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8)
+    };
 
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
@@ -233,6 +234,7 @@ namespace MarioMaker2OCR
                     { "death", false },
                     { "restart", false },
                     { "exit", false },
+                    { "gameover", false }
                 };
 
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
