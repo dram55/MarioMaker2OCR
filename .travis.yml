@@ -23,7 +23,7 @@ deploy:
   api_key: $GITHUB_KEY
   file: "MarioMaker2OCR/bin/MarioMaker2OCR.zip"
   skip_cleanup: true
-  body: git log --oneline $TRAVIS_COMMIT_RANGE
+  #body: git log --oneline $TRAVIS_COMMIT_RANGE
 
 branches:
   only: 
