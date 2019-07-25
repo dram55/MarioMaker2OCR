@@ -83,7 +83,6 @@ namespace MarioMaker2OCR
             resolutionsCombobox.DisplayMember = "Name";
             resolutionsCombobox.ValueMember = "Value";
 
-
             resolutionsCombobox.Items.Add(new { Name = "640x480", Value = new Size(640, 480) });
             resolutionsCombobox.Items.Add(new { Name = "1280x720", Value = new Size(1280, 720) });
             resolutionsCombobox.Items.Add(new { Name = "1920x1080", Value = new Size(1920, 1080) });
@@ -236,7 +235,6 @@ namespace MarioMaker2OCR
                     { "exit", false },
                 };
 
-
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
                 foreach (Image<Bgr, byte> f in e.frameBuffer)
                 {
@@ -248,7 +246,8 @@ namespace MarioMaker2OCR
                     {
                         if (events[tmpl.eventType]) continue;
                         Point loc = tmpl.getLocation(grayscaleFrame);
-                        if (!loc.IsEmpty) { 
+                        if (!loc.IsEmpty)
+                        {
                             events[tmpl.eventType] = true;
                             boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.X, loc.Y, tmpl.template.Width, tmpl.template.Height), grayscaleFrame.Size, f.Size));
                             previewer.SetLastMatch(f, boundaries.ToArray());

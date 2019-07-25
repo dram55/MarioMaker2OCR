@@ -64,7 +64,7 @@ namespace MarioMaker2OCR
         private static void updateOCRBoundryResolutions(Size newResolution)
         {
             // only update if a new resolution is detected
-            if (levelCodeBoundry != null && newResolution.Height != levelCodeBoundry.Height)
+            if (newResolution.Height != levelCodeBoundry.Height)
             {
                 levelCodeBoundry = ImageLibrary.ChangeSize(levelCodeBoundry720, resolution720, newResolution);
                 creatorNameBoundry = ImageLibrary.ChangeSize(creatorNameBoundry720, resolution720, newResolution);
@@ -120,7 +120,7 @@ namespace MarioMaker2OCR
         /// Get string from image using Tesserect Library for OCR
         /// Only use eng language and a subset of characters representing MM2 Level Codes
         /// </summary>
-        public static string doOCROnLevelCodeImage(Image<Gray, byte> image)
+        private static string doOCROnLevelCodeImage(Image<Gray, byte> image)
         {
             using (Tesseract r = new Tesseract(tesseractLibrary, "eng", OcrEngineMode.TesseractLstmCombined))
             {
@@ -139,7 +139,7 @@ namespace MarioMaker2OCR
                 if (originalLevelCode != modifiedLevelCode)
                     log.Debug($"GetStringFromLevelCodeImage - Attempt to correct OCR on level code - original: {originalLevelCode} | modified: {modifiedLevelCode}");
 
-                return modifiedLevelCode; 
+                return modifiedLevelCode;
             }
         }
     }

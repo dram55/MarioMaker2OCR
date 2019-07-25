@@ -7,7 +7,6 @@ using Emgu.CV.CvEnum;
 using System.Runtime.InteropServices;
 using System.IO;
 
-
 namespace MarioMaker2OCR.Test
 {
     [TestClass]
@@ -36,7 +35,7 @@ namespace MarioMaker2OCR.Test
             foreach(string fn in filePaths)
             {
                 var testFrame = new Image<Bgr, byte>(fn);
-                
+
                 // Test frame MUST be 1920x1080 otherwise a black frame will be returned with no errors or warnings
                 Assert.IsTrue(testFrame.Size.Width == 1920);
                 Assert.IsTrue(testFrame.Size.Height == 1080);

@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace MarioMaker2OCR.Test
 {
@@ -34,7 +33,7 @@ namespace MarioMaker2OCR.Test
         [TestMethod]
         public void DetectLevelScreen()
         {
-
+            Assert.Inconclusive("Test Not Implemented.");
         }
     }
 }
