@@ -137,7 +137,7 @@ namespace MarioMaker2OCR
                     .Replace("I", "1").Replace("'", "").Replace("‘", "").Replace("Z","S");
 
                 if (originalLevelCode != modifiedLevelCode)
-                    log.Debug($"GetStringFromLevelCodeImage - Attempt to correct OCR on level code - original: {originalLevelCode} | modified: {modifiedLevelCode}");
+                    log.Debug($"GetStringFromLevelCodeImage - Attempting to correct OCR on level code - original: {originalLevelCode} | modified: {modifiedLevelCode}");
 
                 return modifiedLevelCode;
             }
