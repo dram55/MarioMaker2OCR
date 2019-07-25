@@ -16,7 +16,8 @@
       dramBarFactory.inject = ['$websocket', '$timeout', '$interval', 'dramBarSettings'];
 
       function dramBarFactory($websocket, $timeout, $interval, dramBarSettings) {
-         var server = 'ws://localhost:3000/wss';
+
+         var server = 'ws://localhost:' + location.port + '/wss';
          var socket = $websocket(server, null, {reconnectIfNotNormalClose: true});
 
          var levelStartTime;
@@ -35,6 +36,7 @@
          function startTimer() {
             levelStartTime = new Date();
             timerRunning = true;
+            timerTick(); // force a tick to reset clock
          }
 
          function pauseTimer() {
