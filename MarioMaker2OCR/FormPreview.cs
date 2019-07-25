@@ -36,6 +36,22 @@ namespace MarioMaker2OCR
             }
         }
 
+        public void SetLastMatch(Image<Bgr, byte> frame)
+        {
+            if (!this.Disposing && this.Visible)
+            {
+                try
+                {
+                    imgLastMatch.Image?.Dispose();
+                    imgLastMatch.Image = frame.Clone();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Happens if the window is closed while the ImageBox is processes the Mat
+                }
+            }
+        }
+
         public void SetLastMatch(Image<Bgr, byte> frame, Rectangle[] boundaries)
         {
             if (!this.Disposing && this.Visible)

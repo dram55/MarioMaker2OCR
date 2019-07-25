@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Collections.Generic;
-using System.Threading;
 
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -21,14 +20,8 @@ namespace MarioMaker2OCR
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
         private Size resolution720 = new Size(1280, 720);
         private Size resolution480 = new Size(640, 480);
-        private Rectangle levelCodeArea;
-        private Rectangle creatorNameArea;
-        private Rectangle levelTitleArea;
-        private Rectangle levelCodeArea720p = new Rectangle(78, 175, 191, 33); // based on 1280x720
-        private Rectangle creatorNameArea720 = new Rectangle(641, 173, 422, 39); // based on 1280x720
-        private Rectangle levelTitleArea720 = new Rectangle(100, 92, 1080, 43); // based on 1280x720
 
-        private Mat levelSelectScreen;
+        private Mat levelDetailScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
         private readonly EventTemplate[] templates = new EventTemplate[] {
@@ -98,55 +91,9 @@ namespace MarioMaker2OCR
             resolutionsCombobox.SelectedIndex = Properties.Settings.Default.SelectedResolutionIndex;
         }
 
-        private Level getLevelFromCurrentFrame(Image<Bgr, byte> currentFrame)
-        {
-            try
-            {
-                Level ocrLevel = new Level();
-
-                // Level Code
-                currentFrame.ROI = levelCodeArea;
-                ocrLevel.code = getStringFromLevelCodeImage(currentFrame);
-
-                // Level Title
-                currentFrame.ROI = levelTitleArea;
-                ocrLevel.name = getStringFromImage(currentFrame);
-
-                // Creator Name
-                currentFrame.ROI = creatorNameArea;
-                ocrLevel.author = getStringFromImage(currentFrame);
-
-                return ocrLevel;
-            }
-            catch(Exception ex)
-            {
-                processException("Error Performing OCR", ex);
-            }
-
-            return null;
-        }
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        private static string getStringFromImage(Image<Bgr, byte> image)
-        {
-            Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            return OCRLibrary.GetStringFromImage(ocrReadyImage);
-        }
-
-        private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
-        {
-            Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            return OCRLibrary.GetStringFromLevelCodeImage(ocrReadyImage);
-        }
-
-        private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            Level emptyLevel = new Level();
-            writeLevelToFile(emptyLevel);
         }
 
         private void writeLevelToFile(Level level)
@@ -175,15 +122,10 @@ namespace MarioMaker2OCR
             try
             {
                 // resize reference image based on current resolution
-                levelSelectScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
+                levelDetailScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
 
-                // resize rectangles based on current resolution
-                levelCodeArea = ImageLibrary.ChangeSize(levelCodeArea720p, resolution720, SelectedResolution);
-                creatorNameArea = ImageLibrary.ChangeSize(creatorNameArea720, resolution720, SelectedResolution);
-                levelTitleArea = ImageLibrary.ChangeSize(levelTitleArea720, resolution720, SelectedResolution);
-
-                SMMServer.port = Decimal.ToUInt16(numPort.Value);
-                log.Info(String.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
+                SMMServer.port = decimal.ToUInt16(numPort.Value);
+                log.Info(string.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
                 SMMServer.Start();
 
                 processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
@@ -214,6 +156,12 @@ namespace MarioMaker2OCR
                 processor = null;
             }
             BeginInvoke(new MethodInvoker(() => unlockForm()));
+        }
+
+        private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            Level emptyLevel = new Level();
+            writeLevelToFile(emptyLevel);
         }
 
         private void lockForm()
@@ -262,19 +210,21 @@ namespace MarioMaker2OCR
 
             // Is this a new level?
             Image<Bgr, byte> frame = e.frameBuffer[e.frameBuffer.Length - 5];
-            double imageMatchPercent = ImageLibrary.CompareImages(frame, levelSelectScreen);
+            double imageMatchPercent = ImageLibrary.CompareImages(frame, levelDetailScreen);
             if(imageMatchPercent > 0.94)
             {
                 log.Info("Detected new level.");
-                previewer.SetLastMatch(frame, new Rectangle[] { levelCodeArea, creatorNameArea, levelTitleArea });
+
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
 
-                Level level = getLevelFromCurrentFrame(frame);
+                Level level = OCRLibrary.GetLevelFromFrame(frame);
                 writeLevelToFile(level);
                 SMMServer.BroadcastLevel(level);
 
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
+
+                previewer.SetLastMatch(frame);
             }
             else
             {
@@ -315,9 +265,9 @@ namespace MarioMaker2OCR
                         SMMServer.BroadcastEvent(evt.Key);
                     }
                 }
-
-
             }
+
+            frame.Dispose();
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
@@ -344,11 +294,6 @@ namespace MarioMaker2OCR
 
             stopButton_Click(null, null);
             MessageBox.Show(ex.Message, "Error Processing Video", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void selectFolderButton_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void form1_FormClosing(object sender, FormClosingEventArgs e)
