@@ -58,7 +58,7 @@ namespace MarioMaker2OCR
             Broadcast(json);
 
             // last level is invalid if exitted.
-            if (eventType == "exit") LastLevelTransmitted = null; 
+            if (eventType == "exit" || eventType == "gameover" || eventType == "next") LastLevelTransmitted = null;
         }
 
         /// <summary>
