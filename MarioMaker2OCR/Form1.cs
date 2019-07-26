@@ -11,6 +11,7 @@ using Emgu.CV.CvEnum;
 using Newtonsoft.Json;
 using MarioMaker2OCR.Objects;
 using DirectShowLib;
+using System.Reflection;
 
 namespace MarioMaker2OCR
 {
@@ -44,6 +45,8 @@ namespace MarioMaker2OCR
 
         public Form1()
         {
+            log.Info($"Start Application - version: {Assembly.GetExecutingAssembly().GetName().Version}");
+
             InitializeComponent();
 
             jsonOutputFolder = Properties.Settings.Default.OutputFolder;

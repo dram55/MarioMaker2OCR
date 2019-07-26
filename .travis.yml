@@ -1,6 +1,10 @@
 language: csharp
 solution: MarioMaker2OCR.sln
 
+script:
+  - export VERSION_NUMBER="1.0.$TRAVIS_BUILD_NUMBER"
+  - msbuild /p:Configuration=Release MarioMaker2OCR.sln /p:VersionAssembly=$VERSION_NUMBER
+
 before_deploy:
   - |
       if ! git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '^(readme.md)$|^(screenshots\/)|^(LICENSE)'
@@ -11,20 +15,21 @@ before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name $GITHUB_NAME
   - git config --local user.email $GITHUB_EMAIL
-  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - export TRAVIS_TAG=$VERSION_NUMBER
   - git tag $TRAVIS_TAG
   - cd MarioMaker2OCR/bin
   - mv Release MarioMaker2OCR
-  - zip -r MarioMaker2OCR.zip MarioMaker2OCR
+  - zip -r MarioMaker2OCR_$VERSION_NUMBER.zip MarioMaker2OCR
   - cd ../../
   - IFS='' export CHANGE_LOG=`git log --oneline $TRAVIS_COMMIT_RANGE`
 
 deploy:
   provider: releases
   api_key: $GITHUB_KEY
-  file: "MarioMaker2OCR/bin/MarioMaker2OCR.zip"
+  file: "MarioMaker2OCR/bin/MarioMaker2OCR_$VERSION_NUMBER.zip"
   skip_cleanup: true
   body: $CHANGE_LOG
+  name: $VERSION_NUMBER
 
 branches:
   only: 
