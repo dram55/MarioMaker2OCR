@@ -16,6 +16,7 @@ namespace MarioMaker2OCR.Test
         public void ReadCorrectLevelCode()
         {
             string[] filePaths = Directory.GetFiles("./Test/testdata/frames/720/levels", "*.png", SearchOption.TopDirectoryOnly);
+            string ocrErrors = "";
 
             foreach (var file in filePaths)
             {
@@ -25,9 +26,15 @@ namespace MarioMaker2OCR.Test
                 using (var testFrame = new Image<Bgr, byte>(file))
                 {
                     Level level = OCRLibrary.GetLevelFromFrame(testFrame);
-                    Assert.IsTrue(level.code == actualLevelCode, $"Level code OCR ({level.code}) does not match actual code ({actualLevelCode})");
+                    if (level.code != actualLevelCode)
+                    {
+                        ocrErrors += $"\r\nLevel code OCR ({level.code}) does not match actual code ({actualLevelCode})";
+                    }
                 }
             }
+
+            if (!string.IsNullOrWhiteSpace(ocrErrors))
+                Assert.Fail(ocrErrors);
         }
 
         [TestMethod]

@@ -17,13 +17,14 @@ before_deploy:
   - mv Release MarioMaker2OCR
   - zip -r MarioMaker2OCR.zip MarioMaker2OCR
   - cd ../../
+  - IFS='' export CHANGE_LOG=`git log --oneline $TRAVIS_COMMIT_RANGE`
 
 deploy:
   provider: releases
   api_key: $GITHUB_KEY
   file: "MarioMaker2OCR/bin/MarioMaker2OCR.zip"
   skip_cleanup: true
-  #body: git log --oneline $TRAVIS_COMMIT_RANGE
+  body: $CHANGE_LOG
 
 branches:
   only: 
