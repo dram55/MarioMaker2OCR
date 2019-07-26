@@ -349,9 +349,10 @@ namespace MarioMaker2OCR
         {
             if (frameBuffer[frameBuffer.Length - 1] == null) return;
             BlackScreen?.Invoke(this, e);
-            for (int i = 0; i < e.frameBuffer.Length; i++)
+            for (int i = 0; i < frameBuffer.Length; i++)
             {
-                e.frameBuffer[i]?.Dispose();
+                frameBuffer[i]?.Dispose();
+                frameBuffer[i] = null;
             }
         }
 
@@ -363,9 +364,10 @@ namespace MarioMaker2OCR
         {
             if (frameBuffer[frameBuffer.Length - 1] == null) return;
             ClearScreen?.Invoke(this, e);
-            for (int i = 0; i < e.frameBuffer.Length; i++)
+            for (int i = 0; i < frameBuffer.Length; i++)
             {
-                e.frameBuffer[i]?.Dispose();
+                frameBuffer[i]?.Dispose();
+                frameBuffer[i] = null;
             }
         }
 
