@@ -43,6 +43,10 @@
             timerRunning = false;
          }
 
+         function resumeTimer() {
+            timerRunning = true;
+         }
+
          function timerTick() {
             if (!timerRunning) {
                return;
@@ -116,8 +120,16 @@
          }
 
          function newLevel(data) {
+            // Resume timer if paused - and level isn't cleared from a previous quit or gameover
+            if(!timerRunning && !state.levelCleared && data.level.code === state.level.code) {
+               if (state.hideCurrentLevel)
+                  state.hideCurrentLevel = false;
+
+               resumeTimer();
+            }
+
             // Only process new level if the level data is hidden OR if the level code has changed.
-            if (data.level.code !== state.level.code || state.hideCurrentLevel) {
+            else if (data.level.code !== state.level.code || state.hideCurrentLevel) {
                // If panel is hidden, display immediately
                if (state.hideCurrentLevel) {
                   displayNewLevel(data.level);
