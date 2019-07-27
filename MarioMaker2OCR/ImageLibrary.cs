@@ -19,7 +19,7 @@ namespace MarioMaker2OCR
         public static Image<Gray, byte> PrepareImageForOCR(Image<Bgr, byte> image)
         {
             double scale;
-            if (image.Data.GetLength(0) >= 1080) scale = 2d;
+            if (image.Data.GetLength(0) >= 1080) scale = 1.5d;
             else if (image.Data.GetLength(0) >= 720) scale = 2.4d;
             else scale = 3d;
 
