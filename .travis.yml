@@ -21,7 +21,7 @@ before_deploy:
   - mv Release MarioMaker2OCR
   - zip -r MarioMaker2OCR_$VERSION_NUMBER.zip MarioMaker2OCR
   - cd ../../
-  - export CHANGE_LOG=`git log --oneline $TRAVIS_COMMIT_RANGE`
+  - export CHANGE_LOG=`git log $TRAVIS_COMMIT_RANGE --pretty='(%h) %s' | sed ':a;N;$!ba;s/\n/<br>/g'`
 
 deploy:
   provider: releases
