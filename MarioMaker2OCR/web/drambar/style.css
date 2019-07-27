@@ -6,7 +6,7 @@ body {
 
 h4 {
    margin: 0 0 -3px 0;
-   font-size: 1.5rem;
+   font-size: 1.35rem;
    font-weight: 500;
    line-height: 1.2;
  }
@@ -35,7 +35,7 @@ h4 {
   font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
 }
 
-.level-name { color: #dedede; }
+.level-name { color: #dedede; font-size: 1.06rem;}
 
 .death-count {float: right;}
 
