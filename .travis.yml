@@ -28,8 +28,6 @@ deploy:
   api_key: $GITHUB_KEY
   file: "MarioMaker2OCR/bin/MarioMaker2OCR_$VERSION_NUMBER.zip"
   skip_cleanup: true
-  body: |
-    $CHANGE_LOG
   name: $VERSION_NUMBER
 
 branches:
