@@ -23,7 +23,19 @@ namespace MarioMaker2OCR
             else if (image.Data.GetLength(0) >= 720) scale = 2.4d;
             else scale = 3d;
 
+            // Stretch low resolution 4:3 images for better OCR results
+            if (image.Data.GetLength(0) <= 480)
+            {
+                if ((decimal)image.Data.GetLength(0) / image.Data.GetLength(1) >= .75M)
+                {
+                    int newWidth = (int)Math.Floor(image.Width * 1.333);
+                    image = image.Resize(newWidth, image.Height, Inter.Cubic);
+                }
+            }
+
+            // Convert to grayscale
             Image<Gray, byte> grayScaleImage = image.Convert<Gray, byte>();
+
             grayScaleImage = grayScaleImage.Resize(scale, Inter.Cubic);
             grayScaleImage._GammaCorrect(3.5d);
             grayScaleImage._ThresholdBinary(new Gray(45), new Gray(255));
