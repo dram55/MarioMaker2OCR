@@ -14,7 +14,6 @@
       }
 
       dramBarFactory.inject = ['$websocket', '$timeout', '$interval', 'dramBarSettings'];
-
       function dramBarFactory($websocket, $timeout, $interval, dramBarSettings) {
 
          var server = 'ws://localhost:' + location.port + '/wss';
@@ -146,7 +145,7 @@
          function displayNewLevel(newLevel) {
             state.hideCurrentLevel = false;
             state.level = newLevel;
-            state.deathCount = 0;
+            state.deathCount  ;
 
             startTimer();
             state.levelCleared = false;
