@@ -6,7 +6,7 @@
       isTimerVisible:true, 
       isDeathCountVisible:true,
       slideFromDirection:'left', //left|right|top|bottom
-      playTimerWarning:true,
+      playTimerWarning:false,
       playTimerWarningAt:15, //minutes
    });
 
