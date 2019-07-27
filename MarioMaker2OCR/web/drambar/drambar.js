@@ -145,7 +145,7 @@
          function displayNewLevel(newLevel) {
             state.hideCurrentLevel = false;
             state.level = newLevel;
-            state.deathCount  ;
+            state.deathCount = 0;
 
             startTimer();
             state.levelCleared = false;
