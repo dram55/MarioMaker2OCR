@@ -201,7 +201,7 @@ namespace MarioMaker2OCR
             image._Not();
 
             // Get rid of extra space around the text
-            Mat structuringElement = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(390, 40), new Point(-1,-1));
+            Mat structuringElement = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(30, 3), new Point(-1,-1));
             Mat dilation = new Mat();
             CvInvoke.Dilate(image, dilation, structuringElement, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
             CvInvoke.FindContours(dilation, contours, hier, RetrType.External, ChainApproxMethod.ChainApproxNone);
