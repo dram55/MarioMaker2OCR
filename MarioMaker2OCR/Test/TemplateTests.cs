@@ -4,6 +4,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using MarioMaker2OCR.Objects;
 using System.IO;
+using System.Drawing;
 
 namespace MarioMaker2OCR.Test
 {
@@ -11,13 +12,30 @@ namespace MarioMaker2OCR.Test
     public class TemplateTests
     {
         public static readonly string frameDir = "./Test/testdata/frames";
-        public static readonly EventTemplate[] templates = new EventTemplate[] {
+        private readonly EventTemplate[] templates = new EventTemplate[] {
+            new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,330), new Size(230, 65)), //Pause Menu
+                new Rectangle(new Point(410,325), new Size(215, 60)), //Clear Screen
+            }),
+            new EventTemplate("./templates/480/quit.png", "exit", 0.9),
+            new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
+                new Rectangle(new Point(195,325), new Size(215, 60)), //Clear Screen
+            }),
             new EventTemplate("./templates/480/death_big.png", "death", 0.8),
             new EventTemplate("./templates/480/death_small.png", "death", 0.8),
             new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/exit.png", "exit", 0.8),
-            new EventTemplate("./templates/480/quit.png", "exit", 0.9),
-            new EventTemplate("./templates/480/startover.png", "restart", 0.8),
+            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8)
+        };
+
+        private readonly EventTemplate[] clearTemplates = new EventTemplate[]
+        {
+            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.3, new Rectangle[] {
+                new Rectangle(new Point(400,175), new Size(200, 55)),
+            }),
+            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.3, new Rectangle[] {
+                new Rectangle(new Point(400,175), new Size(200, 55)),
+            }),
         };
 
         [TestMethod]
@@ -163,6 +181,45 @@ namespace MarioMaker2OCR.Test
                 }
             }
         }
+        [TestMethod]
+        public void DetectWorldRecord()
+        {
+            string[] files = new string[]
+            {
+                "/1080/worldrecord.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (!t.filename.EndsWith("worldrecord.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
+                    Assert.IsFalse(t.getLocation(frame).IsEmpty);
+                    var result = t.getLocation(frame);
+                    Assert.IsFalse(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                }
+            }
+        }
+
+        [TestMethod]
+        public void DetectFirstClear()
+        {
+            string[] files = new string[]
+            {
+                "/1080/firstclear.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (!t.filename.EndsWith("firstclear.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
+                    Assert.IsFalse(t.getLocation(frame).IsEmpty);
+                    var result = t.getLocation(frame);
+                    Assert.IsFalse(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                }
+            }
+        }
 
         [TestMethod]
         public void ReturnsEmptyOnGameplay()
@@ -178,8 +235,5 @@ namespace MarioMaker2OCR.Test
                 }
             }
         }
-
-        // TODO: Detects Quit (Endless-mode)
-        // TODO: False-positive testcases
     }
 }
