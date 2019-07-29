@@ -26,14 +26,26 @@ namespace MarioMaker2OCR
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
         private readonly EventTemplate[] templates = new EventTemplate[] {
+            new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,330), new Size(230, 65)), //Pause Menu
+                new Rectangle(new Point(410,325), new Size(215, 60)), //Clear Screen
+            }),
+            new EventTemplate("./templates/480/quit.png", "exit", 0.9),
+            new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
+                new Rectangle(new Point(195,325), new Size(215, 60)), //Clear Screen
+            }),
+            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,175), new Size(200, 55)),
+            }),
+            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
+                new Rectangle(new Point(400,175), new Size(200, 55)),
+            }),
             new EventTemplate("./templates/480/death_big.png", "death", 0.8),
             new EventTemplate("./templates/480/death_small.png", "death", 0.8),
             new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/exit.png", "exit", 0.8),
-            new EventTemplate("./templates/480/quit.png", "exit", 0.9),
-            new EventTemplate("./templates/480/startover.png", "restart", 0.8),
             new EventTemplate("./templates/480/gameover.png", "gameover", 0.8)
-    };
+        };
 
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
@@ -239,7 +251,9 @@ namespace MarioMaker2OCR
                     { "death", false },
                     { "restart", false },
                     { "exit", false },
-                    { "gameover", false }
+                    { "gameover", false },
+                    { "worldrecord", false },
+                    { "firstclear", false },
                 };
 
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));

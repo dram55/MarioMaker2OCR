@@ -183,6 +183,9 @@
     <Content Include="templates\480\exit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="templates\480\firstclear.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="templates\480\gameover.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -190,6 +193,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="templates\480\startover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="templates\480\worldrecord.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\1080\clear_full.png">
@@ -211,6 +217,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\1080\exit_pause.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test\testdata\frames\1080\firstclear.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\1080\gameplay\frame_201907230637083795.png">
@@ -244,6 +253,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\1080\startover_pause.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test\testdata\frames\1080\worldrecord.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\480\black.png">
