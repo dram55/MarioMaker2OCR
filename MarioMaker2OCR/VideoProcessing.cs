@@ -148,7 +148,8 @@ namespace MarioMaker2OCR
         private void initializeCaptureDevice(int device, Size captureResolution)
         {
             resetState();
-            cap = new VideoCapture(device);
+            // Since we are only targeting Windows users, forcing DShow should be a safe choice, this is required for SplitCam to be readable
+            cap = new VideoCapture(device, VideoCapture.API.DShow);
             cap.SetCaptureProperty(CapProp.FrameHeight, captureResolution.Height);
             cap.SetCaptureProperty(CapProp.FrameWidth, captureResolution.Width);
 
@@ -189,6 +190,7 @@ namespace MarioMaker2OCR
 
                     bool WasBlack = false;
                     bool WasClear = false;
+                    bool WaitForClearStats = false;
                     int skip = frameSize.Width / 50;
 
                     while (true)
@@ -203,11 +205,25 @@ namespace MarioMaker2OCR
                         }
                         else if (WasClear)
                         {
+
                             WasClear = isClearFrame(hues);
+                            if (!WasClear) WaitForClearStats = true;
+                        }
+                        else if (WaitForClearStats && isClearWithStatsScreen(hues))
+                        {
+                            // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
+                            // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
+                            Thread.Sleep(500);
+                            cap.Retrieve(currentFrame);
+
+                            VideoEventArgs args = new VideoEventArgs();
+                            args.currentFrame = currentFrame.Clone().ToImage<Bgr, Byte>();
+                            onClearScreen(args);
                         }
                         else if (isBlackFrame(hues))
                         {
                             WasBlack = true;
+                            WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
                             VideoEventArgs args = new VideoEventArgs();
                             args.frameBuffer = copyFrameBuffer();
                             onBlackScreen(args);
@@ -215,9 +231,6 @@ namespace MarioMaker2OCR
                         else if (isClearFrame(hues))
                         {
                             WasClear = true;
-                            VideoEventArgs args = new VideoEventArgs();
-                            args.frameBuffer = copyFrameBuffer();
-                            onClearScreen(args);
                         }
                     }
                 }
@@ -340,6 +353,14 @@ namespace MarioMaker2OCR
             int primary = getPrimaryColor(hues);
             return hues[primary] > 95 && Math.Abs(50 - primary) < 10;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isClearWithStatsScreen(Dictionary<int, int> hues)
+        {
+            int primary = getPrimaryColor(hues);
+            return Math.Abs(50 - primary) < 10 && (hues[primary] > 70 && hues[primary] < 80);
+        }
+
 
         /// <summary>
         /// Event that firces off whenever a black screen is detected

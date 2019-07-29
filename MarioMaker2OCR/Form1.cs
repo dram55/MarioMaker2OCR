@@ -199,8 +199,10 @@ namespace MarioMaker2OCR
         /// </summary>
         private void VideoProcessor_ClearScreen(object sender, VideoProcessor.VideoEventArgs e)
         {
+            previewer.SetLastMatch(e.currentFrame);
             log.Debug("Detected Level Clear");
             SMMServer.BroadcastEvent("clear");
+
         }
 
         /// <summary>
