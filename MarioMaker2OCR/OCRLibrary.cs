@@ -97,7 +97,10 @@ namespace MarioMaker2OCR
                 string clearTime = doOCROnCharacterImages(characters, "0123456789");
 
                 // format clear time
-                clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
+                // quick hack - make sure string is at least 7 length
+                if (clearTime.Length>=7)
+                    clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
+
                 return clearTime;
             }
             else
