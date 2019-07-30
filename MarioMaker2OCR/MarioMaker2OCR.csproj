@@ -99,6 +99,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Objects\ClearEventWrapper.cs" />
     <Compile Include="Test\BlackScreenTests.cs" />
     <Compile Include="DirectShowLibrary.cs" />
     <Compile Include="FormPreview.cs">

@@ -16,12 +16,17 @@ namespace MarioMaker2OCR
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private const string tesseractLibrary = "tessdata";
 
+        // Level Code Boundries
         private static Rectangle levelCodeBoundry720 = new Rectangle(78, 175, 191, 33); // based on 1280x720
         private static Rectangle creatorNameBoundry720 = new Rectangle(641, 173, 422, 39); // based on 1280x720
         private static Rectangle levelTitleBoundry720 = new Rectangle(100, 92, 1080, 43); // based on 1280x720
         private static Rectangle levelCodeBoundry;
         private static Rectangle creatorNameBoundry;
         private static Rectangle levelTitleBoundry;
+
+        // Clear Time Boundry
+        private static Rectangle clearTimeBoundry;
+        private static Rectangle clearTimeBoundry720 = new Rectangle(602, 357, 176, 37); // based on 1280x720
 
         private static Size resolution720 = new Size(1280, 720);
 
@@ -33,7 +38,7 @@ namespace MarioMaker2OCR
         /// <returns></returns>
         public static Level GetLevelFromFrame(Image<Bgr, byte> frame)
         {
-            updateOCRBoundryResolutions(frame.Size);
+            updateLevelBoundryResolutions(frame.Size);
 
             try
             {
@@ -65,7 +70,44 @@ namespace MarioMaker2OCR
             return null;
         }
 
-        private static void updateOCRBoundryResolutions(Size newResolution)
+        internal static string GetClearTimeFromFrame(Image<Bgr, byte> frame)
+        {
+            // Update boundry sizes relative to the current resolution
+            if (frame.Size.Height != clearTimeBoundry.Height)
+                clearTimeBoundry = ImageLibrary.ChangeSize(clearTimeBoundry720, resolution720, frame.Size);
+
+            // Set ROI
+            frame.ROI = clearTimeBoundry;
+
+            // Prepare Image for OCR
+            Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(frame);
+
+            // Segment characters
+            List<Mat> characters = segmentCharacters(ocrReadyImage);
+
+            // expect time to be 9 characters, quote reads as 2 chars (ex: 01'34''789)
+            if (characters.Count == 10)
+            {
+                // Remove quotes
+                characters.RemoveAt(6);
+                characters.RemoveAt(5);
+                characters.RemoveAt(2);
+
+                // Do OCR
+                string clearTime = doOCROnCharacterImages(characters, "0123456789");
+
+                // format clear time
+                clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
+                return clearTime;
+            }
+            else
+            {
+                log.Debug($"segmentChacters for time - {characters.Count} characters detected, expected 9, falling back to original OCR method");
+                return doOCROnImage(ocrReadyImage);
+            }
+        }
+
+        private static void updateLevelBoundryResolutions(Size newResolution)
         {
             // only update if a new resolution is detected
             if (newResolution.Height != levelCodeBoundry.Height)
@@ -87,8 +129,29 @@ namespace MarioMaker2OCR
         private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
         {
             Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            //return doOCROnLevelCodeImage(ocrReadyImage);
-            return doSegmentedOCROnLevelCodeImage(ocrReadyImage);
+            ocrReadyImage = cropLineOfText(ocrReadyImage, new Size(30, 3));
+            List<Mat> characters = segmentCharacters(ocrReadyImage);
+
+            // 11 characters expected in a level code (XXX-XXX-XXX)
+            if (characters.Count == 11)
+            {
+                // Remove the dashes
+                characters.RemoveAt(7);
+                characters.RemoveAt(3);
+
+                string levelCode = doOCROnCharacterImages(characters, "0123456789ABCDEFGHJKLMNPQRSTUVWXY");
+
+                // format code
+                levelCode = $"{levelCode.Substring(0, 3)}-{levelCode.Substring(3, 3)}-{levelCode.Substring(6, 3)}";
+
+                return levelCode;
+            }
+            else
+            {
+                // fallback to original OCR if segmentation has unexpected number of characters
+                log.Debug($"segmentChacters - level code - detected {characters.Count} characters, falling back to original OCR method");
+                return doOCROnLevelCodeImage(ocrReadyImage);
+            }
         }
 
         private static void drawCapturedScreenAreas(Image<Bgr, byte> image)
@@ -124,6 +187,8 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Get string from image using Tesserect Library for OCR
         /// Only use eng language and a subset of characters representing MM2 Level Codes
+        /// 
+        /// Only use as a fallback if doOCROnCharacterImages() cannot be called
         /// </summary>
         private static string doOCROnLevelCodeImage(Image<Gray, byte> image)
         {
@@ -139,7 +204,7 @@ namespace MarioMaker2OCR
                 // possible solution is to filter out anything not in the whitelist above
                 // but just want to make sure there aren't any we could easily replace first
                 string modifiedLevelCode = originalLevelCode.Replace(" ", "").Replace("$", "S").Replace("O", "0")
-                    .Replace("I", "1").Replace("'", "").Replace("‘", "").Replace("Z","S");
+                    .Replace("I", "1").Replace("'", "").Replace("‘", "").Replace("Z", "S");
 
                 log.Debug($"level: {originalLevelCode}");
 
@@ -151,117 +216,103 @@ namespace MarioMaker2OCR
         }
 
         /// <summary>
-        /// <para>Split out each character from the level code to its own image then perform the OCR on each image.</para>
-        /// <para>Seems to be a much more reliable OCR method. </para>
+        /// Get string from list of character images using Tesserect Library for OCR
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="characters">List of characters</param>
+        /// <param name="whiteListCharacters">White listed characters - ignored if empty</param>
         /// <returns></returns>
-        private static string doSegmentedOCROnLevelCodeImage(Image<Gray,byte> image)
+        private static string doOCROnCharacterImages(List<Mat> characters, string whiteListCharacters)
         {
-            List<Mat> letters = segmentCharacters(image);
-
-            // Use original method as a fallback if character segmentation fails
-            if (letters == null) return doOCROnLevelCodeImage(image);
-
-            string levelCode = "";
+            string returnString = "";
 
             using (Tesseract r = new Tesseract(tesseractLibrary, "eng", OcrEngineMode.TesseractOnly))
             {
-                r.SetVariable("tessedit_char_whitelist", "0123456789ABCDEFGHJKLMNPQRSTUVWXY");
+                if (!string.IsNullOrEmpty(whiteListCharacters))
+                    r.SetVariable("tessedit_char_whitelist", whiteListCharacters);
+
                 r.PageSegMode = PageSegMode.SingleChar;
-                foreach (var letter in letters)
+                foreach (var letter in characters)
                 {
                     r.SetImage(letter);
                     r.Recognize();
-                    levelCode += r.GetUTF8Text().Trim();
+                    returnString += r.GetUTF8Text().Trim();
                 }
             }
 
-            // Format with dashes - if needed
-            if (levelCode.Length == 9)
-                levelCode = $"{levelCode.Substring(0, 3)}-{levelCode.Substring(3, 3)}-{levelCode.Substring(6, 3)}";
-
-            return levelCode;
+            return returnString;
         }
 
         /// <summary>
-        /// Pass in an image of a word and receive back a list of images containing each character.
-        /// 
-        /// As of now, it is hard coded to only handle level codes (11 characters)
+        /// Crop a line of text to the given dimensions
         /// </summary>
-        /// <returns></returns>
-        private static List<Mat> segmentCharacters(Image<Gray, byte> image)
+        private static Image<Gray, byte> cropLineOfText(Image<Gray, byte> image, Size dimension)
         {
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
             Mat hier = new Mat();
 
             List<Mat> letters = new List<Mat>();
 
-            // Invert image for more accurate contouring
+            // Better contouring with inverted image (black background on white text)
             image._Not();
 
             // Get rid of extra space around the text
-            Mat structuringElement = CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(30, 3), new Point(-1,-1));
+            Mat structuringElement = CvInvoke.GetStructuringElement(ElementShape.Rectangle, dimension, new Point(-1, -1));
             Mat dilation = new Mat();
             CvInvoke.Dilate(image, dilation, structuringElement, new Point(-1, -1), 1, BorderType.Default, new MCvScalar());
             CvInvoke.FindContours(dilation, contours, hier, RetrType.External, ChainApproxMethod.ChainApproxNone);
 
-            Image<Gray, byte> croppedLine = null;
+            // Invert image back to original
+            image._Not();
 
-            if (contours.Size == 1)
-            {
-                Rectangle lineBoundry = CvInvoke.BoundingRectangle(contours[0]);
-                croppedLine = image.Copy(lineBoundry);
-            }
-            else
-            {
-                log.Debug($"segmentChacters - {contours.Size} lines detected, expected 1, falling back to original OCR method");
-                return null;
-            }
+            // Create new image cropped by the new lineBoundry
+            Image<Gray, byte> croppedLine = null;
+            Rectangle lineBoundry = CvInvoke.BoundingRectangle(contours[0]);
+            croppedLine = image.Copy(lineBoundry);
+
+            return croppedLine;
+        }
+
+        /// <summary>
+        /// Takes an image of a line of text and returns a list of images containing each character.
+        /// </summary>
+        private static List<Mat> segmentCharacters(Image<Gray, byte> image)
+        {
+            // Better contouring with inverted image (black background on white text)
+            image._Not();
 
             // Get contours for each character
-            CvInvoke.FindContours(croppedLine, contours, hier, RetrType.External, ChainApproxMethod.ChainApproxTc89Kcos, new Point(0,0));
+            VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
+            Mat hier = new Mat();
+            CvInvoke.FindContours(image, contours, hier, RetrType.External, ChainApproxMethod.ChainApproxTc89Kcos, new Point(0, 0));
 
-            // Invert images back to white BG
+            // Invert image back to original
             image._Not();
-            croppedLine._Not();
 
-            // expect 11 characters for level code (ex: 012-456-890)
-            if (contours.Size == 11) 
+            // Gather all bounding rectangles (one for each char)
+            List<Rectangle> letterBoundries = new List<Rectangle>();
+            for (int i = 0; i < contours.Size; i++)
             {
-                // Gather all bounding rectangles (one for each char)
-                List<Rectangle> letterBoundries = new List<Rectangle>();
-                for (int i = 0; i < contours.Size; i++)
-                {
-                    letterBoundries.Add(CvInvoke.BoundingRectangle(contours[i]));
-                }
-
-                // Sort bounding rectangles from left to right
-                letterBoundries = letterBoundries.OrderBy(p => p.Left).ToList();
-                for (int i = 0; i < letterBoundries.Count; i++)
-                {
-                    // skip dash characters 012-456-890
-                    if (i == 3 || i == 7)
-                        continue;
-
-                    // Grab current letter into new Mat
-                    croppedLine.ROI = letterBoundries[i];
-                    Mat letter = croppedLine.Mat.Clone();
-
-                    // 5 pixel white border around the letter
-                    CvInvoke.CopyMakeBorder(croppedLine.Mat, letter, 5, 5, 5, 5, BorderType.Constant, new MCvScalar(255, 255, 255));
-
-                    letters.Add(letter);
-                    croppedLine.ROI = Rectangle.Empty;
-                }
-            }
-            else // abort - this contouring method failed
-            {
-                log.Debug($"segmentChacters - detected {contours.Size} characters, falling back to original OCR method");
-                return null;
+                letterBoundries.Add(CvInvoke.BoundingRectangle(contours[i]));
             }
 
-            return letters;
+            List<Mat> characters = new List<Mat>();
+
+            // Sort bounding rectangles from left to right
+            letterBoundries = letterBoundries.OrderBy(p => p.Left).ToList();
+            for (int i = 0; i < letterBoundries.Count; i++)
+            {
+                // Grab current letter into new Mat
+                image.ROI = letterBoundries[i];
+                Mat letter = image.Mat.Clone();
+
+                // 5 pixel white border around the letter
+                CvInvoke.CopyMakeBorder(image.Mat, letter, 5, 5, 5, 5, BorderType.Constant, new MCvScalar(255, 255, 255));
+
+                characters.Add(letter);
+                image.ROI = Rectangle.Empty;
+            }
+
+            return characters;
         }
     }
 }

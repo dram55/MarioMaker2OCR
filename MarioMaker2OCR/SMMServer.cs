@@ -74,6 +74,11 @@ namespace MarioMaker2OCR
             // track last level submitted
             LastLevelTransmitted = levelWrapper;
         }
+        public static void BroadcastDataEvent(string eventType, string data)
+        {
+            string json = JsonConvert.SerializeObject(new DataEventWrapper() { type = eventType, data = data });
+            Broadcast(json);
+        }
         public static void Broadcast(string message)
         {
             foreach (var ws in wss.WebSockets)
