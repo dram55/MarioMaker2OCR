@@ -1,13 +1,14 @@
 # Mario Maker 2 OCR
-This program will capture level information & events from a Mario Maker 2 game feed and display on a locally hosted web app. 
+This program will capture level info & events from a Mario Maker 2 game feed and display on a locally hosted web app. This includes the the level name, level code, level creator, death counter and level timer. 
 
-### [Video Instructions - https://youtu.be/HsQZIANz1Yc](https://youtu.be/HsQZIANz1Yc)
 
 ## Install
 - Download [MarioMaker2OCR.zip](https://github.com/dram55/MarioMaker2OCR/releases) from releases.
 - Extract and run `Mario Maker 2 OCR.exe`
+- Use the [Video Instructions](https://youtu.be/HsQZIANz1Yc) or read the text Setup section below to use. 
 
-
+## Example
+Example of the program in use from [Karibukai Plays](https://youtu.be/myG9h01B4Bs?t=445).
 
 ## Screenshots
 ![](screenshots/screenshot.jpg) ![](screenshots/preview.jpg)
@@ -16,7 +17,6 @@ This program will capture level information & events from a Mario Maker 2 game f
 ![](screenshots/smmbar.png) 
 
 ![](screenshots/drambar.png)
-
 
 
 ## How To Use
@@ -49,6 +49,7 @@ This program will capture level information & events from a Mario Maker 2 game f
 ## Technical
 The [wiki](https://github.com/dram55/MarioMaker2OCR/wiki/Program-Details) contains documentation on the program logic.
 
+
 ### Create your own overlays
 In the `\web` directory you will see overlays to use/modify as an example. Check the `settings.js` in each project for customization. 
 
@@ -68,6 +69,12 @@ On new level
   }
 }
 
+On clear
+{
+   "type" : "gameover",
+   "data" : "01'54\"743"
+}
+
 On death
 { "type" : "death" }
 
@@ -82,6 +89,12 @@ On level clear
 
 On gameover
 { "type" : "gameover" }
+
+On world record
+{ "type" : "gameover" }
+
+On first clear
+{ "type" : "firstclear" }
 
 ```
 
