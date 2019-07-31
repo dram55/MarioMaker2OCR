@@ -59,7 +59,6 @@ This directory is where the web server will be hosted, any web apps created here
 
 ### Websocket Message API
 ``` JSON
--- Outgoing Message API --
 On new level
 {
   "level": {
@@ -69,9 +68,9 @@ On new level
   }
 }
 
-On clear
+On level clear
 {
-   "type" : "gameover",
+   "type" : "clear",
    "data" : "01'54\"743"
 }
 
@@ -84,14 +83,11 @@ On start over
 On exit
 { "type" : "exit" }
 
-On level clear
-{ "type" : "clear" }
-
 On gameover
 { "type" : "gameover" }
 
 On world record
-{ "type" : "gameover" }
+{ "type" : "worldrecord" }
 
 On first clear
 { "type" : "firstclear" }
