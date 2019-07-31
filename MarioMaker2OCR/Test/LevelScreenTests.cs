@@ -63,8 +63,6 @@ namespace MarioMaker2OCR.Test
             return ocrErrors;
         }
 
-
-
         [TestMethod]
         public void DetectLevelScreen()
         {

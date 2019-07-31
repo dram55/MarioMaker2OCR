@@ -83,5 +83,32 @@ namespace MarioMaker2OCR.Test
                 Assert.IsFalse(VideoProcessor.isClearFrame(hues));
             }
         }
+
+        [TestMethod]
+        public void ReadCorrectClearTime()
+        {
+            string[] filePaths = Directory.GetFiles("./Test/testdata/frames/1080/clears", "*.png", SearchOption.TopDirectoryOnly);
+            string ocrErrors = "";
+
+            foreach (var file in filePaths)
+            {
+                // Grab expected time which should be in filename (ex: clear_time_usa_0109645.png)
+                int timeIdx = file.LastIndexOf("_") + 1;
+                string expectedTime = file.Substring(timeIdx, 7);
+                expectedTime = $"{expectedTime.Substring(0, 2)}'{expectedTime.Substring(2, 2)}\"{expectedTime.Substring(4, 3)}";
+
+                using (var testFrame = new Image<Bgr, byte>(file))
+                {
+                    string ocrClearTime = OCRLibrary.GetClearTimeFromFrame(testFrame);
+                    if (expectedTime != ocrClearTime)
+                    {
+                        ocrErrors += $"\r\nClear time OCR: ({ocrClearTime}) does not match expected: ({expectedTime})";
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(ocrErrors))
+                Assert.Fail(ocrErrors);
+        }
     }
 }

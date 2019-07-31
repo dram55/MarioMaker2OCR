@@ -199,6 +199,18 @@
     <Content Include="templates\480\worldrecord.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Test\testdata\frames\1080\clears\clear_time_euro_1825422.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test\testdata\frames\1080\clears\clear_time_spanish_1825422.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test\testdata\frames\1080\clears\clear_time_usa_0018416.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Test\testdata\frames\1080\clears\clear_time_usa_0109645.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test\testdata\frames\1080\clear_full.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
