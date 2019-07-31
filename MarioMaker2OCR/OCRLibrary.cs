@@ -88,16 +88,19 @@ namespace MarioMaker2OCR
             // expect time to be 9 characters, quote reads as 2 chars (ex: 01'34''789)
             if (characters.Count == 10)
             {
-                // Remove quotes
-                characters.RemoveAt(6);
-                characters.RemoveAt(5);
-                characters.RemoveAt(2);
+                // Different Time Formats
+                // 12:34,567 | 12:34.567 | 12'34"567
+
+                // Remove punctuation - can identify by height
+                // Make relative to max character size incase we ever resize images.
+                int maxCharHeight = characters.Max(p => p.Height);
+                int minimumHeight = (int)Math.Floor(maxCharHeight * .60);
+                characters.RemoveAll(p => p.Height < minimumHeight);
 
                 // Do OCR
                 string clearTime = doOCROnCharacterImages(characters, "0123456789");
 
                 // format clear time
-                // quick hack - make sure string is at least 7 length
                 if (clearTime.Length>=7)
                     clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
 
