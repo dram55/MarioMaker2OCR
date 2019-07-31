@@ -8,7 +8,7 @@ This program will capture level info & events from a Mario Maker 2 game feed and
 - Use the [Video Instructions](https://youtu.be/HsQZIANz1Yc) or read the text Setup section below to use. 
 
 ## Example
-Example of the program in use from [Karibukai Plays](https://youtu.be/myG9h01B4Bs?t=445).
+Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs?t=445).
 
 ## Screenshots
 ![](screenshots/screenshot.jpg) ![](screenshots/preview.jpg)
@@ -80,7 +80,7 @@ On death
 On start over
 { "type" : "restart" }
 
-On exit
+On exit or quit
 { "type" : "exit" }
 
 On gameover
