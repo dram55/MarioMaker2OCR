@@ -38,7 +38,9 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/death_big.png", "death", 0.8),
             new EventTemplate("./templates/480/death_small.png", "death", 0.8),
             new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8),
+            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
+                new Rectangle(new Point(187,195), new Size(270, 100))
+            }),
             new EventTemplate("./templates/480/skip.png", "skip", 0.8, new Rectangle[] {
                 new Rectangle(new Point(277,240), new Size(87, 71))
             })

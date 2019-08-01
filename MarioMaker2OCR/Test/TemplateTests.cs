@@ -25,7 +25,9 @@ namespace MarioMaker2OCR.Test
             new EventTemplate("./templates/480/death_big.png", "death", 0.8),
             new EventTemplate("./templates/480/death_small.png", "death", 0.8),
             new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8),
+            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
+                new Rectangle(new Point(187,195), new Size(270, 100))
+            }),
             new EventTemplate("./templates/480/skip.png", "skip", 0.8, new Rectangle[] {
                 new Rectangle(new Point(277,240), new Size(87, 71))
             })
@@ -205,6 +207,26 @@ namespace MarioMaker2OCR.Test
         }
 
         [TestMethod]
+        public void DetectGameOver()
+        {
+            string[] files = new string[]
+            {
+                "/480/gameover.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (!t.filename.EndsWith("gameover.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn);
+                    Assert.IsFalse(t.getLocation(frame).IsEmpty);
+                    var result = t.getLocation(frame);
+                    Assert.IsFalse(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                }
+            }
+        }
+
+        [TestMethod]
         public void DetectFirstClear()
         {
             string[] files = new string[]
@@ -237,7 +259,7 @@ namespace MarioMaker2OCR.Test
                 foreach (var fn in files)
                 {
                     var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
-                    Assert.IsTrue(t.getLocation(frame).IsEmpty, "World record template matched on the first clear image. Not expected.");
+                    Assert.IsTrue(t.getLocation(frame).IsEmpty, "World record template matched on the first clear screenshot. Not expected.");
                 }
             }
         }
@@ -255,9 +277,7 @@ namespace MarioMaker2OCR.Test
                 foreach (var fn in files)
                 {
                     var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
-                    Assert.IsTrue(t.getLocation(frame).IsEmpty);
-                    var result = t.getLocation(frame);
-                    Assert.IsTrue(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                    Assert.IsTrue(t.getLocation(frame).IsEmpty, "First clear template matched on the World Record screenshot.Not expected.");
                 }
             }
         }
