@@ -25,15 +25,18 @@ namespace MarioMaker2OCR.Test
             new EventTemplate("./templates/480/death_big.png", "death", 0.8),
             new EventTemplate("./templates/480/death_small.png", "death", 0.8),
             new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8)
+            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8),
+            new EventTemplate("./templates/480/skip.png", "skip", 0.8, new Rectangle[] {
+                new Rectangle(new Point(277,240), new Size(87, 71))
+            })
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
         {
-            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.3, new Rectangle[] {
+            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.4, new Rectangle[] {
                 new Rectangle(new Point(400,175), new Size(200, 55)),
             }),
-            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.3, new Rectangle[] {
+            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.5, new Rectangle[] {
                 new Rectangle(new Point(400,175), new Size(200, 55)),
             }),
         };
@@ -211,6 +214,64 @@ namespace MarioMaker2OCR.Test
             foreach (var t in clearTemplates)
             {
                 if (!t.filename.EndsWith("firstclear.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
+                    Assert.IsFalse(t.getLocation(frame).IsEmpty);
+                    var result = t.getLocation(frame);
+                    Assert.IsFalse(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                }
+            }
+        }
+
+        [TestMethod]
+        public void WorldRecordReturnEmptyOnFirstClear()
+        {
+            string[] files = new string[]
+            {
+                "/1080/firstclear.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (t.filename.EndsWith("firstclear.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
+                    Assert.IsTrue(t.getLocation(frame).IsEmpty, "World record template matched on the first clear image. Not expected.");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FirstClearReturnEmptyOnWorldRecord()
+        {
+            string[] files = new string[]
+            {
+                "/1080/worldrecord.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (t.filename.EndsWith("worldrecord.png")) continue;
+                foreach (var fn in files)
+                {
+                    var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
+                    Assert.IsTrue(t.getLocation(frame).IsEmpty);
+                    var result = t.getLocation(frame);
+                    Assert.IsTrue(result.IsEmpty, String.Format("Template {0} did not match {1}", t.filename, fn));
+                }
+            }
+        }
+
+        [TestMethod]
+        public void DetectSkip()
+        {
+            string[] files = new string[]
+            {
+                "/1080/skip.png",
+            };
+            foreach (var t in clearTemplates)
+            {
+                if (!t.filename.EndsWith("skip.png")) continue;
                 foreach (var fn in files)
                 {
                     var frame = new Image<Gray, byte>(frameDir + fn).Resize(640, 480, Emgu.CV.CvEnum.Inter.Cubic);
