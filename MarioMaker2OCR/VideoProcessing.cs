@@ -213,7 +213,7 @@ namespace MarioMaker2OCR
                         {
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(500);
+                            Thread.Sleep(532);
                             cap.Retrieve(currentFrame);
 
                             VideoEventArgs args = new VideoEventArgs();
@@ -427,12 +427,12 @@ namespace MarioMaker2OCR
             else
             {
                 // From testing - more frames in the buffer, the further back you can dig.
-                if (nullFrameIdx == 0)
+                if (nullFrameIdx <= 1)
                     returnImage = buffer[0];
-                else if (nullFrameIdx < 8)
-                    returnImage = buffer[nullFrameIdx - 1];
+                else if (nullFrameIdx < 6)
+                    returnImage = buffer[nullFrameIdx - 2];
                 else
-                    returnImage = buffer[nullFrameIdx - 4];
+                    returnImage = buffer[nullFrameIdx - 5];
             }
 
             return returnImage;

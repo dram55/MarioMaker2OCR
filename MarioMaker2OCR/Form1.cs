@@ -43,7 +43,7 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
                 new Rectangle(new Point(187,195), new Size(270, 100))
             }),
-            new EventTemplate("./templates/480/skip.png", "skip", 0.8, new Rectangle[] {
+            new EventTemplate("./templates/480/skip.png", "skip", 0.6, new Rectangle[] {
                 new Rectangle(new Point(277,240), new Size(87, 71))
             })
         };
@@ -292,7 +292,8 @@ namespace MarioMaker2OCR
                     { "death", false },
                     { "restart", false },
                     { "exit", false },
-                    { "gameover", false }
+                    { "gameover", false },
+                    { "skip", false }
                 };
 
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));

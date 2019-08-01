@@ -45,7 +45,6 @@ namespace MarioMaker2OCR.Objects
 
         public EventTemplate(string fn, string type, double thresh, Rectangle[] ROIs)
         {
-
             template = new Image<Gray, byte>(fn);
             threshold = thresh;
             eventType = type;
