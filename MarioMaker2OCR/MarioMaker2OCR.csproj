@@ -277,6 +277,9 @@
     <Content Include="Test\testdata\frames\480\black.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Test\testdata\frames\480\quit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test\testdata\frames\480\static.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
