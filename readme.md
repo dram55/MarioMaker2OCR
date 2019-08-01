@@ -86,6 +86,9 @@ On exit or quit
 On gameover
 { "type" : "gameover" }
 
+On skip
+{ "type" : "skip" }
+
 On world record
 { "type" : "worldrecord" }
 
