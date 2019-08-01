@@ -54,6 +54,11 @@ h4 {
    transition: transform .3s,-webkit-transform .3s;
 }
 
+/**If only displaying timer & death counter - add some margin**/
+.timer-death-bar > span:not(:first-child) {
+   margin-left:35px;
+}
+
 img.clear-flag {
     transform: scale(1.4);
     animation-name: fade-in-then-pulse;

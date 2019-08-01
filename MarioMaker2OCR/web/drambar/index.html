@@ -14,11 +14,11 @@
 </head>
 <body ng-app="dramBarApp">
    <div ng-controller="dramBarController as ctrl">
-      <div ng-if="ctrl.state.level.code" class="level-card"
+      <div class="level-card"
          ng-class="((ctrl.state.hideCurrentLevel) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection">
-         <h4 ng-if="ctrl.state.level.author" class="user-name">{{ctrl.state.level.author}}</h4>
-         <p class="level-name">{{ctrl.state.level.name}}</p>
-         <code ng-if="ctrl.state.level.code" class="level-code text-uppercase">{{ctrl.state.level.code}}</code>
+         <h4 ng-if="ctrl.state.level.author && ctrl.settings.isLevelAuthorVisible" class="user-name">{{ctrl.state.level.author}}</h4>
+         <p class="level-name" ng-if="ctrl.settings.isLevelNameVisible">{{ctrl.state.level.name}}</p>
+         <code ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" class="level-code text-uppercase">{{ctrl.state.level.code}}</code>
          <div class="timer-death-bar">
             <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" ng-class="ctrl.state.levelCleared ? 'level-cleared' : ''">
                 <img src="/drambar/images/smw_clock.png">
@@ -36,3 +36,6 @@
    </audio>
 </body>
 </html>
+
+
+
