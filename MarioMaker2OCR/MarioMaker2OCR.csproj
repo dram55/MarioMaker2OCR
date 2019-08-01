@@ -265,13 +265,13 @@
     <Content Include="Test\testdata\frames\1080\playbuttonpushed.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Test\testdata\frames\1080\worldrecord.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Test\testdata\frames\1080\startover_clearscreen.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\1080\startover_pause.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Test\testdata\frames\1080\worldrecord.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Test\testdata\frames\480\black.png">

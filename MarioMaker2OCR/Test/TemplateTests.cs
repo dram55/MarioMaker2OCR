@@ -33,12 +33,12 @@ namespace MarioMaker2OCR.Test
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
         {
-            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.4, new Rectangle[] {
-                new Rectangle(new Point(400,175), new Size(200, 55)),
+            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
+                new Rectangle(new Point(450,185), new Size(105, 30)),
             }),
-            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.5, new Rectangle[] {
-                new Rectangle(new Point(400,175), new Size(200, 55)),
-            }),
+            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
+                new Rectangle(new Point(450,185), new Size(105, 30)),
+            })
         };
 
         [TestMethod]
