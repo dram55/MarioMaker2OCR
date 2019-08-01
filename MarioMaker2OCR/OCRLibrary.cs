@@ -101,9 +101,16 @@ namespace MarioMaker2OCR
                 string clearTime = doOCROnCharacterImages(characters, "0123456789");
 
                 // format clear time
-                if (clearTime.Length>=7)
-                    clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
-
+                try
+                {
+                    if (clearTime.Length >= 7)
+                        clearTime = $"{clearTime.Substring(0, 2)}'{clearTime.Substring(2, 2)}\"{clearTime.Substring(4, 3)}";
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    log.Error($"ArgumentOutOfRangeException formatting clear time: {clearTime}");
+                    clearTime = "";
+                }
                 return clearTime;
             }
             else
