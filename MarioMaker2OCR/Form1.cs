@@ -259,23 +259,23 @@ namespace MarioMaker2OCR
             log.Debug("Detected a black screen");
             BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing black screen..."));
 
-            // Is this a new level?
-            Image<Bgr, byte> frame = e.frameBuffer[e.frameBuffer.Length - 5];
-            double imageMatchPercent = ImageLibrary.CompareImages(frame, levelDetailScreen);
-            if(imageMatchPercent > 0.94)
+            double imageMatchPercent = ImageLibrary.CompareImages(e.currentFrame, levelDetailScreen);
+
+            // Is this frame a 93% match to a level screen?
+            if(imageMatchPercent > 0.93)
             {
                 log.Info("Detected new level.");
 
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
 
-                Level level = OCRLibrary.GetLevelFromFrame(frame);
+                Level level = OCRLibrary.GetLevelFromFrame(e.currentFrame);
                 writeLevelToFile(level);
                 SMMServer.BroadcastLevel(level);
 
                 BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
 
-                previewer.SetLastMatch(frame);
+                previewer.SetLastMatch(e.currentFrame);
             }
             else
             {
@@ -291,6 +291,10 @@ namespace MarioMaker2OCR
                 BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
                 foreach (Image<Bgr, byte> f in e.frameBuffer)
                 {
+                    // Skip any empty frames in the buffer
+                    if (f == null)
+                        continue;
+
                     Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
                     //grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
 
@@ -318,8 +322,6 @@ namespace MarioMaker2OCR
                     }
                 }
             }
-
-            frame.Dispose();
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)

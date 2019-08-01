@@ -28,7 +28,7 @@ namespace MarioMaker2OCR
         private bool shouldStop = false; // Flag to tell the processorThread to stop executing
 
         private System.Threading.Timer frameBufferTimer; // Timer used to fill the frame buffer
-        private const int frameBufferLength = 10;        // Adjusts the size of the frameBuffer, at 250ms ticks, 10 frames = 5seconds of buffer
+        private const int frameBufferLength = 16;        // Adjusts the size of the frameBuffer, at 250ms ticks, 16 frames = 4 seconds of buffer
         private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength]; // Frame buffer that is passed to events
 
         bool disposed = false; //Flag to indicate the object has been disposed
@@ -226,6 +226,7 @@ namespace MarioMaker2OCR
                             WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
                             VideoEventArgs args = new VideoEventArgs();
                             args.frameBuffer = copyFrameBuffer();
+                            args.currentFrame = getLevelScreenImageFromBuffer(args.frameBuffer);
                             onBlackScreen(args);
                         }
                         else if (isClearFrame(hues))
@@ -363,12 +364,12 @@ namespace MarioMaker2OCR
 
 
         /// <summary>
-        /// Event that firces off whenever a black screen is detected
+        /// Event that fires off whenever a black screen is detected
         /// </summary>
         public event EventHandler<VideoEventArgs> BlackScreen;
         protected virtual void onBlackScreen(VideoEventArgs e)
         {
-            if (frameBuffer[frameBuffer.Length - 1] == null) return;
+            if (frameBuffer[0] == null) return;
             BlackScreen?.Invoke(this, e);
             for (int i = 0; i < frameBuffer.Length; i++)
             {
@@ -383,7 +384,7 @@ namespace MarioMaker2OCR
         public event EventHandler<VideoEventArgs> ClearScreen;
         protected virtual void onClearScreen(VideoEventArgs e)
         {
-            if (frameBuffer[frameBuffer.Length - 1] == null) return;
+            if (frameBuffer[0] == null) return;
             ClearScreen?.Invoke(this, e);
             for (int i = 0; i < frameBuffer.Length; i++)
             {
@@ -405,6 +406,36 @@ namespace MarioMaker2OCR
         {
             public Image<Bgr, byte>[] frameBuffer;
             public Image<Bgr, byte> currentFrame;
+        }
+
+        /// <summary>
+        /// Inspects passed in buffer and returns the best guess of level screen.
+        /// 
+        /// On a full buffer this is 5 frames in. But you must also account that the buffer
+        /// may not be full.
+        /// </summary>
+        /// <returns></returns>
+        private Image<Bgr, byte> getLevelScreenImageFromBuffer(Image<Bgr, byte>[] buffer)
+        {
+            Image<Bgr, byte> returnImage = null;
+
+            int nullFrameIdx = Array.IndexOf(buffer, null);
+
+            // buffer is full
+            if (nullFrameIdx == -1)
+                returnImage = buffer[buffer.Length - 5];
+            else
+            {
+                // From testing - more frames in the buffer, the further back you can dig.
+                if (nullFrameIdx == 0)
+                    returnImage = buffer[0];
+                else if (nullFrameIdx < 8)
+                    returnImage = buffer[nullFrameIdx - 1];
+                else
+                    returnImage = buffer[nullFrameIdx - 4];
+            }
+
+            return returnImage;
         }
     }
 }
