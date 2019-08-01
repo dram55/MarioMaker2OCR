@@ -31,7 +31,10 @@ namespace MarioMaker2OCR
                 new Rectangle(new Point(410,325), new Size(215, 60)), //Clear Screen
             }),
             new EventTemplate("./templates/480/quit.png", "exit", 0.9, new Rectangle[] {
-                new Rectangle(new Point(408,338), new Size(224, 70))
+                new Rectangle(new Point(408,338), new Size(224, 70)) //Pause Menu
+            }),
+            new EventTemplate("./templates/480/quit_full.png", "exit", 0.8, new Rectangle[] {
+                new Rectangle(new Point(195,325), new Size(215, 60)), //Clear Screen
             }),
             new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
                 new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu

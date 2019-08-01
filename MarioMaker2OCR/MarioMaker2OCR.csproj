@@ -193,6 +193,9 @@
     <Content Include="templates\480\quit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="templates\480\quit_full.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="templates\480\skip.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
