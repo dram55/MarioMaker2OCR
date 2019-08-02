@@ -42,7 +42,6 @@ var SMMBarModel = function() {
     clear: ko.observable(),
   }
 
-
   //Computed value for UI use
   this.isPlaying = ko.pureComputed(function() {
     return this.level.name() !== undefined
@@ -79,6 +78,8 @@ var SMMBarModel = function() {
   //called every second to update the timer
   this.timer_tick = function() {
     if(self.timestamps.level() === undefined) return;
+    if(this.state.cleared() !== undefined) return;
+
     var elapsed = Math.floor((new Date().getTime() - self.timestamps.level().getTime())/1000)
     this.state.timer(elapsed);
     if(settings.timer.playWarning && elapsed == settings.timer.playWarningAtMinute*60) {
@@ -96,6 +97,10 @@ var SMMBarModel = function() {
     }
     eventObj.type = event.type;
     if(event.type == 'level') {
+       // Skip level event if currently in the same level.
+       if (event.level.code === this.level.code() && this.isPlaying()) {
+          return;
+       }
       eventObj.data = event.level;
     }
     this.events.unshift(eventObj);
@@ -139,7 +144,9 @@ var SMMBarModel = function() {
       case 'exit':
         this.clearState();
         break;
-
+      case 'gameover':
+         this.clearState();
+         break;
     }
   }
 }
@@ -178,14 +185,12 @@ connectToWSS(function(event) {
   }
 })
 
-
 var app = new SMMBarModel();
 $(function() {
   app.clearState();
   ko.applyBindings(app);
 })
 setInterval(function() { app.timer_tick(); }, 1000)
-
 
 //Useful for testing
 function newLevel(name, code, author) {
