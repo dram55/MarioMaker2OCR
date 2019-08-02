@@ -3,7 +3,8 @@ solution: MarioMaker2OCR.sln
 
 script:
   - export VERSION_NUMBER="1.0.$TRAVIS_BUILD_NUMBER"
-  - msbuild /p:Configuration=Release MarioMaker2OCR.sln /p:VersionAssembly=$VERSION_NUMBER
+  - python setVersion.py $VERSION_NUMBER
+  - msbuild /p:Configuration=Release MarioMaker2OCR.sln
 
 before_deploy:
   - |
