@@ -56,6 +56,7 @@
             this.numPort = new System.Windows.Forms.NumericUpDown();
             this.resolutionsCombobox = new System.Windows.Forms.ComboBox();
             this.lblResolution = new System.Windows.Forms.Label();
+            this.langNeutralcheckBox = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -129,7 +130,7 @@
             // 
             this.ocrTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ocrTextBox.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrTextBox.Location = new System.Drawing.Point(10, 162);
+            this.ocrTextBox.Location = new System.Drawing.Point(10, 194);
             this.ocrTextBox.Name = "ocrTextBox";
             this.ocrTextBox.ReadOnly = true;
             this.ocrTextBox.Size = new System.Drawing.Size(393, 29);
@@ -140,7 +141,7 @@
             this.ocrLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ocrLabel.AutoSize = true;
             this.ocrLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrLabel.Location = new System.Drawing.Point(17, 141);
+            this.ocrLabel.Location = new System.Drawing.Point(17, 173);
             this.ocrLabel.Name = "ocrLabel";
             this.ocrLabel.Size = new System.Drawing.Size(38, 20);
             this.ocrLabel.TabIndex = 10;
@@ -169,7 +170,7 @@
             // startButton
             // 
             this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.startButton.Location = new System.Drawing.Point(113, 214);
+            this.startButton.Location = new System.Drawing.Point(113, 246);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(75, 23);
             this.startButton.TabIndex = 13;
@@ -181,7 +182,7 @@
             // 
             this.stopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(212, 214);
+            this.stopButton.Location = new System.Drawing.Point(212, 246);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(75, 23);
             this.stopButton.TabIndex = 14;
@@ -208,7 +209,7 @@
             this.webServerAddressStatusLabel,
             this.toolStripStatusLabel1,
             this.processingLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 248);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 280);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.ShowItemToolTips = true;
             this.statusStrip1.Size = new System.Drawing.Size(415, 22);
@@ -316,11 +317,23 @@
             this.lblResolution.TabIndex = 24;
             this.lblResolution.Text = "Resolution";
             // 
+            // langNeutralcheckBox
+            // 
+            this.langNeutralcheckBox.AutoSize = true;
+            this.langNeutralcheckBox.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.langNeutralcheckBox.Location = new System.Drawing.Point(89, 140);
+            this.langNeutralcheckBox.Name = "langNeutralcheckBox";
+            this.langNeutralcheckBox.Size = new System.Drawing.Size(304, 24);
+            this.langNeutralcheckBox.TabIndex = 26;
+            this.langNeutralcheckBox.Text = "Detect multiple languages (experimental)";
+            this.langNeutralcheckBox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(415, 270);
+            this.ClientSize = new System.Drawing.Size(415, 302);
+            this.Controls.Add(this.langNeutralcheckBox);
             this.Controls.Add(this.resolutionsCombobox);
             this.Controls.Add(this.lblResolution);
             this.Controls.Add(this.numPort);
@@ -377,6 +390,7 @@
         private System.Windows.Forms.Label lblResolution;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem jSONFileLocationToolStripMenuItem;
+        private System.Windows.Forms.CheckBox langNeutralcheckBox;
     }
 }
 

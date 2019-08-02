@@ -25,7 +25,9 @@ namespace MarioMaker2OCR
         private Mat levelDetailScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
-        private readonly EventTemplate[] templates = new EventTemplate[] {
+        private List<EventTemplate> templates = new List<EventTemplate>();
+
+        private EventTemplate[] engTemplates = new EventTemplate[] {
             new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
                 new Rectangle(new Point(400,330), new Size(230, 65)), //Pause Menu
                 new Rectangle(new Point(410,325), new Size(215, 60)), //Clear Screen
@@ -49,6 +51,18 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/skip.png", "skip", 0.6, new Rectangle[] {
                 new Rectangle(new Point(277,240), new Size(87, 71))
             })
+        };
+
+        private EventTemplate[] langNeutralTemplates = new EventTemplate[]
+        {
+            new EventTemplate("./templates/480/lang_neutral/startover.png", "restart", 0.8, new Rectangle[] {
+                new Rectangle(new Point(397,269), new Size(243, 71)), // Pause Menu
+                //new Rectangle(new Point(195,325), new Size(230, 60)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
+            }),
+            // This works for Quit (endless) and Exit (other modes)
+            new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.9, new Rectangle[] {
+                new Rectangle(new Point(537,331), new Size(103, 71)) //Pause Menu
+            }),
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
@@ -89,6 +103,7 @@ namespace MarioMaker2OCR
             new ToolTip().SetToolTip(deviceLabel, "Available capture devices.");
             new ToolTip().SetToolTip(propertiesButton, "Properties for the selected capture device.");
             new ToolTip().SetToolTip(numPortLabel, "Port to run the Web Server on (used for OBS Browser Source)");
+            new ToolTip().SetToolTip(langNeutralcheckBox, "Scan gamefeed for generic button presses in addition to button text.\r\nExperimental feature, may trigger false events.\r\nAlso does not yet support all events.");
         }
 
         private void loadVideoDevices()
@@ -150,6 +165,15 @@ namespace MarioMaker2OCR
             }
             try
             {
+                templates.Clear();
+                templates.AddRange(engTemplates);
+
+                // Add language neutral templates if selected.
+                if (langNeutralcheckBox.Checked)
+                {
+                    templates.AddRange(langNeutralTemplates);
+                }
+
                 // resize reference image based on current resolution
                 levelDetailScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
 
@@ -195,6 +219,7 @@ namespace MarioMaker2OCR
 
         private void lockForm()
         {
+            langNeutralcheckBox.Enabled = false;
             deviceComboBox.Enabled = false;
             resolutionsCombobox.Enabled = false;
             startButton.Enabled = false;
@@ -210,6 +235,7 @@ namespace MarioMaker2OCR
 
         private void unlockForm()
         {
+            langNeutralcheckBox.Enabled = true;
             processStatusIcon.BackColor = Color.Red;
             deviceComboBox.Enabled = true;
             resolutionsCombobox.Enabled = true;
