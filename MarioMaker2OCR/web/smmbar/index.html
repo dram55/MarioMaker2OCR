@@ -16,7 +16,8 @@
 	    font-family: "Press Start 2P";
 	    height: 30px;
 	    background-color: rgb(249, 255, 50);
-	    align-content: center;
+       align-content: center;
+       overflow: hidden;
 	 }
   	.flex-container {
   		display:flex;
@@ -87,7 +88,7 @@
 		<div class="deaths"><span data-bind="html: settings.messages.label_deaths"></span><span data-bind="text: state.deaths"></span></div>
 		<div class="levelcode"><span data-bind="html: settings.messages.label_levelcode"></span><span data-bind='text: level.code'></span></div>
 	</div>
-	<div class="container flex-container" data-bind='fadeHidden: isPlaying, text: settings.messages.no_level_active'>Test</div>
+	<!--<div class="container flex-container" data-bind='fadeHidden: isPlaying, text: settings.messages.no_level_active'>Test</div>-->
 </div>
 <audio id="timerAudio">
   <source src="timer.mp3" type="audio/mpeg">
