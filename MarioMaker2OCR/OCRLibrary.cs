@@ -142,7 +142,7 @@ namespace MarioMaker2OCR
         private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
         {
             Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            ocrReadyImage = cropLineOfText(ocrReadyImage, new Size(30, 3));
+            ocrReadyImage = cropLineOfText(ocrReadyImage, new Size(33, 3));
             List<Mat> characters = segmentCharacters(ocrReadyImage);
 
             // 11 characters expected in a level code (XXX-XXX-XXX)
