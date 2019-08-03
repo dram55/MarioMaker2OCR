@@ -213,7 +213,7 @@ namespace MarioMaker2OCR
                         {
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(532);
+                            Thread.Sleep(560);
                             cap.Retrieve(currentFrame);
 
                             VideoEventArgs args = new VideoEventArgs();
