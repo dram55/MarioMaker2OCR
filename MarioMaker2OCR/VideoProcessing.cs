@@ -192,6 +192,7 @@ namespace MarioMaker2OCR
                     bool WasClear = false;
                     bool WaitForClearStats = false;
                     int skip = frameSize.Width / 50;
+                    DateTime blackStart = DateTime.Now;
 
                     while (true)
                     {
@@ -202,6 +203,10 @@ namespace MarioMaker2OCR
                         if (WasBlack)
                         {
                             WasBlack = isBlackFrame(hues);
+                            if(!WasBlack)
+                            {
+                                log.Debug(String.Format("Black Screen Length: {0}", DateTime.Now.Subtract(blackStart).TotalMilliseconds / 1000));
+                            }
                         }
                         else if (WasClear)
                         {
@@ -224,6 +229,7 @@ namespace MarioMaker2OCR
                         {
                             WasBlack = true;
                             WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
+                            blackStart = DateTime.Now;
                             VideoEventArgs args = new VideoEventArgs();
                             args.frameBuffer = copyFrameBuffer();
                             args.currentFrame = getLevelScreenImageFromBuffer(args.frameBuffer);
