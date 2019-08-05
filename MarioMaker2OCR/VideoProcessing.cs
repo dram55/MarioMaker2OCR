@@ -205,7 +205,11 @@ namespace MarioMaker2OCR
                             WasBlack = isBlackFrame(hues);
                             if(!WasBlack)
                             {
-                                log.Debug(String.Format("Black Screen Length: {0}", DateTime.Now.Subtract(blackStart).TotalMilliseconds / 1000));
+                                BlackScreenEventArgs args = new BlackScreenEventArgs();
+                                args.frameBuffer = copyFrameBuffer();
+                                args.currentFrame = getLevelScreenImageFromBuffer(args.frameBuffer);
+                                args.seconds = DateTime.Now.Subtract(blackStart).TotalMilliseconds/1000;
+                                onBlackScreen(args);
                             }
                         }
                         else if (WasClear)
@@ -230,10 +234,6 @@ namespace MarioMaker2OCR
                             WasBlack = true;
                             WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
                             blackStart = DateTime.Now;
-                            VideoEventArgs args = new VideoEventArgs();
-                            args.frameBuffer = copyFrameBuffer();
-                            args.currentFrame = getLevelScreenImageFromBuffer(args.frameBuffer);
-                            onBlackScreen(args);
                         }
                         else if (isClearFrame(hues))
                         {
@@ -372,8 +372,8 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Event that fires off whenever a black screen is detected
         /// </summary>
-        public event EventHandler<VideoEventArgs> BlackScreen;
-        protected virtual void onBlackScreen(VideoEventArgs e)
+        public event EventHandler<BlackScreenEventArgs> BlackScreen;
+        protected virtual void onBlackScreen(BlackScreenEventArgs e)
         {
             if (frameBuffer[0] == null) return;
             BlackScreen?.Invoke(this, e);
@@ -412,6 +412,11 @@ namespace MarioMaker2OCR
         {
             public Image<Bgr, byte>[] frameBuffer;
             public Image<Bgr, byte> currentFrame;
+        }
+
+        public class BlackScreenEventArgs: VideoEventArgs
+        {
+            public double seconds;
         }
 
         /// <summary>
