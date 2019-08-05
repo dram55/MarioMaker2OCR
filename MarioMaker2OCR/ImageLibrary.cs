@@ -18,6 +18,8 @@ namespace MarioMaker2OCR
         /// </summary>
         public static Image<Gray, byte> PrepareImageForOCR(Image<Bgr, byte> image)
         {
+            double gammaAdjustment = 2.5d;
+            double threshold = 56;
             double scale;
             if (image.Data.GetLength(0) >= 1080) scale = 1.5d;
             else if (image.Data.GetLength(0) >= 720) scale = 2.4d;
@@ -26,6 +28,11 @@ namespace MarioMaker2OCR
             // Stretch low resolution 4:3 images for better OCR results
             if (image.Data.GetLength(0) <= 480)
             {
+                // These values work for levels with "TT" but break many other levels bc too skinny
+                //gammaAdjustment = 2.74d;
+                //threshold = 49;
+                gammaAdjustment = 3.2d;
+                threshold = 46;
                 if ((decimal)image.Data.GetLength(0) / image.Data.GetLength(1) >= .75M)
                 {
                     int newWidth = (int)Math.Floor(image.Width * 1.333);
@@ -37,8 +44,8 @@ namespace MarioMaker2OCR
             Image<Gray, byte> grayScaleImage = image.Convert<Gray, byte>();
 
             grayScaleImage = grayScaleImage.Resize(scale, Inter.Cubic);
-            grayScaleImage._GammaCorrect(3.5d);
-            grayScaleImage._ThresholdBinary(new Gray(45), new Gray(255));
+            grayScaleImage._GammaCorrect(gammaAdjustment);
+            grayScaleImage._ThresholdBinary(new Gray(threshold), new Gray(255));
 
             // grayScaleImage.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging
             return grayScaleImage;
