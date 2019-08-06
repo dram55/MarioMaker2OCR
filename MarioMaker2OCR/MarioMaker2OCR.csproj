@@ -196,6 +196,9 @@
     <Content Include="templates\480\lang_neutral\quit.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="templates\480\skip.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="templates\480\lang_neutral\startover.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -203,9 +206,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="templates\480\quit_full.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="templates\480\skip.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="templates\480\startover.png">

@@ -48,8 +48,8 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
                 new Rectangle(new Point(187,195), new Size(270, 100))
             }),
-            new EventTemplate("./templates/480/skip.png", "skip", 0.6, new Rectangle[] {
-                new Rectangle(new Point(277,240), new Size(87, 71))
+            new EventTemplate("./templates/480/skip.png", "skip", 0.85, new Rectangle[] {
+                new Rectangle(new Point(308,200), new Size(25, 37))
             })
         };
 
@@ -66,7 +66,7 @@ namespace MarioMaker2OCR
             // This is Next (endless) or Exit (other modes)
             new EventTemplate("./templates/480/lang_neutral/exit_next.png", "exit", 0.9, new Rectangle[] {
                 new Rectangle(new Point(598,323), new Size(30, 60)) // Clear Screen
-            }),
+            })
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
@@ -301,8 +301,8 @@ namespace MarioMaker2OCR
 
             double imageMatchPercent = ImageLibrary.CompareImages(e.currentFrame, levelDetailScreen);
 
-            // Is this frame a 93% match to a level screen?
-            if(imageMatchPercent > 0.93)
+            // Is this frame a 90% match to a level screen?
+            if(imageMatchPercent > 0.90)
             {
                 log.Info(String.Format("Detected new level. [{0}]", e.seconds));
 
