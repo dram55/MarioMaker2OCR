@@ -63,6 +63,10 @@ namespace MarioMaker2OCR
             new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.9, new Rectangle[] {
                 new Rectangle(new Point(537,331), new Size(103, 71)) //Pause Menu
             }),
+            // This is Next (endless) or Exit (other modes)
+            new EventTemplate("./templates/480/lang_neutral/exit_next.png", "exit", 0.9, new Rectangle[] {
+                new Rectangle(new Point(598,323), new Size(30, 60)) // Clear Screen
+            }),
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]

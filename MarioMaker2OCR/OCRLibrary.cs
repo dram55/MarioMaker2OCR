@@ -115,7 +115,7 @@ namespace MarioMaker2OCR
             }
             else
             {
-                log.Debug($"segmentChacters for time - {characters.Count} characters detected, expected 9, falling back to original OCR method");
+                log.Debug($"segmentChacters for time - {characters.Count} characters detected, expected 10, falling back to original OCR method");
                 return doOCROnImage(ocrReadyImage);
             }
         }
