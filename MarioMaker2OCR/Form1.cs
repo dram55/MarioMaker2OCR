@@ -95,6 +95,7 @@ namespace MarioMaker2OCR
 
             jsonOutputFolder = Properties.Settings.Default.OutputFolder;
             numPort.Value = Properties.Settings.Default.SelectedPort;
+            langNeutralcheckBox.Checked = Properties.Settings.Default.DetectMultipleLanguages;
 
             initializeToolTips();
             loadVideoDevices();
@@ -398,6 +399,7 @@ namespace MarioMaker2OCR
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name;
             Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
             Properties.Settings.Default.SelectedResolutionIndex = resolutionsCombobox.SelectedIndex;
+            Properties.Settings.Default.DetectMultipleLanguages = langNeutralcheckBox.Checked;
             Properties.Settings.Default.Save();
         }
 
@@ -443,6 +445,12 @@ namespace MarioMaker2OCR
         private void deviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.SelectedDevice = (deviceComboBox.SelectedItem as dynamic)?.Name ?? "";
+            Properties.Settings.Default.Save();
+        }
+
+        private void langNeutralcheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.DetectMultipleLanguages = langNeutralcheckBox.Checked;
             Properties.Settings.Default.Save();
         }
     }

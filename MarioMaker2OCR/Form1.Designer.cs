@@ -327,6 +327,7 @@
             this.langNeutralcheckBox.TabIndex = 26;
             this.langNeutralcheckBox.Text = "Detect multiple languages (experimental)";
             this.langNeutralcheckBox.UseVisualStyleBackColor = true;
+            this.langNeutralcheckBox.CheckedChanged += new System.EventHandler(this.langNeutralcheckBox_CheckedChanged);
             // 
             // Form1
             // 
