@@ -71,7 +71,7 @@ namespace MarioMaker2OCR
                 //new Rectangle(new Point(195,325), new Size(230, 60)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
             }),
             // This works for Quit (endless) and Exit (other modes)
-            new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.9, new Rectangle[] {
+            new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.96, new Rectangle[] {
                 new Rectangle(new Point(537,331), new Size(103, 71)) //Pause Menu
             }),
             // This is Next (endless) or Exit (other modes)
