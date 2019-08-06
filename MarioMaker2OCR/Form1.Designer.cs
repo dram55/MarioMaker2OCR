@@ -57,6 +57,7 @@
             this.resolutionsCombobox = new System.Windows.Forms.ComboBox();
             this.lblResolution = new System.Windows.Forms.Label();
             this.langNeutralcheckBox = new System.Windows.Forms.CheckBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -329,6 +330,10 @@
             this.langNeutralcheckBox.UseVisualStyleBackColor = true;
             this.langNeutralcheckBox.CheckedChanged += new System.EventHandler(this.langNeutralcheckBox_CheckedChanged);
             // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -392,6 +397,7 @@
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem jSONFileLocationToolStripMenuItem;
         private System.Windows.Forms.CheckBox langNeutralcheckBox;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

@@ -82,5 +82,17 @@ namespace MarioMaker2OCR.Properties {
                 this["DetectMultipleLanguages"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0")]
+        public string NewVersionWarning {
+            get {
+                return ((string)(this["NewVersionWarning"]));
+            }
+            set {
+                this["NewVersionWarning"] = value;
+            }
+        }
     }
 }

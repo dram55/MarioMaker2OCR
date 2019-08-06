@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using MarioMaker2OCR.Objects;
 using DirectShowLib;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace MarioMaker2OCR
 {
@@ -24,6 +25,16 @@ namespace MarioMaker2OCR
 
         private Mat levelDetailScreen;
         private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
+
+        // Product version
+        public string CurrentVersion
+        {
+            get
+            {
+                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+                return fileVersionInfo.ProductVersion;
+            }
+        }
 
         private List<EventTemplate> templates = new List<EventTemplate>();
 
@@ -89,7 +100,7 @@ namespace MarioMaker2OCR
 
         public Form1()
         {
-            log.Info($"Start Application - version: {Assembly.GetExecutingAssembly().GetName().Version}");
+            log.Info($"Start Application - version: {CurrentVersion}");
 
             InitializeComponent();
 
@@ -100,6 +111,9 @@ namespace MarioMaker2OCR
             initializeToolTips();
             loadVideoDevices();
             loadResolutions();
+
+            // Check latest version
+            backgroundWorker1.RunWorkerAsync();
         }
 
         private void initializeToolTips()
@@ -452,6 +466,63 @@ namespace MarioMaker2OCR
         {
             Properties.Settings.Default.DetectMultipleLanguages = langNeutralcheckBox.Checked;
             Properties.Settings.Default.Save();
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            checkLatestVersion();
+        }
+
+        /// <summary>
+        /// Check via github API if there is a new version available. If so alert the user, if they have not been alerted yet.
+        /// </summary>
+        private void checkLatestVersion()
+        {
+            try
+            {
+                string githubApi = @"https://api.github.com/repos/dram55/MarioMaker2OCR/releases/latest";
+                string latestReleaseUrl = @"https://github.com/dram55/MarioMaker2OCR/releases";
+
+                // Github requires User-Agent in header
+                System.Net.HttpWebRequest request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(githubApi);
+                request.UserAgent = "MarioMaker2OCR";
+
+                System.Net.WebResponse response = request.GetResponse();
+                using (Stream stream = response.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    string json = reader.ReadToEnd();
+                    dynamic jsonObject = Newtonsoft.Json.Linq.JObject.Parse(json);
+                    string latestVersion = jsonObject.name;
+                    string lastVersionWarned = Properties.Settings.Default.NewVersionWarning;
+
+                    // Are they on the latest version?
+                    if (latestVersion != null && latestVersion != this.CurrentVersion)
+                    {
+                        // Have they already been warned about this version? Only notify 1x per version
+                        if (lastVersionWarned != latestVersion)
+                        {
+                            Properties.Settings.Default.NewVersionWarning = latestVersion;
+                            Properties.Settings.Default.Save();
+
+                            string releaseNotes = jsonObject.body?.ToString().Replace("<br>","\r\n - ");
+                            string message = $"New version {latestVersion} is available! Do you want to download now?\r\n\r\n";
+                            if (releaseNotes != null)
+                                message += $"Includes Changes:\r\n - {releaseNotes}";
+
+                            DialogResult result = MessageBox.Show(message, "New Version Available",MessageBoxButtons.OKCancel,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2);
+                            if (result == DialogResult.OK)
+                            {
+                                Process.Start(latestReleaseUrl);
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                log.Error(e.Message);
+            }
         }
     }
 }
