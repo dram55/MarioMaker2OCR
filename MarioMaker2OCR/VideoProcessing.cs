@@ -31,7 +31,9 @@ namespace MarioMaker2OCR
         private const int frameBufferLength = 16;        // Adjusts the size of the frameBuffer, at 250ms ticks, 16 frames = 4 seconds of buffer
         private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength]; // Frame buffer that is passed to events
 
-        bool disposed = false; //Flag to indicate the object has been disposed
+        bool disposed = false; // Flag to indicate the object has been disposed
+
+        bool WasBlack = false; // Flag to indicate the video feed is on a black screen
 
         /// <summary>
         /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
@@ -102,6 +104,7 @@ namespace MarioMaker2OCR
             try
             {
                 if (cap == null) return;
+                if (WasBlack) return;
 
                 Image<Bgr, byte> frame = new Image<Bgr, byte>(frameSize);
                 cap.Retrieve(frame);
@@ -188,7 +191,7 @@ namespace MarioMaker2OCR
                     GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     Mat currentFrame = new Mat(frameSize, DepthType.Cv8U, 3, dataHandle.AddrOfPinnedObject(), frameSize.Width * 3);
 
-                    bool WasBlack = false;
+                    WasBlack = false;
                     bool WasClear = false;
                     bool WaitForClearStats = false;
                     int skip = frameSize.Width / 50;
@@ -441,7 +444,7 @@ namespace MarioMaker2OCR
                 if (nullFrameIdx <= 1)
                     returnImage = buffer[0];
                 else if (nullFrameIdx < 6)
-                    returnImage = buffer[nullFrameIdx - 2];
+                    returnImage = buffer[nullFrameIdx - 1];
                 else
                     returnImage = buffer[nullFrameIdx - 5];
             }
