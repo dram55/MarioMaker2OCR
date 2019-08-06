@@ -11,7 +11,7 @@
       isLevelAuthorVisible:true,
       isLevelCodeVisible:true,
 
-      
+
 
       // How do they look?
       slideFromDirection:'left', //left|right|top|bottom
@@ -21,6 +21,7 @@
       levelAuthorColor: '#f5f5f5',
       timerFontColor: '#f5f5f5',
       deathCountFontColor: '#f5f5f5',
+      timerColorOnClear: '#10ff00',
 
       fontSize: '100%',
       mainFont: 'Segoe UI',

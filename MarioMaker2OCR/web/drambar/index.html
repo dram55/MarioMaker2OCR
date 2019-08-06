@@ -25,8 +25,8 @@
          <code ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" 
          class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor, 'font-family':ctrl.settings.levelCodeFont}">{{ctrl.state.level.code}}</code>
          <div class="timer-death-bar">
-            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" ng-class="ctrl.state.levelCleared ? 'level-cleared' : ''"
-               ng-style="{'color':ctrl.settings.timerFontColor}">
+            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" 
+               ng-style="{'color':(ctrl.state.levelCleared) ? ctrl.settings.timerColorOnClear : ctrl.settings.timerFontColor}">
                 <img src="/drambar/images/smw_clock.png">
                 {{ctrl.state.levelTimer}}
                 <img class="clear-flag" ng-if="ctrl.state.levelCleared" src="/drambar/images/clear_flag.png">

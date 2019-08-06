@@ -73,10 +73,6 @@ img.clear-flag {
     100% {transform: scale(1.4);}
 }
 
-.level-cleared {
-   color:#10ff00;
-}
-
 .death-count img.pulse {
    -webkit-transform: scale(1.2);
    -ms-transform: scale(1.2);
