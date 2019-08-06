@@ -11,14 +11,24 @@
       isLevelAuthorVisible:true,
       isLevelCodeVisible:true,
 
+      
 
       // How do they look?
       slideFromDirection:'left', //left|right|top|bottom
+
       levelCodeColor: '#ff49ad',
       levelNameColor: '#f5f5f5',
       levelAuthorColor: '#f5f5f5',
+      timerFontColor: '#f5f5f5',
+      deathCountFontColor: '#f5f5f5',
+
       fontSize: '100%',
-      
+      mainFont: 'Segoe UI',
+      levelCodeFont: 'Consolas',
+
+      backgroundColor: 'rgba(0, 0, 0, 0.77)',
+
+
 
       //Other options
       playTimerWarning:false,

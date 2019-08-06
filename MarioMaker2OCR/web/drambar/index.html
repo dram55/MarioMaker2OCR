@@ -16,20 +16,22 @@
    <div ng-controller="dramBarController as ctrl">
       <div class="level-card"
          ng-class="((ctrl.state.hideCurrentLevel) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection" 
-         ng-style="{'font-size':ctrl.settings.fontSize}">
+         ng-style="{'font-size':ctrl.settings.fontSize, 'font-family':ctrl.settings.mainFont, 
+         'background-color':ctrl.settings.backgroundColor}">
          <h4 ng-if="ctrl.state.level.author && ctrl.settings.isLevelAuthorVisible" 
          ng-style="{color:ctrl.settings.levelAuthorColor}" class="user-name">{{ctrl.state.level.author}}</h4>
          <p class="level-name" ng-if="ctrl.settings.isLevelNameVisible" 
             ng-style="{color:ctrl.settings.levelNameColor}">{{ctrl.state.level.name}}</p>
          <code ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" 
-         class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor}">{{ctrl.state.level.code}}</code>
+         class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor, 'font-family':ctrl.settings.levelCodeFont}">{{ctrl.state.level.code}}</code>
          <div class="timer-death-bar">
-            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" ng-class="ctrl.state.levelCleared ? 'level-cleared' : ''">
+            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" ng-class="ctrl.state.levelCleared ? 'level-cleared' : ''"
+               ng-style="{'color':ctrl.settings.timerFontColor}">
                 <img src="/drambar/images/smw_clock.png">
                 {{ctrl.state.levelTimer}}
                 <img class="clear-flag" ng-if="ctrl.state.levelCleared" src="/drambar/images/clear_flag.png">
             </span>
-            <span ng-if="ctrl.settings.isDeathCountVisible" class="death-count">
+            <span ng-if="ctrl.settings.isDeathCountVisible" class="death-count" ng-style="{'color':ctrl.settings.deathCountFontColor}">
                <img src="/drambar/images/mario_dead.png" ng-class="ctrl.state.deathInProgress ? 'pulse' : ''">{{ctrl.state.deathCount}}
             </span>
          </div>
