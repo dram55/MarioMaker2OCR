@@ -58,6 +58,7 @@ This directory is where the web server will be hosted, any web apps created here
 ![](screenshots/web.jpg)
 
 ### Websocket Message API
+Once the program is started, the following websocket messages will be broadcast when detected. By default the address for this is `ws://localhost:3000/wss`
 ``` JSON
 On new level
 {
