@@ -147,9 +147,9 @@ namespace MarioMaker2OCR
             resolutionsCombobox.DisplayMember = "Name";
             resolutionsCombobox.ValueMember = "Value";
 
-            resolutionsCombobox.Items.Add(new { Name = "640x480", Value = new Size(640, 480) });
+            resolutionsCombobox.Items.Add(new { Name = "640x480 (low accuracy / low CPU)", Value = new Size(640, 480) });
             resolutionsCombobox.Items.Add(new { Name = "1280x720", Value = new Size(1280, 720) });
-            resolutionsCombobox.Items.Add(new { Name = "1920x1080", Value = new Size(1920, 1080) });
+            resolutionsCombobox.Items.Add(new { Name = "1920x1080 (high accuracy / high CPU)", Value = new Size(1920, 1080) });
 
             resolutionsCombobox.SelectedIndex = Properties.Settings.Default.SelectedResolutionIndex;
         }
