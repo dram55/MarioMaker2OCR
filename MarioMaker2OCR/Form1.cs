@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
+
 namespace MarioMaker2OCR
 {
     public partial class Form1 : Form
@@ -240,6 +241,8 @@ namespace MarioMaker2OCR
                 processor = null;
             }
             BeginInvoke(new MethodInvoker(() => unlockForm()));
+            if (JsonSettings.ClearOnStop)
+                clearJsonFile();
         }
 
         private void lockForm()
@@ -388,10 +391,17 @@ namespace MarioMaker2OCR
                         SMMServer.BroadcastEvent(evt.Key);
 
                         // Even though this will get sent on exiting after a clear, it only matters if a entry is active, and after marking it as a win it goes inactive.
-                        if(evt.Key == "exit" && Properties.Settings.Default.WarpWorldEnabled)
+                        if(evt.Key == "exit")
                         {
-                            WarpWorld?.lose();
+                            if (Properties.Settings.Default.WarpWorldEnabled)
+                                WarpWorld?.lose();
+                            if (JsonSettings.ClearOnExit)
+                                clearJsonFile();
                         }
+                        if (evt.Key == "skip" && JsonSettings.ClearOnSkip)
+                            clearJsonFile();
+                        if (evt.Key == "gameover" && JsonSettings.ClearOnGameover)
+                            clearJsonFile();
                     }
                 }
             }
@@ -562,8 +572,20 @@ namespace MarioMaker2OCR
 
         private void clearFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            clearJsonFile();
+        }
+
+        private void clearJsonFile()
+        {
             Level emptyLevel = new Level();
             writeLevelToFile(emptyLevel);
+        }
+
+        private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            FormJsonSettings jsonSettings = new FormJsonSettings();
+            jsonSettings.ShowDialog();
+            jsonSettings.BringToFront();
         }
     }
 }

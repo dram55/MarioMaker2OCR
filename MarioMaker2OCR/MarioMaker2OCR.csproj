@@ -104,7 +104,13 @@
     </Compile>
     <Compile Include="FormAbout.Designer.cs">
       <DependentUpon>FormAbout.cs</DependentUpon>
-	</Compile>
+    </Compile>
+    <Compile Include="FormJsonSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormJsonSettings.Designer.cs">
+      <DependentUpon>FormJsonSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormWarpWorld.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -112,6 +118,7 @@
       <DependentUpon>FormWarpWorld.cs</DependentUpon>
     </Compile>
     <Compile Include="Objects\ClearEventWrapper.cs" />
+    <Compile Include="Objects\JsonSettings.cs" />
     <Compile Include="Test\BlackScreenTests.cs" />
     <Compile Include="DirectShowLibrary.cs" />
     <Compile Include="FormPreview.cs">
@@ -146,6 +153,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormAbout.resx">
       <DependentUpon>FormAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormJsonSettings.resx">
+      <DependentUpon>FormJsonSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPreview.resx">
       <DependentUpon>FormPreview.cs</DependentUpon>

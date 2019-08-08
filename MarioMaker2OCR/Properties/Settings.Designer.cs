@@ -12,7 +12,7 @@ namespace MarioMaker2OCR.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -128,6 +128,54 @@ namespace MarioMaker2OCR.Properties {
             }
             set {
                 this["WarpWorldEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool jsonClearOnExit {
+            get {
+                return ((bool)(this["jsonClearOnExit"]));
+            }
+            set {
+                this["jsonClearOnExit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool jsonClearOnSkip {
+            get {
+                return ((bool)(this["jsonClearOnSkip"]));
+            }
+            set {
+                this["jsonClearOnSkip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool jsonClearOnGameover {
+            get {
+                return ((bool)(this["jsonClearOnGameover"]));
+            }
+            set {
+                this["jsonClearOnGameover"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool jsonClearOnStop {
+            get {
+                return ((bool)(this["jsonClearOnStop"]));
+            }
+            set {
+                this["jsonClearOnStop"] = value;
             }
         }
     }

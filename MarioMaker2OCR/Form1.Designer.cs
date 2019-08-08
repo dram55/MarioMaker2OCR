@@ -63,6 +63,8 @@
             this.jsonOutputFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectOutputFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -357,7 +359,9 @@
             // jsonOutputFileToolStripMenuItem
             // 
             this.jsonOutputFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem1,
             this.selectOutputFolderToolStripMenuItem,
+            this.toolStripMenuItem3,
             this.clearFileToolStripMenuItem});
             this.jsonOutputFileToolStripMenuItem.Name = "jsonOutputFileToolStripMenuItem";
             this.jsonOutputFileToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
@@ -376,6 +380,18 @@
             this.clearFileToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.clearFileToolStripMenuItem.Text = "Clear File";
             this.clearFileToolStripMenuItem.Click += new System.EventHandler(this.clearFileToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(179, 6);
+            // 
+            // settingsToolStripMenuItem1
+            // 
+            this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(182, 22);
+            this.settingsToolStripMenuItem1.Text = "Settings...";
+            this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem1_Click);
             // 
             // Form1
             // 
@@ -446,6 +462,8 @@
         private System.Windows.Forms.ToolStripMenuItem jsonOutputFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectOutputFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
     }
 }
 
