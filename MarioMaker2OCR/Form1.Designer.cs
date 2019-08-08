@@ -58,6 +58,7 @@
             this.lblResolution = new System.Windows.Forms.Label();
             this.langNeutralcheckBox = new System.Windows.Forms.CheckBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.warpWorldSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -71,7 +72,8 @@
             this.settingsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(415, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(622, 35);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -83,47 +85,48 @@
             this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(54, 29);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // clearLevelFileToolStripMenuItem
             // 
             this.clearLevelFileToolStripMenuItem.Name = "clearLevelFileToolStripMenuItem";
-            this.clearLevelFileToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.clearLevelFileToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
             this.clearLevelFileToolStripMenuItem.Text = "Clear Level File";
             this.clearLevelFileToolStripMenuItem.Click += new System.EventHandler(this.clearLevelFileToolStripMenuItem_Click_1);
             // 
             // showPreviewWindowToolStripMenuItem
             // 
             this.showPreviewWindowToolStripMenuItem.Name = "showPreviewWindowToolStripMenuItem";
-            this.showPreviewWindowToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.showPreviewWindowToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
             this.showPreviewWindowToolStripMenuItem.Text = "Show Preview Window";
             this.showPreviewWindowToolStripMenuItem.Click += new System.EventHandler(this.showPreviewWindowToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(191, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(291, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(294, 34);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.jSONFileLocationToolStripMenuItem});
+            this.jSONFileLocationToolStripMenuItem,
+            this.warpWorldSettingsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(92, 29);
             this.settingsToolStripMenuItem.Text = "Settings";
             // 
             // jSONFileLocationToolStripMenuItem
             // 
             this.jSONFileLocationToolStripMenuItem.Name = "jSONFileLocationToolStripMenuItem";
-            this.jSONFileLocationToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
+            this.jSONFileLocationToolStripMenuItem.Size = new System.Drawing.Size(278, 34);
             this.jSONFileLocationToolStripMenuItem.Text = "JSON File Location...";
             this.jSONFileLocationToolStripMenuItem.Click += new System.EventHandler(this.jSONFileLocationToolStripMenuItem_Click);
             // 
@@ -131,10 +134,11 @@
             // 
             this.ocrTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ocrTextBox.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrTextBox.Location = new System.Drawing.Point(10, 194);
+            this.ocrTextBox.Location = new System.Drawing.Point(15, 298);
+            this.ocrTextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.ocrTextBox.Name = "ocrTextBox";
             this.ocrTextBox.ReadOnly = true;
-            this.ocrTextBox.Size = new System.Drawing.Size(393, 29);
+            this.ocrTextBox.Size = new System.Drawing.Size(588, 39);
             this.ocrTextBox.TabIndex = 5;
             // 
             // ocrLabel
@@ -142,9 +146,10 @@
             this.ocrLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ocrLabel.AutoSize = true;
             this.ocrLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ocrLabel.Location = new System.Drawing.Point(17, 173);
+            this.ocrLabel.Location = new System.Drawing.Point(26, 266);
+            this.ocrLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ocrLabel.Name = "ocrLabel";
-            this.ocrLabel.Size = new System.Drawing.Size(38, 20);
+            this.ocrLabel.Size = new System.Drawing.Size(59, 31);
             this.ocrLabel.TabIndex = 10;
             this.ocrLabel.Text = "OCR";
             // 
@@ -152,9 +157,10 @@
             // 
             this.deviceLabel.AutoSize = true;
             this.deviceLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.deviceLabel.Location = new System.Drawing.Point(29, 34);
+            this.deviceLabel.Location = new System.Drawing.Point(44, 52);
+            this.deviceLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.deviceLabel.Name = "deviceLabel";
-            this.deviceLabel.Size = new System.Drawing.Size(54, 20);
+            this.deviceLabel.Size = new System.Drawing.Size(82, 31);
             this.deviceLabel.TabIndex = 11;
             this.deviceLabel.Text = "Device";
             // 
@@ -162,18 +168,20 @@
             // 
             this.deviceComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.deviceComboBox.FormattingEnabled = true;
-            this.deviceComboBox.Location = new System.Drawing.Point(90, 36);
+            this.deviceComboBox.Location = new System.Drawing.Point(135, 55);
+            this.deviceComboBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.deviceComboBox.Name = "deviceComboBox";
-            this.deviceComboBox.Size = new System.Drawing.Size(241, 21);
+            this.deviceComboBox.Size = new System.Drawing.Size(360, 28);
             this.deviceComboBox.TabIndex = 12;
             this.deviceComboBox.SelectedIndexChanged += new System.EventHandler(this.deviceComboBox_SelectedIndexChanged);
             // 
             // startButton
             // 
             this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.startButton.Location = new System.Drawing.Point(113, 246);
+            this.startButton.Location = new System.Drawing.Point(170, 378);
+            this.startButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(75, 23);
+            this.startButton.Size = new System.Drawing.Size(112, 35);
             this.startButton.TabIndex = 13;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = true;
@@ -183,9 +191,10 @@
             // 
             this.stopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.stopButton.Enabled = false;
-            this.stopButton.Location = new System.Drawing.Point(212, 246);
+            this.stopButton.Location = new System.Drawing.Point(318, 378);
+            this.stopButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(75, 23);
+            this.stopButton.Size = new System.Drawing.Size(112, 35);
             this.stopButton.TabIndex = 14;
             this.stopButton.Text = "Stop";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -193,9 +202,10 @@
             // 
             // propertiesButton
             // 
-            this.propertiesButton.Location = new System.Drawing.Point(335, 35);
+            this.propertiesButton.Location = new System.Drawing.Point(502, 54);
+            this.propertiesButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.propertiesButton.Name = "propertiesButton";
-            this.propertiesButton.Size = new System.Drawing.Size(67, 23);
+            this.propertiesButton.Size = new System.Drawing.Size(100, 35);
             this.propertiesButton.TabIndex = 15;
             this.propertiesButton.Text = "Properties";
             this.propertiesButton.UseVisualStyleBackColor = true;
@@ -210,10 +220,11 @@
             this.webServerAddressStatusLabel,
             this.toolStripStatusLabel1,
             this.processingLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 280);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 443);
             this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
             this.statusStrip1.ShowItemToolTips = true;
-            this.statusStrip1.Size = new System.Drawing.Size(415, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(622, 22);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 20;
             this.statusStrip1.Text = "statusStrip1";
@@ -244,7 +255,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(374, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(573, 15);
             this.toolStripStatusLabel1.Spring = true;
             this.toolStripStatusLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -253,7 +264,7 @@
             this.processingLabel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.processingLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.processingLabel.Name = "processingLabel";
-            this.processingLabel.Size = new System.Drawing.Size(113, 17);
+            this.processingLabel.Size = new System.Drawing.Size(166, 28);
             this.processingLabel.Text = "Processing Level...";
             this.processingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.processingLabel.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
@@ -268,16 +279,16 @@
             // 
             this.numPortLabel.AutoSize = true;
             this.numPortLabel.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numPortLabel.Location = new System.Drawing.Point(47, 103);
+            this.numPortLabel.Location = new System.Drawing.Point(70, 158);
+            this.numPortLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.numPortLabel.Name = "numPortLabel";
-            this.numPortLabel.Size = new System.Drawing.Size(35, 20);
+            this.numPortLabel.Size = new System.Drawing.Size(55, 31);
             this.numPortLabel.TabIndex = 22;
             this.numPortLabel.Text = "Port";
             // 
             // numPort
             // 
-            this.numPort.Location = new System.Drawing.Point(89, 103);
-            this.numPort.Margin = new System.Windows.Forms.Padding(2);
+            this.numPort.Location = new System.Drawing.Point(134, 158);
             this.numPort.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -289,7 +300,7 @@
             0,
             0});
             this.numPort.Name = "numPort";
-            this.numPort.Size = new System.Drawing.Size(84, 20);
+            this.numPort.Size = new System.Drawing.Size(126, 26);
             this.numPort.TabIndex = 23;
             this.numPort.Value = new decimal(new int[] {
             1025,
@@ -302,9 +313,10 @@
             // 
             this.resolutionsCombobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.resolutionsCombobox.FormattingEnabled = true;
-            this.resolutionsCombobox.Location = new System.Drawing.Point(89, 69);
+            this.resolutionsCombobox.Location = new System.Drawing.Point(134, 106);
+            this.resolutionsCombobox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.resolutionsCombobox.Name = "resolutionsCombobox";
-            this.resolutionsCombobox.Size = new System.Drawing.Size(241, 21);
+            this.resolutionsCombobox.Size = new System.Drawing.Size(360, 28);
             this.resolutionsCombobox.TabIndex = 25;
             this.resolutionsCombobox.SelectedIndexChanged += new System.EventHandler(this.resolutionsCombobox_SelectedIndexChanged);
             // 
@@ -312,9 +324,10 @@
             // 
             this.lblResolution.AutoSize = true;
             this.lblResolution.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblResolution.Location = new System.Drawing.Point(3, 69);
+            this.lblResolution.Location = new System.Drawing.Point(4, 106);
+            this.lblResolution.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblResolution.Name = "lblResolution";
-            this.lblResolution.Size = new System.Drawing.Size(79, 20);
+            this.lblResolution.Size = new System.Drawing.Size(121, 31);
             this.lblResolution.TabIndex = 24;
             this.lblResolution.Text = "Resolution";
             // 
@@ -322,9 +335,10 @@
             // 
             this.langNeutralcheckBox.AutoSize = true;
             this.langNeutralcheckBox.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.langNeutralcheckBox.Location = new System.Drawing.Point(89, 140);
+            this.langNeutralcheckBox.Location = new System.Drawing.Point(134, 215);
+            this.langNeutralcheckBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.langNeutralcheckBox.Name = "langNeutralcheckBox";
-            this.langNeutralcheckBox.Size = new System.Drawing.Size(304, 24);
+            this.langNeutralcheckBox.Size = new System.Drawing.Size(464, 35);
             this.langNeutralcheckBox.TabIndex = 26;
             this.langNeutralcheckBox.Text = "Detect multiple languages (experimental)";
             this.langNeutralcheckBox.UseVisualStyleBackColor = true;
@@ -334,11 +348,18 @@
             // 
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             // 
+            // warpWorldSettingsToolStripMenuItem
+            // 
+            this.warpWorldSettingsToolStripMenuItem.Name = "warpWorldSettingsToolStripMenuItem";
+            this.warpWorldSettingsToolStripMenuItem.Size = new System.Drawing.Size(278, 34);
+            this.warpWorldSettingsToolStripMenuItem.Text = "Warp World Settings";
+            this.warpWorldSettingsToolStripMenuItem.Click += new System.EventHandler(this.WarpWorldSettingsToolStripMenuItem_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(415, 302);
+            this.ClientSize = new System.Drawing.Size(622, 465);
             this.Controls.Add(this.langNeutralcheckBox);
             this.Controls.Add(this.resolutionsCombobox);
             this.Controls.Add(this.lblResolution);
@@ -356,6 +377,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Mario Maker 2 OCR";
@@ -398,6 +420,7 @@
         private System.Windows.Forms.ToolStripMenuItem jSONFileLocationToolStripMenuItem;
         private System.Windows.Forms.CheckBox langNeutralcheckBox;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.ToolStripMenuItem warpWorldSettingsToolStripMenuItem;
     }
 }
 

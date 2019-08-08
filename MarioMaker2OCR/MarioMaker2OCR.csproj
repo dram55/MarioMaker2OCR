@@ -99,6 +99,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormWarpWorld.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormWarpWorld.Designer.cs">
+      <DependentUpon>FormWarpWorld.cs</DependentUpon>
+    </Compile>
     <Compile Include="Objects\ClearEventWrapper.cs" />
     <Compile Include="Test\BlackScreenTests.cs" />
     <Compile Include="DirectShowLibrary.cs" />
@@ -126,12 +132,17 @@
     <Compile Include="Test\ClearScreenTests.cs" />
     <Compile Include="Test\LevelScreenTests.cs" />
     <Compile Include="Test\TemplateTests.cs" />
+    <Compile Include="Test\WarpWorldAPITests.cs" />
     <Compile Include="VideoProcessing.cs" />
+    <Compile Include="WarpWorldAPI.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPreview.resx">
       <DependentUpon>FormPreview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormWarpWorld.resx">
+      <DependentUpon>FormWarpWorld.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
