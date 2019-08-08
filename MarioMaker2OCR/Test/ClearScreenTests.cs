@@ -99,7 +99,7 @@ namespace MarioMaker2OCR.Test
 
                 using (var testFrame = new Image<Bgr, byte>(file))
                 {
-                    string ocrClearTime = OCRLibrary.GetClearTimeFromFrame(testFrame);
+                    string ocrClearTime = OCRLibrary.GetClearTimeFromFrame(testFrame, false);
                     if (expectedTime != ocrClearTime)
                     {
                         ocrErrors += $"\r\nClear time OCR: ({ocrClearTime}) does not match expected: ({expectedTime})";

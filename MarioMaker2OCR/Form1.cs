@@ -48,7 +48,7 @@ namespace MarioMaker2OCR
                 new Rectangle(new Point(408,338), new Size(224, 70)) //Pause Menu
             }),
             new EventTemplate("./templates/480/quit_full.png", "exit", 0.8, new Rectangle[] {
-                new Rectangle(new Point(195,325), new Size(215, 60)), //Clear Screen
+                new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
             }),
             new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
                 new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
@@ -69,7 +69,7 @@ namespace MarioMaker2OCR
         {
             new EventTemplate("./templates/480/lang_neutral/startover.png", "restart", 0.8, new Rectangle[] {
                 new Rectangle(new Point(397,269), new Size(243, 71)), // Pause Menu
-                //new Rectangle(new Point(195,325), new Size(230, 60)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
+                //new Rectangle(new Point(195,225), new Size(230, 160)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
             }),
             // This works for Quit (endless) and Exit (other modes)
             new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.96, new Rectangle[] {
@@ -77,17 +77,18 @@ namespace MarioMaker2OCR
             }),
             // This is Next (endless) or Exit (other modes)
             new EventTemplate("./templates/480/lang_neutral/exit_next.png", "exit", 0.9, new Rectangle[] {
-                new Rectangle(new Point(598,323), new Size(30, 60)) // Clear Screen
+                new Rectangle(new Point(598,323), new Size(30, 60)), // Clear Screen
+                new Rectangle(new Point(598,223), new Size(30, 60))  // Clear Screen (w/ comments)
             })
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
         {
             new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
-                new Rectangle(new Point(450,185), new Size(105, 30)),
+                new Rectangle(new Point(445,85), new Size(115, 130)),
             }),
             new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
-                new Rectangle(new Point(450,185), new Size(105, 30)),
+                new Rectangle(new Point(445,85), new Size(115, 130)),
             })
         };
 
@@ -279,7 +280,7 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Event callback for the Clear Screen event generatead by the VideoProcessor
         /// </summary>
-        private void VideoProcessor_ClearScreen(object sender, VideoProcessor.VideoEventArgs e)
+        private void VideoProcessor_ClearScreen(object sender, VideoProcessor.ClearScreenEventArgs e)
         {
             log.Debug("Detected Level Clear");
 
@@ -319,7 +320,7 @@ namespace MarioMaker2OCR
             }
 
             // Read time from screen
-            string clearTime = OCRLibrary.GetClearTimeFromFrame(e.currentFrame);
+            string clearTime = OCRLibrary.GetClearTimeFromFrame(e.currentFrame, e.commentsEnabled);
             SMMServer.BroadcastDataEvent("clear", clearTime);
         }
         /// <summary>

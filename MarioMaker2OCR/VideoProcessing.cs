@@ -225,11 +225,19 @@ namespace MarioMaker2OCR
                         {
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(560);
+                            Thread.Sleep(593);
                             cap.Retrieve(currentFrame);
 
-                            VideoEventArgs args = new VideoEventArgs();
+                            ClearScreenEventArgs args = new ClearScreenEventArgs();
                             args.currentFrame = currentFrame.Clone().ToImage<Bgr, Byte>();
+
+                            // Check to see if this is the clear screen with comments on - things are positioned differently.
+                            // Top of screen is yellow if comments are on
+                            Size topOfScreen = new Size(frameSize.Width, frameSize.Height / 6);
+                            Dictionary<int, int> topHues = getHues(data, topOfScreen, skip);
+                            if (isMostlyYellow(topHues))
+                                args.commentsEnabled = true;
+
                             onClearScreen(args);
                         }
                         else if (isBlackFrame(hues))
@@ -371,6 +379,13 @@ namespace MarioMaker2OCR
             return Math.Abs(50 - primary) < 10 && (hues[primary] > 70 && hues[primary] < 80);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool isMostlyYellow(Dictionary<int, int> hues)
+        {
+            int primary = getPrimaryColor(hues);
+            return hues[primary] > 88 && Math.Abs(50 - primary) < 10;
+        }
+
 
         /// <summary>
         /// Event that fires off whenever a black screen is detected
@@ -390,8 +405,8 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Event fires off whenever a clear screen is detected
         /// </summary>
-        public event EventHandler<VideoEventArgs> ClearScreen;
-        protected virtual void onClearScreen(VideoEventArgs e)
+        public event EventHandler<ClearScreenEventArgs> ClearScreen;
+        protected virtual void onClearScreen(ClearScreenEventArgs e)
         {
             if (frameBuffer[0] == null) return;
             ClearScreen?.Invoke(this, e);
@@ -420,6 +435,11 @@ namespace MarioMaker2OCR
         public class BlackScreenEventArgs: VideoEventArgs
         {
             public double seconds;
+        }
+
+        public class ClearScreenEventArgs : VideoEventArgs
+        {
+            public bool commentsEnabled;
         }
 
         /// <summary>

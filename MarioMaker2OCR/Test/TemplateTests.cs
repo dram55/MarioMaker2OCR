@@ -21,7 +21,7 @@ namespace MarioMaker2OCR.Test
                 new Rectangle(new Point(408,338), new Size(224, 70)) //Pause Menu
             }),
             new EventTemplate("./templates/480/quit_full.png", "exit", 0.8, new Rectangle[] {
-                new Rectangle(new Point(195,325), new Size(215, 60)), //Clear Screen
+                new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
             }),
             new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
                 new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
@@ -33,18 +33,18 @@ namespace MarioMaker2OCR.Test
             new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
                 new Rectangle(new Point(187,195), new Size(270, 100))
             }),
-            new EventTemplate("./templates/480/skip.png", "skip", 0.6, new Rectangle[] {
-                new Rectangle(new Point(277,240), new Size(87, 71))
+            new EventTemplate("./templates/480/skip.png", "skip", 0.85, new Rectangle[] {
+                new Rectangle(new Point(308,200), new Size(25, 37))
             })
         };
 
         private readonly EventTemplate[] clearTemplates = new EventTemplate[]
         {
             new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
-                new Rectangle(new Point(450,185), new Size(105, 30)),
+                new Rectangle(new Point(445,85), new Size(115, 130)),
             }),
             new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
-                new Rectangle(new Point(450,185), new Size(105, 30)),
+                new Rectangle(new Point(445,85), new Size(115, 130)),
             })
         };
 

@@ -26,7 +26,10 @@ namespace MarioMaker2OCR
 
         // Clear Time Boundry
         private static Rectangle clearTimeBoundry;
-        private static Rectangle clearTimeBoundry720 = new Rectangle(602, 357, 176, 37); // based on 1280x720
+        private static Rectangle[] clearTimeBoundry720 = {
+            new Rectangle(602, 357, 176, 37), // no comments
+            new Rectangle(602, 226, 176, 37), // with comments
+        }; // based on 1280x720
 
         private static Size resolution720 = new Size(1280, 720);
 
@@ -70,11 +73,17 @@ namespace MarioMaker2OCR
             return null;
         }
 
-        internal static string GetClearTimeFromFrame(Image<Bgr, byte> frame)
+        /// <summary>
+        /// Read clear time from frame
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="commentsEnabled">If true, then use a different screen region to scan for time</param>
+        /// <returns></returns>
+        internal static string GetClearTimeFromFrame(Image<Bgr, byte> frame, bool commentsEnabled)
         {
             // Update boundry sizes relative to the current resolution
-            if (frame.Size.Height != clearTimeBoundry.Height)
-                clearTimeBoundry = ImageLibrary.ChangeSize(clearTimeBoundry720, resolution720, frame.Size);
+            int idx = commentsEnabled ? 1 : 0;
+            clearTimeBoundry = ImageLibrary.ChangeSize(clearTimeBoundry720[idx], resolution720, frame.Size);
 
             // Set ROI
             frame.ROI = clearTimeBoundry;
