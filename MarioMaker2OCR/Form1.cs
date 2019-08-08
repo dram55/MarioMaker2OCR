@@ -13,6 +13,7 @@ using MarioMaker2OCR.Objects;
 using DirectShowLib;
 using System.Reflection;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace MarioMaker2OCR
 {
@@ -528,8 +529,10 @@ namespace MarioMaker2OCR
 
                             string releaseNotes = jsonObject.body?.ToString().Replace("<br>","\r\n - ");
                             string message = $"New version {latestVersion} is available! Do you want to download now?\r\n\r\n";
+
+                            // Add release notes and remove commitId, if exists
                             if (releaseNotes != null)
-                                message += $"Includes Changes:\r\n - {releaseNotes}";
+                                message += $"Includes Changes:\r\n - {Regex.Replace(releaseNotes, @"\(\w{7}\)", "")}";
 
                             DialogResult result = MessageBox.Show(message, "New Version Available",MessageBoxButtons.OKCancel,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2);
                             if (result == DialogResult.OK)
