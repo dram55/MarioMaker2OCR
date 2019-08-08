@@ -64,6 +64,7 @@ namespace MarioMaker2OCR.Test
         }
 
         [TestMethod]
+        [Ignore("Test Not Implemented.")]
         public void DetectLevelScreen()
         {
             Assert.Inconclusive("Test Not Implemented.");

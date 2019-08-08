@@ -94,6 +94,8 @@ namespace MarioMaker2OCR
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
 
         private FormPreview previewer = new FormPreview();
+        private FormWarpWorld warpworldForm = new FormWarpWorld();
+        private WarpWorldAPI WarpWorld;
         private VideoProcessor processor;
 
         private string jsonOutputFolder = "";
@@ -200,6 +202,14 @@ namespace MarioMaker2OCR
                 log.Info(string.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
                 SMMServer.Start();
 
+                if (Properties.Settings.Default.WarpWorldEnabled)
+                {
+                    WarpWorld = new WarpWorldAPI(Properties.Settings.Default.WarpWorldUsername, Properties.Settings.Default.WarpWorldToken);
+                } else
+                {
+                    WarpWorld = null;
+                }
+
                 processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
                 processor.BlackScreen += VideoProcessor_BlackScreen;
                 processor.ClearScreen += VideoProcessor_ClearScreen;
@@ -302,6 +312,11 @@ namespace MarioMaker2OCR
                 }
             }
 
+            if (Properties.Settings.Default.WarpWorldEnabled)
+            {
+                WarpWorld?.win();
+            }
+
             // Read time from screen
             string clearTime = OCRLibrary.GetClearTimeFromFrame(e.currentFrame);
             SMMServer.BroadcastDataEvent("clear", clearTime);
@@ -375,6 +390,12 @@ namespace MarioMaker2OCR
                     {
                         log.Info(String.Format("Detected {0} [{1}].", evt.Key, e.seconds));
                         SMMServer.BroadcastEvent(evt.Key);
+
+                        // Even though this will get sent on exiting after a clear, it only matters if a entry is active, and after marking it as a win it goes inactive.
+                        if(evt.Key == "exit" && Properties.Settings.Default.WarpWorldEnabled)
+                        {
+                            WarpWorld?.lose();
+                        }
                     }
                 }
             }
@@ -529,6 +550,16 @@ namespace MarioMaker2OCR
         {
             FormAbout about = new FormAbout(CurrentVersion);
             about.ShowDialog();
+		}
+
+        private void WarpWorldSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (warpworldForm.IsDisposed)
+            {
+                warpworldForm = new FormWarpWorld();
+            }
+            warpworldForm.Show();
+            warpworldForm.BringToFront();
         }
     }
 }

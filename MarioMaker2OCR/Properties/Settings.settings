@@ -20,5 +20,14 @@
     <Setting Name="NewVersionWarning" Type="System.String" Scope="User">
       <Value Profile="(Default)">0.0.0</Value>
     </Setting>
+    <Setting Name="WarpWorldUsername" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="WarpWorldToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="WarpWorldEnabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
