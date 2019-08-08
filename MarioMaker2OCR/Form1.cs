@@ -242,12 +242,6 @@ namespace MarioMaker2OCR
             BeginInvoke(new MethodInvoker(() => unlockForm()));
         }
 
-        private void clearLevelFileToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            Level emptyLevel = new Level();
-            writeLevelToFile(emptyLevel);
-        }
-
         private void lockForm()
         {
             langNeutralcheckBox.Enabled = false;
@@ -455,18 +449,6 @@ namespace MarioMaker2OCR
             System.Diagnostics.Process.Start($"http://localhost:{numPort.Value}");
         }
 
-        private void jSONFileLocationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog dialog = new FolderBrowserDialog();
-            dialog.Description = "Select a location to save the JSON output file.";
-
-            DialogResult result = dialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                jsonOutputFolder = dialog.SelectedPath;
-            }
-        }
-
         private void numPort_ValueChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.SelectedPort = Decimal.ToInt32(numPort.Value);
@@ -564,6 +546,24 @@ namespace MarioMaker2OCR
             }
             warpworldForm.Show();
             warpworldForm.BringToFront();
+        }
+
+        private void selectOutputFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "Select a location to save the JSON output file.";
+
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                jsonOutputFolder = dialog.SelectedPath;
+            }
+        }
+
+        private void clearFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Level emptyLevel = new Level();
+            writeLevelToFile(emptyLevel);
         }
     }
 }
