@@ -33,12 +33,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearLevelFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showPreviewWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.jSONFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ocrTextBox = new System.Windows.Forms.TextBox();
             this.ocrLabel = new System.Windows.Forms.Label();
             this.deviceLabel = new System.Windows.Forms.Label();
@@ -58,6 +55,8 @@
             this.lblResolution = new System.Windows.Forms.Label();
             this.langNeutralcheckBox = new System.Windows.Forms.CheckBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -68,7 +67,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.settingsToolStripMenuItem});
+            this.toolStripMenuItem2});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(415, 24);
@@ -78,20 +77,12 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearLevelFileToolStripMenuItem,
             this.showPreviewWindowToolStripMenuItem,
             this.toolStripMenuItem1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
-            // 
-            // clearLevelFileToolStripMenuItem
-            // 
-            this.clearLevelFileToolStripMenuItem.Name = "clearLevelFileToolStripMenuItem";
-            this.clearLevelFileToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.clearLevelFileToolStripMenuItem.Text = "Clear Level File";
-            this.clearLevelFileToolStripMenuItem.Click += new System.EventHandler(this.clearLevelFileToolStripMenuItem_Click_1);
             // 
             // showPreviewWindowToolStripMenuItem
             // 
@@ -111,21 +102,6 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.jSONFileLocationToolStripMenuItem});
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.settingsToolStripMenuItem.Text = "Settings";
-            // 
-            // jSONFileLocationToolStripMenuItem
-            // 
-            this.jSONFileLocationToolStripMenuItem.Name = "jSONFileLocationToolStripMenuItem";
-            this.jSONFileLocationToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.jSONFileLocationToolStripMenuItem.Text = "JSON File Location...";
-            this.jSONFileLocationToolStripMenuItem.Click += new System.EventHandler(this.jSONFileLocationToolStripMenuItem_Click);
             // 
             // ocrTextBox
             // 
@@ -334,6 +310,21 @@
             // 
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(44, 20);
+            this.toolStripMenuItem2.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -377,7 +368,6 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.TextBox ocrTextBox;
         private System.Windows.Forms.Label ocrLabel;
-        private System.Windows.Forms.ToolStripMenuItem clearLevelFileToolStripMenuItem;
         private System.Windows.Forms.Label deviceLabel;
         private System.Windows.Forms.ComboBox deviceComboBox;
         private System.Windows.Forms.Button startButton;
@@ -394,10 +384,10 @@
         private System.Windows.Forms.ToolStripStatusLabel webServerAddressStatusLabel;
         private System.Windows.Forms.ComboBox resolutionsCombobox;
         private System.Windows.Forms.Label lblResolution;
-        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem jSONFileLocationToolStripMenuItem;
         private System.Windows.Forms.CheckBox langNeutralcheckBox;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
 
