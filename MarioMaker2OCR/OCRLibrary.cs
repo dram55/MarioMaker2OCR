@@ -151,28 +151,80 @@ namespace MarioMaker2OCR
         private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
         {
             Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            ocrReadyImage = cropLineOfText(ocrReadyImage, new Size(37, 3));
-            List<Mat> characters = segmentCharacters(ocrReadyImage);
+            Image<Gray, byte> croppedImage = cropLineOfText(ocrReadyImage, new Size(37, 3));
+            List<Mat> characters = segmentCharacters(croppedImage);
 
-            // 11 characters expected in a level code (XXX-XXX-XXX)
-            if (characters.Count == 11)
+            try
             {
-                // Remove the dashes
-                characters.RemoveAt(7);
-                characters.RemoveAt(3);
+                // 11 characters expected in a level code (XXX-XXX-XXX)
+                if (characters.Count == 11)
+                {
+                    // Remove the dashes
+                    characters.RemoveAt(7);
+                    characters.RemoveAt(3);
 
-                string levelCode = doOCROnCharacterImages(characters, "0123456789ABCDEFGHJKLMNPQRSTUVWXY");
+                    string levelCode = doOCROnCharacterImages(characters, "0123456789ABCDEFGHJKLMNPQRSTUVWXY");
 
-                // format code
-                levelCode = $"{levelCode.Substring(0, 3)}-{levelCode.Substring(3, 3)}-{levelCode.Substring(6, 3)}";
+                    // format code
+                    levelCode = $"{levelCode.Substring(0, 3)}-{levelCode.Substring(3, 3)}-{levelCode.Substring(6, 3)}";
 
-                return levelCode;
+                    return levelCode;
+                }
+                else
+                {
+                    // before falling back to line based OCR, take one more shot at saving this code with segmenting characters.
+                    // This is an extremely crude method which will split character images in half if they are much wider than
+                    // median char width. This is needed for adjacent "TT" characters in a level code.
+                    if (characters.Count < 11 && characters.Count > 7)
+                    {
+                        log.Debug($"getStringFromLevelCodeImage - level code - detected {characters.Count} characters, manually splitting larger characters");
+
+                        // Remove dashes - can identify by height
+                        int maxCharHeight = characters.Max(p => p.Height);
+                        int minimumHeight = (int)Math.Floor(maxCharHeight * .60);
+                        characters.RemoveAll(p => p.Height < minimumHeight);
+
+                        double medianCharacterWidth = characters.OrderBy(p => p.Width).Skip(characters.Count / 2).Take(1).FirstOrDefault().Width;
+
+                        for (int i = 0; i < characters.Count; i++)
+                        {
+                            var character = characters[i];
+
+                            double perc = medianCharacterWidth / character.Width;
+
+                            // Current letter is significantly larger than median width
+                            if (perc < .65)
+                            {
+                                Rectangle leftRect = new Rectangle(0, 0, character.Width / 2, character.Height);
+                                Rectangle rightRect = new Rectangle(character.Width / 2, 0, character.Width / 2, character.Height);
+
+                                // Left character
+                                Mat leftCharacter = new Mat(character, leftRect);
+                                // Right character
+                                characters[i] = new Mat(character, rightRect);
+
+                                // Insert left character into array
+                                characters.Insert(i, leftCharacter);
+                            }
+
+                            // If there are 9 characters then we are done
+                            if (characters.Count == 9) break;
+                        }
+
+                        string levelCode = doOCROnCharacterImages(characters, "0123456789ABCDEFGHJKLMNPQRSTUVWXY");
+                        levelCode = $"{levelCode.Substring(0, 3)}-{levelCode.Substring(3, 3)}-{levelCode.Substring(6, 3)}";
+                        return levelCode;
+                    }
+
+                    // fallback to original OCR if segmentation has unexpected number of characters
+                    log.Debug($"segmentChacters - level code - detected {characters.Count} characters, falling back to original OCR method");
+                    return doOCROnLevelCodeImage(ocrReadyImage);
+                }
             }
-            else
+            finally
             {
-                // fallback to original OCR if segmentation has unexpected number of characters
-                log.Debug($"segmentChacters - level code - detected {characters.Count} characters, falling back to original OCR method");
-                return doOCROnLevelCodeImage(ocrReadyImage);
+                ocrReadyImage.Dispose();
+                croppedImage.Dispose();
             }
         }
 
@@ -217,7 +269,7 @@ namespace MarioMaker2OCR
             using (Tesseract r = new Tesseract(tesseractLibrary, "eng", OcrEngineMode.TesseractLstmCombined))
             {
                 r.SetVariable("tessedit_char_whitelist", "-0123456789ABCDEFGHJKLMNPQRSTUVWXY"); // only works for OcrEngineMode.TesseractOnly
-                r.PageSegMode = PageSegMode.SingleWord;
+                r.PageSegMode = PageSegMode.SingleLine;
                 r.SetImage(image);
                 r.Recognize();
                 string originalLevelCode = r.GetUTF8Text().Trim();
