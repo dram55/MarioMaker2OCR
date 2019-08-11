@@ -17,23 +17,16 @@ namespace MarioMaker2OCR
     class VideoProcessor : IDisposable
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public bool disposed = false; // Flag to indicate the object has been disposed
+        public const int NO_DEVICE = -1; // Constant indicating that no video device was used
 
         private VideoCapture cap;        // EmguCV VideoCapture device object
         private int deviceId;            // Device id of the video capture device
-        private Size resolution;         // Resolution information to capture with
-
-        private Thread processorThread;  // The thread performing the main video processing
-
         private Size frameSize;          // Contains the Size() object for the frame, needed for frameBuffer_tick to create the iamge
-        private bool shouldStop = false; // Flag to tell the processorThread to stop executing
-
+        private Thread processorThread;  // The thread performing the main video processing
         private System.Threading.Timer frameBufferTimer; // Timer used to fill the frame buffer
-        private const int frameBufferLength = 16;        // Adjusts the size of the frameBuffer, at 250ms ticks, 16 frames = 4 seconds of buffer
-        private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[frameBufferLength]; // Frame buffer that is passed to events
-
-        bool disposed = false; // Flag to indicate the object has been disposed
-
-        bool WasBlack = false; // Flag to indicate the video feed is on a black screen
+        private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[16]; // Frame buffer that is passed to events
+        private (bool IsBlack, bool IsClear, bool ShouldStop) flags = (false, false, false); // Contains flags indicating the current status of the video processor
 
         /// <summary>
         /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
@@ -51,7 +44,6 @@ namespace MarioMaker2OCR
         protected virtual void Dispose(bool disposing)
         {
             if (disposed) return;
-
             if (disposing)
             {
                 if(frameBufferTimer != null) frameBufferTimer.Dispose();
@@ -60,23 +52,42 @@ namespace MarioMaker2OCR
             disposed = true;
         }
 
+        public VideoProcessor(VideoCapture video)
+        {
+            this.deviceId = NO_DEVICE;
+            this.cap = video;
+            this.frameSize = getCaptureInfo(video).resolution;
+        }
+
         public VideoProcessor(int device, Size resolution)
         {
             this.deviceId = device;
-            this.resolution = resolution;
+            this.cap = createCaptureDevice(device, resolution);
+            this.frameSize = getCaptureInfo(this.cap).resolution;
         }
         /// <summary>
         /// Starts the main video processing loop
         /// </summary>
-        public void Start()
+        public void Start(bool blocking=false)
         {
-            resetState();
-            shouldStop = false;
+            clearFrameBuffer();
+            flags.ShouldStop = false;
+
             processorThread = new Thread(new ThreadStart(processingLoop));
             processorThread.Start();
 
-            frameBufferTimer = new System.Threading.Timer(frameBuffer_tick);
-            frameBufferTimer.Change(0, 250);
+
+            // No device means this isn't a real-time capture, so the loop will call _tick
+            if(deviceId != NO_DEVICE)
+            {
+                frameBufferTimer = new System.Threading.Timer(frameBuffer_tick);
+                frameBufferTimer.Change(0, 250);
+            }
+
+            if(blocking)
+            {
+                processorThread.Join();
+            }
         }
 
         /// <summary>
@@ -88,7 +99,7 @@ namespace MarioMaker2OCR
             frameBufferTimer = null;
             if(processorThread != null)
             {
-                shouldStop = true;
+                flags.ShouldStop = true;
                 while(processorThread.IsAlive)
                 {
                     Thread.Sleep(500);
@@ -99,12 +110,12 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Grabs a frame for the frame buffer every tick.
         /// </summary>
-        public void frameBuffer_tick(object sender)
+        public void frameBuffer_tick(object sender=null)
         {
             try
             {
                 if (cap == null) return;
-                if (WasBlack) return;
+                if (flags.IsBlack) return;
 
                 Image<Bgr, byte> frame = new Image<Bgr, byte>(frameSize);
                 cap.Retrieve(frame);
@@ -131,16 +142,13 @@ namespace MarioMaker2OCR
         /// <summary>
         /// Clears the existing framebuffer and disposes the current capture device
         /// </summary>
-        private void resetState()
+        private void clearFrameBuffer()
         {
             for (int i = 0; i < frameBuffer.Length; i++)
             {
                 frameBuffer[i]?.Dispose();
                 frameBuffer[i] = null;
             }
-            cap?.Dispose();
-            cap = null;
-
         }
 
         /// <summary>
@@ -148,65 +156,87 @@ namespace MarioMaker2OCR
         /// </summary>
         /// <param name="device"></param>
         /// <param name="captureResolution"></param>
-        private void initializeCaptureDevice(int device, Size captureResolution)
+        private VideoCapture createCaptureDevice(int device, Size captureResolution)
         {
-            resetState();
             // Since we are only targeting Windows users, forcing DShow should be a safe choice, this is required for SplitCam to be readable
-            cap = new VideoCapture(device, VideoCapture.API.DShow);
-            cap.SetCaptureProperty(CapProp.FrameHeight, captureResolution.Height);
-            cap.SetCaptureProperty(CapProp.FrameWidth, captureResolution.Width);
+            var newcap = new VideoCapture(device, VideoCapture.API.DShow);
+            newcap.SetCaptureProperty(CapProp.FrameHeight, captureResolution.Height);
+            newcap.SetCaptureProperty(CapProp.FrameWidth, captureResolution.Width);
 
-            //Capture a first frame to get the basic information so we can initalize the frameSize field
+            var info = getCaptureInfo(newcap);
+            if(info.channels != 3)
+            {
+                throw new Exception(String.Format("Unexcepted channel count: {0}", info.channels));
+            }
+
+            return newcap;
+        }
+
+        /// <summary>
+        /// Gets some basic information about the video capture
+        /// </summary>
+        /// <param name="video"></param>
+        /// <returns>The resolution as Size() and an int reflecting the number of channels</returns>
+        private (Size resolution, int channels) getCaptureInfo(VideoCapture video)
+        {
             Mat tmp = new Mat();
-            cap.Retrieve(tmp);
+            video.Retrieve(tmp);
 
             if (tmp.Bitmap == null)
             {
                 throw new Exception("Failed to get image from video device");
             }
 
-            frameSize = new Size(tmp.Width, tmp.Height);
-
-            int channels = tmp.NumberOfChannels;
-            log.Debug(String.Format("Found resolution: {0}x{1} with {2} channels.", tmp.Width, tmp.Height, tmp.NumberOfChannels));
-            if (channels != 3)
-            {
-                throw new Exception(String.Format("Unexcepted channel count: {0}", tmp.NumberOfChannels));
-            }
+            return (new Size(tmp.Width, tmp.Height), tmp.NumberOfChannels);
         }
 
+
+
+
         /// <summary>
-        /// Main video processing loop
+        /// Main video processing loop on the video capture device which should already be initalized
         /// </summary>
         public void processingLoop()
         {
-            while(true)
+            // Create a Mat that uses our preallocated data block so it can be used without a conversion to Image<>
+            // Allocated before the loops so we don't leak memory every time the capture devices crashes
+            byte[] data = new byte[frameSize.Width * frameSize.Height * 3];
+            GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            Mat currentFrame = new Mat(frameSize, DepthType.Cv8U, 3, dataHandle.AddrOfPinnedObject(), frameSize.Width * 3);
+
+            int skip = frameSize.Width / 50;
+            DateTime blackStart = DateTime.Now;
+
+            while (true)
             {
                 try
                 {
-                    initializeCaptureDevice(deviceId, resolution);
+                    if(cap == null && deviceId != NO_DEVICE)
+                    {
+                        this.cap = createCaptureDevice(deviceId, frameSize);
+                    }
 
-                    //Initalize the currentFrame mat with a byte[] pointer so we can access its data directly without a conversion to Image<>
-                    byte[] data = new byte[frameSize.Width * frameSize.Height * 3];
-                    GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-                    Mat currentFrame = new Mat(frameSize, DepthType.Cv8U, 3, dataHandle.AddrOfPinnedObject(), frameSize.Width * 3);
-
-                    WasBlack = false;
-                    bool WasClear = false;
+                    flags.IsBlack = false;
+                    flags.IsClear = false;
                     bool WaitForClearStats = false;
-                    int skip = frameSize.Width / 50;
-                    DateTime blackStart = DateTime.Now;
 
                     while (true)
                     {
-                        if (shouldStop) return;
                         cap.Retrieve(currentFrame);
+                        if(deviceId == NO_DEVICE)
+                        {
+                            double fps = cap.GetCaptureProperty(CapProp.Fps);
+                            double i = cap.GetCaptureProperty(CapProp.PosFrames);
+                            cap.SetCaptureProperty(CapProp.PosFrames, i + 1);
+                            if (i == cap.GetCaptureProperty(CapProp.FrameCount)-1) return;
+                            if (i % (int)Math.Floor(fps / 4) == 0) frameBuffer_tick();
+                        }
                         Dictionary<int, int> hues = getHues(data, frameSize, skip);
 
-                        if (WasBlack)
+                        if (flags.IsBlack)
                         {
-                            WasBlack = isBlackFrame(hues);
-                            if(!WasBlack)
+                            flags.IsBlack = isBlackFrame(hues);
+                            if(!flags.IsBlack)
                             {
                                 BlackScreenEventArgs args = new BlackScreenEventArgs();
                                 args.frameBuffer = copyFrameBuffer();
@@ -215,14 +245,15 @@ namespace MarioMaker2OCR
                                 onBlackScreen(args);
                             }
                         }
-                        else if (WasClear)
+                        else if (flags.IsClear)
                         {
 
-                            WasClear = isClearFrame(hues);
-                            if (!WasClear) WaitForClearStats = true;
+                            flags.IsClear = isClearFrame(hues);
+                            if (!flags.IsClear) WaitForClearStats = true;
                         }
                         else if (WaitForClearStats && isClearWithStatsScreen(hues))
                         {
+                            log.Info("Have clear screen");
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
                             Thread.Sleep(593);
@@ -238,22 +269,25 @@ namespace MarioMaker2OCR
                             if (isMostlyYellow(topHues))
                                 args.commentsEnabled = true;
 
+
                             onClearScreen(args);
                         }
                         else if (isBlackFrame(hues))
                         {
-                            WasBlack = true;
+                            flags.IsBlack = true;
                             WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
                             blackStart = DateTime.Now;
                         }
                         else if (isClearFrame(hues))
                         {
-                            WasClear = true;
+                            flags.IsClear = true;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
+                    cap?.Dispose();
+                    cap = null;
                     log.Debug("Exception in main procesisng loop");
                     log.Error(ex);
                     Thread.Sleep(5000);
@@ -345,7 +379,7 @@ namespace MarioMaker2OCR
         /// <returns>Returns a new frameBuffer array that won't be updated or disposed.</returns>
         private Image<Bgr, byte>[] copyFrameBuffer()
         {
-            Image<Bgr, byte>[] cloned = new Image<Bgr, byte>[frameBufferLength];
+            Image<Bgr, byte>[] cloned = new Image<Bgr, byte>[frameBuffer.Length];
             for(int i=0;i<frameBuffer.Length; i++)
             {
                 cloned[i] = frameBuffer[i]?.Clone();
