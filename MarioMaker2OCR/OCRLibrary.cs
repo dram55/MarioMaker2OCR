@@ -150,12 +150,14 @@ namespace MarioMaker2OCR
 
         private static string getStringFromLevelCodeImage(Image<Bgr, byte> image)
         {
-            Image<Gray, byte> ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
-            Image<Gray, byte> croppedImage = cropLineOfText(ocrReadyImage, new Size(37, 3));
-            List<Mat> characters = segmentCharacters(croppedImage);
-
+            Image<Gray, byte> ocrReadyImage = null;
+            Image<Gray, byte> croppedImage = null;
             try
             {
+                ocrReadyImage = ImageLibrary.PrepareImageForOCR(image);
+                croppedImage = cropLineOfText(ocrReadyImage, new Size(37, 3));
+                List<Mat> characters = segmentCharacters(croppedImage);
+
                 // 11 characters expected in a level code (XXX-XXX-XXX)
                 if (characters.Count == 11)
                 {
@@ -221,10 +223,15 @@ namespace MarioMaker2OCR
                     return doOCROnLevelCodeImage(ocrReadyImage);
                 }
             }
+            catch (Exception ex)
+            {
+                log.Error("Exception in getStringFromLevelCodeImage - " + ex.Message);
+                return "";
+            }
             finally
             {
-                ocrReadyImage.Dispose();
-                croppedImage.Dispose();
+                ocrReadyImage?.Dispose();
+                croppedImage?.Dispose();
             }
         }
 
