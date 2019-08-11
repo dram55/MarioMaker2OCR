@@ -28,6 +28,8 @@ namespace MarioMaker2OCR
         private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[16]; // Frame buffer that is passed to events
         private (bool IsBlack, bool IsClear, bool ShouldStop) flags = (false, false, false); // Contains flags indicating the current status of the video processor
 
+        private const int FRAME_BUFFER_INTERVAL = 250; // put frame in buffer every 250ms
+
         /// <summary>
         /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         /// </summary>
@@ -81,7 +83,7 @@ namespace MarioMaker2OCR
             if(deviceId != NO_DEVICE)
             {
                 frameBufferTimer = new System.Threading.Timer(frameBuffer_tick);
-                frameBufferTimer.Change(0, 250);
+                frameBufferTimer.Change(0, FRAME_BUFFER_INTERVAL);
             }
 
             if(blocking)
@@ -219,18 +221,22 @@ namespace MarioMaker2OCR
                     flags.IsBlack = false;
                     flags.IsClear = false;
                     bool WaitForClearStats = false;
-
                     while (true)
                     {
-                        cap.Retrieve(currentFrame);
                         if(deviceId == NO_DEVICE)
                         {
+                            cap.Read(currentFrame);
+                            if (currentFrame.IsEmpty) return;
+                            data = currentFrame.GetRawData();
                             double fps = cap.GetCaptureProperty(CapProp.Fps);
                             double i = cap.GetCaptureProperty(CapProp.PosFrames);
-                            cap.SetCaptureProperty(CapProp.PosFrames, i + 1);
-                            if (i == cap.GetCaptureProperty(CapProp.FrameCount)-1) return;
-                            if (i % (int)Math.Floor(fps / 4) == 0) frameBuffer_tick();
+                            if (i % (int)Math.Floor(fps / (1000/FRAME_BUFFER_INTERVAL)) == 0) frameBuffer_tick();
                         }
+                        else
+                        {
+                            cap.Retrieve(currentFrame);
+                        }
+
                         Dictionary<int, int> hues = getHues(data, frameSize, skip);
 
                         if (flags.IsBlack)
