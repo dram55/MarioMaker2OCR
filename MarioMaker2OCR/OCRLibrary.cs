@@ -94,6 +94,8 @@ namespace MarioMaker2OCR
             // Segment characters
             List<Mat> characters = segmentCharacters(ocrReadyImage);
 
+            frame.ROI = Rectangle.Empty;
+
             // expect time to be 9 characters, quote reads as 2 chars (ex: 01'34''789)
             if (characters.Count == 10)
             {

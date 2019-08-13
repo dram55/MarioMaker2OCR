@@ -159,10 +159,6 @@ namespace MarioMaker2OCR
                 processor.ClearScreen += warpWorldCallback;
                 processor.Exit += warpWorldCallback;
 
-
-
-
-
                 processor.Start();
                 lockForm();
             }

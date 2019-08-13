@@ -92,14 +92,14 @@ namespace MarioMaker2OCR
 
             // Start Clear Detail screen templates
             clearDetailTemplates.Add(
-                new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
+                new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.6, new Rectangle[] {
                     new Rectangle(new Point(445,85), new Size(115, 130)),
-                })
+                }, 1.31)
             );
             clearDetailTemplates.Add(
-                new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
+                new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.6, new Rectangle[] {
                     new Rectangle(new Point(445,85), new Size(115, 130)),
-                })
+                }, 1.31)
             );
 
             //Start Templates that run on black screen immediately following a clear
@@ -383,7 +383,7 @@ namespace MarioMaker2OCR
                             log.Info("Detected level clear.");
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(593);
+                            Thread.Sleep(500);
                             cap.Retrieve(currentFrame);
 
                             ClearScreenEventArgs args = new ClearScreenEventArgs();
@@ -395,7 +395,6 @@ namespace MarioMaker2OCR
                             Dictionary<int, int> topHues = getHues(data, topOfScreen, skip);
                             if (isMostlyYellow(topHues)) args.commentsEnabled = true;
                             new Thread(new ParameterizedThreadStart(onClearScreen)).Start(args);
-
                         }
                         else if (isBlackFrame(hues))
                         {
@@ -588,6 +587,10 @@ namespace MarioMaker2OCR
         {
             var buffer = copyFrameBuffer();
             var levelFrame = getLevelScreenImageFromBuffer(buffer);
+
+            // Do not process anything if the buffer is empty
+            if (levelFrame == null) return;
+
             double levelScreenMatch = ImageLibrary.CompareImages(levelFrame, levelDetailScreen);
             if(levelScreenMatch > 0.90)
             {
@@ -680,12 +683,15 @@ namespace MarioMaker2OCR
             this.lastEvent = "clear";
             if (frameBuffer[0] == null) return;
 
+            e.clearTime = OCRLibrary.GetClearTimeFromFrame(e.frame, e.commentsEnabled);
+
             Image<Gray, byte> grayscaleFrame = e.frame.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
             foreach (var tmpl in templates["clear"])
             {
                 var loc = tmpl.getLocation(grayscaleFrame);
                 if (loc != Point.Empty)
                 {
+                    log.Info(String.Format("Detected {0}", tmpl.eventType));
                     TemplateMatchEventArgs args = new TemplateMatchEventArgs
                     {
                         frame = e.frame,
