@@ -303,7 +303,7 @@ namespace MarioMaker2OCR
         private (Size resolution, int channels) getCaptureInfo(VideoCapture video)
         {
             Mat tmp = new Mat();
-            video.Retrieve(tmp);
+            video.Read(tmp);
 
             if (tmp.Bitmap == null)
             {

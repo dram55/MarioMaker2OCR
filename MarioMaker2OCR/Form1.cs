@@ -14,6 +14,7 @@ using DirectShowLib;
 using System.Reflection;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 
 
@@ -39,6 +40,7 @@ namespace MarioMaker2OCR
 
         private FormPreview previewer = new FormPreview();
         private FormWarpWorld warpworldForm = new FormWarpWorld();
+        private StatsTracker tracker = new StatsTracker();
         private WarpWorldAPI WarpWorld;
         private VideoProcessor processor;
 
@@ -142,6 +144,7 @@ namespace MarioMaker2OCR
                     WarpWorld = null;
                 }
                 processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
+                //processor = new VideoProcessor(new VideoCapture("D:/2019-08-11 04-23-08.flv"));
 
                 processor.TemplateMatch += broadcastTemplateMatch;
 
@@ -159,7 +162,12 @@ namespace MarioMaker2OCR
                 processor.ClearScreen += warpWorldCallback;
                 processor.Exit += warpWorldCallback;
 
+                processor.TemplateMatch += statsCallback;
+                processor.LevelScreen += statsCallback;
+                processor.ClearScreen += statsCallback;
+
                 processor.Start();
+                //processor.Start(true);
                 lockForm();
             }
             catch (Exception ex)
@@ -442,13 +450,75 @@ namespace MarioMaker2OCR
         private void warpWorldCallback(object sender, VideoProcessor.TemplateMatchEventArgs e)
         {
             if (!Properties.Settings.Default.WarpWorldEnabled) return;
-            if (e.template.eventType == "exit") WarpWorld?.lose();
+            if (e.template.eventType != "exit") return;
+
+            var latestLevel = tracker.latest("level");
+
+            if (latestLevel == null)
+            {
+                log.Debug("[WarpWorld] Latest was null, no update");
+                return;
+            }
+
+            if (tracker.latest("clear") != null)
+            {
+                log.Debug("[WarpWorld] Level was already cleared, not sending loss.");
+                return;
+            }
+
+            Thread.Sleep(20000);
+
+            var currentLevel = tracker.latest("level");
+            if (currentLevel == null || currentLevel.time.Ticks == latestLevel.time.Ticks || currentLevel.data != latestLevel.data)
+            {
+                log.Debug("[WarpWorld] Loss");
+                WarpWorld?.lose();
+            } else
+            {
+                log.Debug("[WarpWorld] Rejoined level, not sending loss.");
+            }
         }
 
         private void warpWorldCallback(object sender, VideoProcessor.ClearScreenEventArgs e)
         {
             if (!Properties.Settings.Default.WarpWorldEnabled) return;
+            log.Debug("[WarpWorld] win");
             WarpWorld?.win();
+        }
+
+        private void statsCallback(object sender, VideoProcessor.TemplateMatchEventArgs e)
+        {
+            tracker?.addEvent(e.template.eventType);
+
+            if(e.template.eventType == "exit")
+            {
+                // TODO: Send to endpoint or append to file?
+            }
+        }
+
+        private void statsCallback(object sender, VideoProcessor.ClearScreenEventArgs e)
+        {
+            var data = JsonConvert.SerializeObject( new
+            {
+                clearTime = e.clearTime,
+                firstClear = e.firstClear,
+                worldRecord = e.worldRecord,
+            });
+            tracker?.addEvent("clear", data);
+        }
+
+        private void statsCallback(object sender, VideoProcessor.LevelScreenEventArgs e)
+        {
+            var data = JsonConvert.SerializeObject(e.levelInfo);
+
+            var level = tracker.latest("level");
+            if (level == null || level.data != data)
+            {
+                log.Debug("New level, clearing stats history.");
+                tracker.clearHistory();
+            }
+
+            tracker?.addEvent("level", data);
         }
     }
 }

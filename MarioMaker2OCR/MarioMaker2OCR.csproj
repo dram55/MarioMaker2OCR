@@ -119,6 +119,7 @@
     </Compile>
     <Compile Include="Objects\ClearEventWrapper.cs" />
     <Compile Include="Objects\JsonSettings.cs" />
+    <Compile Include="StatsTracker.cs" />
     <Compile Include="Test\BlackScreenTests.cs" />
     <Compile Include="DirectShowLibrary.cs" />
     <Compile Include="FormPreview.cs">
@@ -144,6 +145,7 @@
     <Compile Include="SMMServer.cs" />
     <Compile Include="Test\ClearScreenTests.cs" />
     <Compile Include="Test\LevelScreenTests.cs" />
+    <Compile Include="Test\StatsTrackerTests.cs" />
     <Compile Include="Test\TemplateTests.cs" />
     <Compile Include="Test\WarpWorldAPITests.cs" />
     <Compile Include="VideoProcessor.cs" />
