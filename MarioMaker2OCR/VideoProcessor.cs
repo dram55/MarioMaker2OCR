@@ -10,6 +10,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Runtime.CompilerServices;
+using MarioMaker2OCR.Objects;
 
 
 namespace MarioMaker2OCR
@@ -19,16 +20,23 @@ namespace MarioMaker2OCR
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public bool disposed = false; // Flag to indicate the object has been disposed
         public const int NO_DEVICE = -1; // Constant indicating that no video device was used
+        public readonly Size TEMPLATE_FRAME_SIZE = new Size(640, 480);
+        public Size frameSize;          // Contains the Size() object for the frame, needed for frameBuffer_tick to create the iamge
 
         private VideoCapture cap;        // EmguCV VideoCapture device object
         private int deviceId;            // Device id of the video capture device
-        private Size frameSize;          // Contains the Size() object for the frame, needed for frameBuffer_tick to create the iamge
         private Thread processorThread;  // The thread performing the main video processing
         private System.Threading.Timer frameBufferTimer; // Timer used to fill the frame buffer
         private Image<Bgr, byte>[] frameBuffer = new Image<Bgr, byte>[16]; // Frame buffer that is passed to events
         private (bool IsBlack, bool IsClear, bool ShouldStop) flags = (false, false, false); // Contains flags indicating the current status of the video processor
 
         private const int FRAME_BUFFER_INTERVAL = 250; // put frame in buffer every 250ms
+
+        private Mat levelDetailScreen;
+        private string lastEvent;
+
+        private Dictionary<string, List<EventTemplate>> templates = new Dictionary<string, List<EventTemplate>>();
+
 
         /// <summary>
         /// Essentially copied from https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
@@ -59,6 +67,8 @@ namespace MarioMaker2OCR
             this.deviceId = NO_DEVICE;
             this.cap = video;
             this.frameSize = getCaptureInfo(video).resolution;
+
+            initializeTemplates();
         }
 
         public VideoProcessor(int device, Size resolution)
@@ -66,6 +76,115 @@ namespace MarioMaker2OCR
             this.deviceId = device;
             this.cap = createCaptureDevice(device, resolution);
             this.frameSize = getCaptureInfo(this.cap).resolution;
+
+            initializeTemplates();
+        }
+
+        private void initializeTemplates()
+        {
+            var originalLevelScreen = new Image<Bgr, byte>("referenceImage.jpg").Mat;
+            levelDetailScreen = ImageLibrary.ChangeSize(originalLevelScreen, new Size(originalLevelScreen.Width, originalLevelScreen.Height), frameSize);
+
+            List<EventTemplate> clearDetailTemplates = new List<EventTemplate>();
+            List<EventTemplate> blackScreenTemplates = new List<EventTemplate>();
+            List<EventTemplate> postClearTemplates = new List<EventTemplate>();
+
+
+            // Start Clear Detail screen templates
+            clearDetailTemplates.Add(
+                new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.6, new Rectangle[] {
+                    new Rectangle(new Point(445,85), new Size(115, 130)),
+                }, 1.31)
+            );
+            clearDetailTemplates.Add(
+                new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.6, new Rectangle[] {
+                    new Rectangle(new Point(445,85), new Size(115, 130)),
+                }, 1.31)
+            );
+
+            //Start Templates that run on black screen immediately following a clear
+            postClearTemplates.Add(
+                new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(410,225), new Size(215, 160)), //Clear Screen
+                })
+            );
+            postClearTemplates.Add(
+                new EventTemplate("./templates/480/quit_full.png", "exit", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
+                })
+            );
+            postClearTemplates.Add(
+                new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
+                })
+            );
+
+            // Start Black Screen Templates
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(400,330), new Size(230, 65)), //Pause Menu
+                })
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/quit.png", "exit", 0.9, new Rectangle[] {
+                    new Rectangle(new Point(408,338), new Size(224, 70)) //Pause Menu
+                })
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
+                })
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/death_big.png", "death", 0.8)
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/death_small.png", "death", 0.8)
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/death_partial.png", "death", 0.9)
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
+                    new Rectangle(new Point(187,195), new Size(270, 100))
+                })
+            );
+            blackScreenTemplates.Add(
+                new EventTemplate("./templates/480/skip.png", "skip", 0.85, new Rectangle[] {
+                    new Rectangle(new Point(308,200), new Size(25, 37))
+                })
+            );
+
+            if (Properties.Settings.Default.DetectMultipleLanguages)
+            {
+                postClearTemplates.Add(
+                    new EventTemplate("./templates/480/lang_neutral/exit_next.png", "exit", 0.9, new Rectangle[] {
+                        new Rectangle(new Point(598,323), new Size(30, 60)), // Clear Screen
+                        new Rectangle(new Point(598,223), new Size(30, 60))  // Clear Screen (w/ comments)
+                    })
+                );
+
+                blackScreenTemplates.Add(
+                    new EventTemplate("./templates/480/lang_neutral/startover.png", "restart", 0.8, new Rectangle[] {
+                        new Rectangle(new Point(397,269), new Size(243, 71)), // Pause Menu
+                        //new Rectangle(new Point(195,225), new Size(230, 160)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
+                    })
+                );
+                blackScreenTemplates.Add(
+                    new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.96, new Rectangle[] {
+                        new Rectangle(new Point(537,331), new Size(103, 71)) //Pause Menu
+                    })
+                );
+
+            }
+
+            templates.Add("clear", clearDetailTemplates);
+            templates.Add("postclear", postClearTemplates);
+            templates.Add("black", blackScreenTemplates);
+
+             
+
+
         }
         /// <summary>
         /// Starts the main video processing loop
@@ -130,8 +249,10 @@ namespace MarioMaker2OCR
                 }
                 frameBuffer[0] = frame;
 
-                VideoEventArgs args = new VideoEventArgs();
-                args.currentFrame = frame.Clone();
+                NewFrameEventArgs args = new NewFrameEventArgs
+                {
+                    frame = frame.Clone()
+                };
                 onNewFrame(args);
             }
             catch(Exception ex)
@@ -223,7 +344,9 @@ namespace MarioMaker2OCR
                     bool WaitForClearStats = false;
                     while (true)
                     {
-                        if(deviceId == NO_DEVICE)
+                        if (flags.ShouldStop) return;
+
+                        if (deviceId == NO_DEVICE)
                         {
                             cap.Read(currentFrame);
                             if (currentFrame.IsEmpty) return;
@@ -245,10 +368,8 @@ namespace MarioMaker2OCR
                             if(!flags.IsBlack)
                             {
                                 BlackScreenEventArgs args = new BlackScreenEventArgs();
-                                args.frameBuffer = copyFrameBuffer();
-                                args.currentFrame = getLevelScreenImageFromBuffer(args.frameBuffer);
                                 args.seconds = DateTime.Now.Subtract(blackStart).TotalMilliseconds/1000;
-                                onBlackScreen(args);
+                                new Thread(new ParameterizedThreadStart(onBlackScreenEnd)).Start(args);
                             }
                         }
                         else if (flags.IsClear)
@@ -259,30 +380,28 @@ namespace MarioMaker2OCR
                         }
                         else if (WaitForClearStats && isClearWithStatsScreen(hues))
                         {
-                            log.Info("Have clear screen");
+                            log.Info("Detected level clear.");
                             // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
                             // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(593);
+                            Thread.Sleep(500);
                             cap.Retrieve(currentFrame);
 
                             ClearScreenEventArgs args = new ClearScreenEventArgs();
-                            args.currentFrame = currentFrame.Clone().ToImage<Bgr, Byte>();
+                            args.frame = currentFrame.Clone().ToImage<Bgr, Byte>();
 
                             // Check to see if this is the clear screen with comments on - things are positioned differently.
                             // Top of screen is yellow if comments are on
                             Size topOfScreen = new Size(frameSize.Width, frameSize.Height / 6);
                             Dictionary<int, int> topHues = getHues(data, topOfScreen, skip);
-                            if (isMostlyYellow(topHues))
-                                args.commentsEnabled = true;
-
-
-                            onClearScreen(args);
+                            if (isMostlyYellow(topHues)) args.commentsEnabled = true;
+                            new Thread(new ParameterizedThreadStart(onClearScreen)).Start(args);
                         }
                         else if (isBlackFrame(hues))
                         {
                             flags.IsBlack = true;
-                            WaitForClearStats = false; // XXX: If we get a black screen and this is true, something weird is going on
+                            WaitForClearStats = false; // If we get a black screen and this is true, something weird is going on
                             blackStart = DateTime.Now;
+                            new Thread(new ThreadStart(onBlackScreenStart)).Start();
                         }
                         else if (isClearFrame(hues))
                         {
@@ -431,55 +550,203 @@ namespace MarioMaker2OCR
         /// Event that fires off whenever a black screen is detected
         /// </summary>
         public event EventHandler<BlackScreenEventArgs> BlackScreen;
-        protected virtual void onBlackScreen(BlackScreenEventArgs e)
+        protected virtual void onBlackScreenEnd(object a)
         {
             if (frameBuffer[0] == null) return;
-            BlackScreen?.Invoke(this, e);
-            for (int i = 0; i < frameBuffer.Length; i++)
+
+            BlackScreen?.Invoke(this, (BlackScreenEventArgs)a);
+            clearFrameBuffer();
+        }
+
+
+        public class TemplateMatchEventArgs: EventArgs
+        {
+            public Image<Bgr, byte> frame;
+            public Point location;
+            public EventTemplate template;
+        }
+        public class LevelScreenEventArgs : TemplateMatchEventArgs
+        {
+            public Level levelInfo;
+        }
+        public event EventHandler<LevelScreenEventArgs> LevelScreen;
+        public event EventHandler<TemplateMatchEventArgs> TemplateMatch;
+        public event EventHandler<TemplateMatchEventArgs> Death;
+        public event EventHandler<TemplateMatchEventArgs> Exit;
+        public event EventHandler<TemplateMatchEventArgs> Restart;
+        public event EventHandler<TemplateMatchEventArgs> Skip;
+        public event EventHandler<TemplateMatchEventArgs> GameOver;
+        public event EventHandler<ClearScreenEventArgs> WorldRecord;
+        public event EventHandler<ClearScreenEventArgs> FirstClear;
+
+        protected virtual void onClear()
+        {
+
+        }
+        protected virtual void onBlackScreenStart()
+        {
+            var buffer = copyFrameBuffer();
+            var levelFrame = getLevelScreenImageFromBuffer(buffer);
+
+            // Do not process anything if the buffer is empty
+            if (levelFrame == null) return;
+
+            double levelScreenMatch = ImageLibrary.CompareImages(levelFrame, levelDetailScreen);
+            if(levelScreenMatch > 0.90)
             {
-                frameBuffer[i]?.Dispose();
-                frameBuffer[i] = null;
+                this.lastEvent = "level";
+                Level level = OCRLibrary.GetLevelFromFrame(levelFrame);
+                log.Info(String.Format("Detected new level: {0}", level.code));
+                LevelScreenEventArgs args = new LevelScreenEventArgs {
+                    frame = levelFrame,
+                    levelInfo = level,
+                };
+                LevelScreen?.Invoke(this, args);
+            } else
+            {
+                List<EventTemplate> ts;
+                switch(this.lastEvent)
+                {
+                    case "clear":
+                        ts = templates["postclear"];
+                        break;
+                    default:
+                        ts = templates["black"];
+                        break;
+                }
+
+                bool matchFound = false;
+                foreach (var frame in buffer)
+                {
+                    if (frame == null) break;
+                    Image<Gray, byte> grayscaleFrame = frame.Mat.ToImage<Gray, byte>().Resize(TEMPLATE_FRAME_SIZE.Width, TEMPLATE_FRAME_SIZE.Height, Inter.Cubic);
+                    foreach (var tmpl in ts)
+                    {
+                        var loc = tmpl.getLocation(grayscaleFrame);
+                        if (loc != Point.Empty)
+                        {
+                            this.lastEvent = tmpl.eventType;
+                            log.Info(String.Format("Detected {0}", tmpl.eventType));
+                            TemplateMatchEventArgs args = new TemplateMatchEventArgs
+                            {
+                                frame = frame,
+                                location = loc,
+                                template = tmpl,
+                            };
+                            TemplateMatch?.Invoke(this, args);
+
+                            switch(tmpl.eventType)
+                            {
+                                case "death":
+                                    Death?.Invoke(this, args);
+                                    break;
+                                case "exit":
+                                    Exit?.Invoke(this, args);
+                                    break;
+                                case "restart":
+                                    Restart?.Invoke(this, args);
+                                    break;
+                                case "skip":
+                                    Skip?.Invoke(this, args);
+                                    break;
+                                case "gameover":
+                                    GameOver?.Invoke(this, args);
+                                    break;
+                                default:
+                                    log.Error(String.Format("No handler for event type: {0}", tmpl.eventType));
+                                    break;
+                            }
+                            matchFound = true;
+                            break;
+                        }
+                    }
+                    if (matchFound) break;
+                }
+            }
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i]?.Dispose();
+                buffer[i] = null;
             }
         }
+
+
 
         /// <summary>
         /// Event fires off whenever a clear screen is detected
         /// </summary>
         public event EventHandler<ClearScreenEventArgs> ClearScreen;
-        protected virtual void onClearScreen(ClearScreenEventArgs e)
+        protected virtual void onClearScreen(object a)
         {
+            ClearScreenEventArgs e = (ClearScreenEventArgs)a;
+            this.lastEvent = "clear";
             if (frameBuffer[0] == null) return;
-            ClearScreen?.Invoke(this, e);
-            for (int i = 0; i < frameBuffer.Length; i++)
+
+            e.clearTime = OCRLibrary.GetClearTimeFromFrame(e.frame, e.commentsEnabled);
+
+            Image<Gray, byte> grayscaleFrame = e.frame.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
+            foreach (var tmpl in templates["clear"])
             {
-                frameBuffer[i]?.Dispose();
-                frameBuffer[i] = null;
+                var loc = tmpl.getLocation(grayscaleFrame);
+                if (loc != Point.Empty)
+                {
+                    log.Info(String.Format("Detected {0}", tmpl.eventType));
+                    TemplateMatchEventArgs args = new TemplateMatchEventArgs
+                    {
+                        frame = e.frame,
+                        location = loc,
+                        template = tmpl,
+                    };
+                    TemplateMatch?.Invoke(this, args);
+
+                    switch (tmpl.eventType)
+                    {
+                        case "firstclear":
+                            e.firstClear = true;
+                            FirstClear?.Invoke(this, e);
+                            break; //or count a firstClear as a WR?
+                        case "worldrecord":
+                            e.worldRecord = true;
+                            WorldRecord?.Invoke(this, e);
+                            break;
+                        default:
+                            log.Error(String.Format("No handler for event type: {0}", tmpl.eventType));
+                            break;
+                    }
+                    break;
+                }
             }
+            ClearScreen?.Invoke(this, e);
+            clearFrameBuffer();
         }
 
         /// <summary>
         /// Fires off every time the frameBuffer adds a new frame.
         /// </summary>
-        public event EventHandler<VideoEventArgs> NewFrame;
-        protected virtual void onNewFrame(VideoEventArgs e)
+        public event EventHandler<NewFrameEventArgs> NewFrame;
+        protected virtual void onNewFrame(NewFrameEventArgs e)
         {
             NewFrame?.Invoke(this, e);
-            e.currentFrame.Dispose();
+            e.frame.Dispose();
         }
-        public class VideoEventArgs : EventArgs
+        public class NewFrameEventArgs : EventArgs
         {
-            public Image<Bgr, byte>[] frameBuffer;
-            public Image<Bgr, byte> currentFrame;
+            public Image<Bgr, byte> frame;
         }
 
-        public class BlackScreenEventArgs: VideoEventArgs
+        public class BlackScreenEventArgs: EventArgs
         {
             public double seconds;
         }
 
-        public class ClearScreenEventArgs : VideoEventArgs
+        public class ClearScreenEventArgs : EventArgs
         {
+            public Image<Bgr, byte> frame;
             public bool commentsEnabled;
+            public string clearTime;
+            public bool firstClear;
+            public bool worldRecord;
         }
 
         /// <summary>
@@ -511,5 +778,6 @@ namespace MarioMaker2OCR
 
             return returnImage;
         }
+
     }
 }

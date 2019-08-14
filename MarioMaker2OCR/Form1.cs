@@ -16,17 +16,13 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 
+
 namespace MarioMaker2OCR
 {
     public partial class Form1 : Form
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private const string LEVEL_JSON_FILE = "ocrLevel.json";
-        private Size resolution720 = new Size(1280, 720);
-        private Size resolution480 = new Size(640, 480);
-
-        private Mat levelDetailScreen;
-        private readonly Mat levelSelectScreen720 = new Image<Bgr, byte>("referenceImage.jpg").Mat; // based on 1280x720
 
         // Product version
         public string CurrentVersion
@@ -37,61 +33,6 @@ namespace MarioMaker2OCR
                 return fileVersionInfo.ProductVersion;
             }
         }
-
-        private List<EventTemplate> templates = new List<EventTemplate>();
-
-        private EventTemplate[] engTemplates = new EventTemplate[] {
-            new EventTemplate("./templates/480/exit.png", "exit", 0.8, new Rectangle[] {
-                new Rectangle(new Point(400,330), new Size(230, 65)), //Pause Menu
-                new Rectangle(new Point(410,225), new Size(215, 160)), //Clear Screen
-            }),
-            new EventTemplate("./templates/480/quit.png", "exit", 0.9, new Rectangle[] {
-                new Rectangle(new Point(408,338), new Size(224, 70)) //Pause Menu
-            }),
-            new EventTemplate("./templates/480/quit_full.png", "exit", 0.8, new Rectangle[] {
-                new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
-            }),
-            new EventTemplate("./templates/480/startover.png", "restart", 0.8, new Rectangle[] {
-                new Rectangle(new Point(400,275), new Size(230, 65)), //Pause Menu
-                new Rectangle(new Point(195,225), new Size(215, 160)), //Clear Screen
-            }),
-            new EventTemplate("./templates/480/death_big.png", "death", 0.8),
-            new EventTemplate("./templates/480/death_small.png", "death", 0.8),
-            new EventTemplate("./templates/480/death_partial.png", "death", 0.9),
-            new EventTemplate("./templates/480/gameover.png", "gameover", 0.8, new Rectangle[] {
-                new Rectangle(new Point(187,195), new Size(270, 100))
-            }),
-            new EventTemplate("./templates/480/skip.png", "skip", 0.85, new Rectangle[] {
-                new Rectangle(new Point(308,200), new Size(25, 37))
-            })
-        };
-
-        private EventTemplate[] langNeutralTemplates = new EventTemplate[]
-        {
-            new EventTemplate("./templates/480/lang_neutral/startover.png", "restart", 0.8, new Rectangle[] {
-                new Rectangle(new Point(397,269), new Size(243, 71)), // Pause Menu
-                //new Rectangle(new Point(195,225), new Size(230, 160)), // This is ROI is "Start Over" or "Quit" depending on gamemode, leave out for now
-            }),
-            // This works for Quit (endless) and Exit (other modes)
-            new EventTemplate("./templates/480/lang_neutral/quit.png", "exit", 0.96, new Rectangle[] {
-                new Rectangle(new Point(537,331), new Size(103, 71)) //Pause Menu
-            }),
-            // This is Next (endless) or Exit (other modes)
-            new EventTemplate("./templates/480/lang_neutral/exit_next.png", "exit", 0.9, new Rectangle[] {
-                new Rectangle(new Point(598,323), new Size(30, 60)), // Clear Screen
-                new Rectangle(new Point(598,223), new Size(30, 60))  // Clear Screen (w/ comments)
-            })
-        };
-
-        private readonly EventTemplate[] clearTemplates = new EventTemplate[]
-        {
-            new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.8, new Rectangle[] {
-                new Rectangle(new Point(445,85), new Size(115, 130)),
-            }),
-            new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.8, new Rectangle[] {
-                new Rectangle(new Point(445,85), new Size(115, 130)),
-            })
-        };
 
         public DsDevice SelectedDevice => (deviceComboBox.SelectedItem as dynamic)?.Value;
         public Size SelectedResolution => (resolutionsCombobox.SelectedItem as dynamic)?.Value;
@@ -189,18 +130,6 @@ namespace MarioMaker2OCR
             }
             try
             {
-                templates.Clear();
-                templates.AddRange(engTemplates);
-
-                // Add language neutral templates if selected.
-                if (langNeutralcheckBox.Checked)
-                {
-                    templates.AddRange(langNeutralTemplates);
-                }
-
-                // resize reference image based on current resolution
-                levelDetailScreen = ImageLibrary.ChangeSize(levelSelectScreen720, resolution720, SelectedResolution);
-
                 SMMServer.port = decimal.ToUInt16(numPort.Value);
                 log.Info(string.Format("Start Web Server on http://localhost:{0}/", SMMServer.port));
                 SMMServer.Start();
@@ -212,11 +141,24 @@ namespace MarioMaker2OCR
                 {
                     WarpWorld = null;
                 }
-
                 processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
-                processor.BlackScreen += VideoProcessor_BlackScreen;
-                processor.ClearScreen += VideoProcessor_ClearScreen;
-                processor.NewFrame += VideoProcessor_NewFrame;
+
+                processor.TemplateMatch += broadcastTemplateMatch;
+
+                processor.TemplateMatch += previewMatch;
+                processor.NewFrame += previewNewFrame;
+
+
+                processor.LevelScreen += Processor_LevelScreen;
+                processor.ClearScreen += Processor_ClearScreen;
+
+                processor.Exit += clearJsonOnEvent;
+                processor.Skip += clearJsonOnEvent;
+                processor.GameOver += clearJsonOnEvent;
+
+                processor.ClearScreen += warpWorldCallback;
+                processor.Exit += warpWorldCallback;
+
                 processor.Start();
                 lockForm();
             }
@@ -226,9 +168,20 @@ namespace MarioMaker2OCR
             }
         }
 
-        private void VideoProcessor_NewFrame(object sender, VideoProcessor.VideoEventArgs e)
+        private void clearJsonOnEvent(object sender, VideoProcessor.TemplateMatchEventArgs e)
         {
-            previewer.SetLiveFrame(e.currentFrame);
+            switch (e.template.eventType)
+            {
+                case "exit":
+                    if (JsonSettings.ClearOnExit) clearJsonFile();
+                    break;
+                case "skip":
+                    if (JsonSettings.ClearOnSkip) clearJsonFile();
+                    break;
+                case "gameover":
+                    if (JsonSettings.ClearOnGameover) clearJsonFile();
+                    break;
+            }
         }
 
         private void stopButton_Click(object sender, EventArgs e)
@@ -272,139 +225,6 @@ namespace MarioMaker2OCR
             processingLabel.Visible = false;
             numPort.Enabled = true;
             webServerAddressStatusLabel.Text = "";
-        }
-
-        /// <summary>
-        /// Event callback for the Clear Screen event generatead by the VideoProcessor
-        /// </summary>
-        private void VideoProcessor_ClearScreen(object sender, VideoProcessor.ClearScreenEventArgs e)
-        {
-            log.Debug("Detected Level Clear");
-
-            Image<Gray, byte> grayscaleFrame = e.currentFrame.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
-            //e.currentFrame.Save("clearmatch_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png");
-
-            Dictionary<String, bool> events = new Dictionary<String, bool>
-            {
-                { "worldrecord", false },
-                { "firstclear", false },
-            };
-            List<Rectangle> boundaries = new List<Rectangle>();
-            foreach (EventTemplate tmpl in clearTemplates)
-            {
-                if (events[tmpl.eventType]) continue;
-                Point loc = tmpl.getLocation(grayscaleFrame);
-                if (!loc.IsEmpty)
-                {
-                    events[tmpl.eventType] = true;
-                    boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.X, loc.Y, tmpl.template.Width, tmpl.template.Height), grayscaleFrame.Size, e.currentFrame.Size));
-                    previewer.SetLastMatch(e.currentFrame, boundaries.ToArray());
-                }
-            }
-
-            foreach (var evt in events)
-            {
-                if (evt.Value)
-                {
-                    log.Info(String.Format("Detected {0}.", evt.Key));
-                    SMMServer.BroadcastEvent(evt.Key);
-                }
-            }
-
-            if (Properties.Settings.Default.WarpWorldEnabled)
-            {
-                WarpWorld?.win();
-            }
-
-            // Read time from screen
-            string clearTime = OCRLibrary.GetClearTimeFromFrame(e.currentFrame, e.commentsEnabled);
-            SMMServer.BroadcastDataEvent("clear", clearTime);
-        }
-        /// <summary>
-        /// Event Callback for the Black Screen event generated by the VideoProcessor
-        /// </summary>
-        private void VideoProcessor_BlackScreen(object sender, VideoProcessor.BlackScreenEventArgs e)
-        {
-            log.Debug(String.Format("Detected a black screen [{0}]", e.seconds));
-            BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing black screen..."));
-
-            double imageMatchPercent = ImageLibrary.CompareImages(e.currentFrame, levelDetailScreen);
-
-            // Is this frame a 90% match to a level screen?
-            if(imageMatchPercent > 0.90)
-            {
-                log.Info(String.Format("Detected new level. [{0}]", e.seconds));
-
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing level screen..."));
-
-                Level level = OCRLibrary.GetLevelFromFrame(e.currentFrame);
-                writeLevelToFile(level);
-                SMMServer.BroadcastLevel(level);
-
-                BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = level.code + "  |  " + level.author + "  |  " + level.name));
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
-
-                previewer.SetLastMatch(e.currentFrame);
-            }
-            else
-            {
-                // Not a new level, see if we can detect a template.
-                Dictionary<String, bool> events = new Dictionary<String, bool>
-                {
-                    { "death", false },
-                    { "restart", false },
-                    { "exit", false },
-                    { "gameover", false },
-                    { "skip", false }
-                };
-
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = "Processing events..."));
-                foreach (Image<Bgr, byte> f in e.frameBuffer)
-                {
-                    // Skip any empty frames in the buffer
-                    if (f == null)
-                        continue;
-
-                    Image<Gray, byte> grayscaleFrame = f.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
-                    //grayscaleFrame.Save("frame_" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + ".png"); // XXX: Useful for debugging template false-negatives, and for getting templates
-
-                    List<Rectangle> boundaries = new List<Rectangle>();
-                    foreach (EventTemplate tmpl in templates)
-                    {
-                        if (events[tmpl.eventType]) continue;
-                        Point loc = tmpl.getLocation(grayscaleFrame);
-                        if (!loc.IsEmpty)
-                        {
-                            events[tmpl.eventType] = true;
-                            boundaries.Add(ImageLibrary.ChangeSize(new Rectangle(loc.X, loc.Y, tmpl.template.Width, tmpl.template.Height), grayscaleFrame.Size, f.Size));
-                            previewer.SetLastMatch(f, boundaries.ToArray());
-                        }
-                    }
-                }
-                BeginInvoke((MethodInvoker)(() => processingLabel.Text = ""));
-
-                foreach (var evt in events)
-                {
-                    if (evt.Value)
-                    {
-                        log.Info(String.Format("Detected {0} [{1}].", evt.Key, e.seconds));
-                        SMMServer.BroadcastEvent(evt.Key);
-
-                        // Even though this will get sent on exiting after a clear, it only matters if a entry is active, and after marking it as a win it goes inactive.
-                        if(evt.Key == "exit")
-                        {
-                            if (Properties.Settings.Default.WarpWorldEnabled)
-                                WarpWorld?.lose();
-                            if (JsonSettings.ClearOnExit)
-                                clearJsonFile();
-                        }
-                        if (evt.Key == "skip" && JsonSettings.ClearOnSkip)
-                            clearJsonFile();
-                        if (evt.Key == "gameover" && JsonSettings.ClearOnGameover)
-                            clearJsonFile();
-                    }
-                }
-            }
         }
 
         private void propertiesButton_Click(object sender, EventArgs e)
@@ -586,6 +406,49 @@ namespace MarioMaker2OCR
             FormJsonSettings jsonSettings = new FormJsonSettings();
             jsonSettings.ShowDialog();
             jsonSettings.BringToFront();
+        }
+
+        private void broadcastTemplateMatch(object sender, VideoProcessor.TemplateMatchEventArgs e)
+        {
+            SMMServer.BroadcastEvent(e.template.eventType);
+        }
+
+        private void previewMatch(object sender, VideoProcessor.TemplateMatchEventArgs e)
+        {
+            var boundary = ImageLibrary.ChangeSize(new Rectangle(e.location, e.template.template.Size), processor.TEMPLATE_FRAME_SIZE, processor.frameSize);
+            previewer.SetLastMatch(e.frame, new Rectangle[] { boundary });
+            
+        }
+        private void previewNewFrame(object sender, VideoProcessor.NewFrameEventArgs e)
+        {
+            previewer.SetLiveFrame(e.frame);
+        }
+
+        private void Processor_ClearScreen(object sender, VideoProcessor.ClearScreenEventArgs e)
+        {
+            if (Properties.Settings.Default.WarpWorldEnabled) WarpWorld?.win();
+            SMMServer.BroadcastDataEvent("clear", e.clearTime);
+            // TODO: Send WR/First Clear here also since we have that in the event
+        }
+
+        private void Processor_LevelScreen(object sender, VideoProcessor.LevelScreenEventArgs e)
+        {
+            previewer.SetLastMatch(e.frame);
+            writeLevelToFile(e.levelInfo);
+            SMMServer.BroadcastLevel(e.levelInfo);
+            BeginInvoke((MethodInvoker)(() => ocrTextBox.Text = e.levelInfo.code + "  |  " + e.levelInfo.author + "  |  " + e.levelInfo.name));
+        }
+
+        private void warpWorldCallback(object sender, VideoProcessor.TemplateMatchEventArgs e)
+        {
+            if (!Properties.Settings.Default.WarpWorldEnabled) return;
+            if (e.template.eventType == "exit") WarpWorld?.lose();
+        }
+
+        private void warpWorldCallback(object sender, VideoProcessor.ClearScreenEventArgs e)
+        {
+            if (!Properties.Settings.Default.WarpWorldEnabled) return;
+            WarpWorld?.win();
         }
     }
 }
