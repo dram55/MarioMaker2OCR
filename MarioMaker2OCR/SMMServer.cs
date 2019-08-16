@@ -9,6 +9,8 @@ namespace MarioMaker2OCR
 {
     internal static class SMMServer
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private static WebServer server;
         private static SMMWebSocketServer wss;
         public static ushort port = 3001;
@@ -81,9 +83,16 @@ namespace MarioMaker2OCR
         }
         public static void Broadcast(string message)
         {
-            foreach (var ws in wss.WebSockets)
+            try
             {
-                ws.WebSocket.SendAsync(Encoding.UTF8.GetBytes(message), true);
+                foreach (var ws in wss?.WebSockets)
+                {
+                    ws.WebSocket.SendAsync(Encoding.UTF8.GetBytes(message), true);
+                }
+            }
+            catch (Exception e)
+            {
+                log.Error("Exception in WebSocket Broadcast() - " + e.Message);
             }
         }
     }
