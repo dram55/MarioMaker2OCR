@@ -313,9 +313,6 @@ namespace MarioMaker2OCR
             return (new Size(tmp.Width, tmp.Height), tmp.NumberOfChannels);
         }
 
-
-
-
         /// <summary>
         /// Main video processing loop on the video capture device which should already be initalized
         /// </summary>
@@ -505,10 +502,20 @@ namespace MarioMaker2OCR
         private Image<Bgr, byte>[] copyFrameBuffer()
         {
             Image<Bgr, byte>[] cloned = new Image<Bgr, byte>[frameBuffer.Length];
-            for(int i=0;i<frameBuffer.Length; i++)
+
+            try
             {
-                cloned[i] = frameBuffer[i]?.Clone();
+                for (int i = 0; i < frameBuffer.Length; i++)
+                {
+                    cloned[i] = frameBuffer[i]?.Clone();
+                }
             }
+            catch (Exception ex)
+            {
+                log.Debug("Exception in copyFrameBuffer()");
+                log.Error(ex);
+            }
+
             return cloned;
         }
 
