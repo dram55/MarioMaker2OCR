@@ -45,11 +45,14 @@ h4 {
 
 .level-name { color: #dedede; font-size: 1.2em;margin-bottom:.4em}
 
-.death-count {float: right;}
+.death-count {margin-left: auto;}
+.death-count img {margin-right:auto;}
+.death-count-number {min-width:22px; display:inline-block; text-align: right;}
 
 .timer-death-bar {
    font-size: 130%;
    text-align: left;
+   display: flex;
 }
 
 .timer-death-bar img {

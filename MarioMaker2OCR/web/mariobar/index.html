@@ -32,15 +32,16 @@
 
 
          <div class="timer-death-bar">
-            <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" 
+            <div ng-if="ctrl.settings.isTimerVisible" class="level-timer" 
                ng-style="{'color':(ctrl.state.levelCleared) ? ctrl.settings.timerColorOnClear : ctrl.settings.timerFontColor}">
                 <img src="/drambar/images/smw_clock_dark.png">
                 {{ctrl.state.levelTimer}}
                 <img class="clear-flag" ng-if="ctrl.state.levelCleared" src="/drambar/images/clear_flag.png">
-            </span>
-            <span ng-if="ctrl.settings.isDeathCountVisible" class="death-count" ng-style="{'color':ctrl.settings.deathCountFontColor}">
-               <img src="/drambar/images/mario_dead.png" ng-class="ctrl.state.deathInProgress ? 'pulse' : ''">{{ctrl.state.deathCount}}
-            </span>
+            </div>
+            <div ng-if="ctrl.settings.isDeathCountVisible" class="death-count" ng-style="{'color':ctrl.settings.deathCountFontColor}">
+               <img src="/drambar/images/mario_dead.png" ng-class="ctrl.state.deathInProgress ? 'pulse' : ''">
+               <div class="death-count-number">{{ctrl.state.deathCount}}</div>
+            </div>
          </div>
       </div>
    </div>
