@@ -11,12 +11,15 @@ This program will capture level info & events from a Mario Maker 2 game feed and
 Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs?t=445).
 
 ## Screenshots
-![](screenshots/screenshot.jpg) ![](screenshots/preview.jpg)
+![](screenshots/screenshot.png) ![](screenshots/preview.jpg)
 
 ## Stream Overlays
 ![](screenshots/smmbar.png) 
 
 ![](screenshots/drambar.png)
+
+![](screenshots/mariobar.png)
+
 
 
 ## How To Use
@@ -40,6 +43,7 @@ Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs
 1) Setup a Browser source in OBS to point to the web overlay you would like.
     - ex: http://localhost:3000/smmbar
     - ex: http://localhost:3000/drambar
+    - ex: http://localhost:3000/mariobar
     - Refresh cache on the browser source if it is ever unresponsive.
 1) Play Mario Maker 2...
 1) When an event is detected:
@@ -47,7 +51,7 @@ Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs
    - The web overlays will updated.
    
 ### Customization
-To customize the included overlays (font, color, etc.) make adjustments to either of the settings files: `\web\drambar\settings.js` and `\web\smmbar\settings.js`.
+To customize the included overlays (font, color, etc.) make adjustments to the settings file for the overlay you are using: ex: `\web\drambar\settings.js`.
 
 The `web` directory is where the web server will be hosted, any web apps created here can be used as a stream overlay. Feel free to create and share your own!
 

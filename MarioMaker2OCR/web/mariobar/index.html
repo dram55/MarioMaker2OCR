@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-   <title>Drambar</title>
+   <title>Mariobar</title>
    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
    <script src="https://cdn.rawgit.com/AngularClass/angular-websocket/v2.0.0/dist/angular-websocket.js"></script>
    <script src="/drambar/drambar.js"></script>
-   <script src="/drambar/settings.js"></script>
+   <script src="/mariobar/settings.js"></script>
    
-   <link rel="stylesheet" href="/drambar/style.css">
+   <link rel="stylesheet" href="/mariobar/style.css">
 </head>
 <body ng-app="dramBarApp">
    <div ng-controller="dramBarController as ctrl">
@@ -18,16 +18,23 @@
          ng-class="((ctrl.state.hideCurrentLevel) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection" 
          ng-style="{'font-size':ctrl.settings.fontSize, 'font-family':ctrl.settings.mainFont, 
          'background-color':ctrl.settings.backgroundColor, 'border':ctrl.settings.border}">
+
          <h4 ng-if="ctrl.state.level.author && ctrl.settings.isLevelAuthorVisible" 
          ng-style="{color:ctrl.settings.levelAuthorColor}" class="user-name">{{ctrl.state.level.author}}</h4>
          <p class="level-name" ng-if="ctrl.settings.isLevelNameVisible" 
             ng-style="{color:ctrl.settings.levelNameColor}">{{ctrl.state.level.name}}</p>
-         <code ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" 
-         class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor, 'font-family':ctrl.settings.levelCodeFont}">{{ctrl.state.level.code}}</code>
+
+		<hr ng-if="ctrl.settings.isLevelNameVisible || ctrl.settings.isLevelAuthorVisible" 
+		    ng-style="{'border-color': ctrl.settings.lineColor, 'background-color':ctrl.settings.lineColor}">
+
+         <p ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" 
+         class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor, 'font-family':ctrl.settings.levelCodeFont}">{{ctrl.state.level.code}}</p>
+
+
          <div class="timer-death-bar">
             <span ng-if="ctrl.settings.isTimerVisible" class="level-timer" 
                ng-style="{'color':(ctrl.state.levelCleared) ? ctrl.settings.timerColorOnClear : ctrl.settings.timerFontColor}">
-                <img src="/drambar/images/smw_clock.png">
+                <img src="/drambar/images/smw_clock_dark.png">
                 {{ctrl.state.levelTimer}}
                 <img class="clear-flag" ng-if="ctrl.state.levelCleared" src="/drambar/images/clear_flag.png">
             </span>

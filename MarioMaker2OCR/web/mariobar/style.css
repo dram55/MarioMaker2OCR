@@ -1,0 +1,213 @@
+/* Element Styles */
+@font-face {
+  font-family:"SuperMarioMaker2";
+  src: url("super-mario-maker-2.ttf") format("truetype");
+}
+
+body {
+  font-family: "SuperMarioMaker2", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.5;
+}
+
+h4 {
+   margin: 0 0 -3px 0;
+   font-size: 1.35em;
+   font-weight: 500;
+   line-height: 1.2;
+ }
+
+ p { margin: 0; }
+ 
+ 
+/* Class Styles */
+.level-card {
+  position: absolute;
+  padding: 9px 13px 3px 13px;
+  background-color: rgba(0, 0, 0, 0.77);
+  border-radius: 8px;
+  color: white;
+  max-width: 350px;
+  bottom:0;
+  margin-left:5px;
+  text-align: center;
+  margin-bottom:8px;
+  box-shadow: -2px 4px  5px rgba(0, 0, 0, .9) ;
+}
+
+.level-code {
+  color: #ff49ad;
+  font-size: 170%;
+  line-height: 1.2;
+  text-transform: uppercase!important;
+  font-family: "SuperMarioMaker2", SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  /**-webkit-text-stroke: .5px #000;**/
+}
+
+.level-name { color: #dedede; font-size: 1.2em;margin-bottom:.4em}
+
+.death-count {float: right;}
+
+.timer-death-bar {
+   font-size: 130%;
+   text-align: left;
+}
+
+.timer-death-bar img {
+   width: 20px;
+   margin-right: 4px;
+
+   -webkit-transition: -webkit-transform .3s;
+   -o-transition: transform .3s;
+   transition: transform .3s;
+   transition: transform .3s,-webkit-transform .3s;
+   
+   margin-bottom: -3px;
+}
+
+/**If only displaying timer & death counter - add some margin**/
+.timer-death-bar > span:not(:first-child) {
+   margin-left:35px;
+}
+
+img.clear-flag {
+    transform: scale(1.4);
+    animation-name: fade-in-then-pulse;
+    animation-duration: 1.5s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in-out;
+}
+@keyframes fade-in-then-pulse {
+    0%   {opacity: 0;}
+    25% {opacity: 1;}
+    30% {transform: scale(1.4);}
+    65% {transform: scale(1.65);}
+    100% {transform: scale(1.4);}
+}
+
+.death-count img.pulse {
+   -webkit-transform: scale(1.2);
+   -ms-transform: scale(1.2);
+   transform: scale(1.2);
+}
+
+
+ /* Animations */
+.slide-in-left {
+  opacity: 0;
+  left: -500px;
+  bottom: 0px;
+  animation: slide-in-left 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+.slide-out-left {
+  opacity: 1;
+  left: 0px;
+  bottom: 0px;
+  animation: slide-out-left 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes slide-in-left {
+  100% {
+    left: 0px;
+    opacity: 1
+  }
+}
+
+@keyframes slide-out-left {
+  100% {
+    left: -600px;
+    opacity: 0
+  }
+}
+
+.slide-in-right {
+  opacity: 0;
+  right: -500px;
+  bottom: 0px;
+  animation: slide-in-right 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+.slide-out-right {
+  opacity: 1;
+  right: 0px;
+  bottom: 0px;
+  animation: slide-out-right 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes slide-in-right {
+  100% {
+    right: 0px;
+    opacity: 1
+  }
+}
+
+@keyframes slide-out-right {
+  100% {
+    right: -600px;
+    opacity: 0
+  }
+}
+
+.slide-in-top {
+  opacity: 0;
+  top: -500px;
+  left: 0px;
+  animation: slide-in-top 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+.slide-out-top {
+  opacity: 1;
+  top: 0px;
+  left: 0px;
+  animation: slide-out-top 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes slide-in-top {
+  100% {
+    top: 0px;
+    opacity: 1
+  }
+}
+
+@keyframes slide-out-top {
+  100% {
+    top: -600px;
+    opacity: 0
+  }
+}
+
+.slide-in-bottom {
+  opacity: 0;
+  bottom: -500px;
+  left: 0px;
+  animation: slide-in-bottom 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+.slide-out-bottom {
+  opacity: 1;
+  bottom: 0px;
+  left: 0px;
+  animation: slide-out-bottom 2s forwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes slide-in-bottom {
+  100% {
+    bottom: 0px;
+    opacity: 1
+  }
+}
+
+@keyframes slide-out-bottom {
+  100% {
+    bottom: -600px;
+    opacity: 0
+  }
+}

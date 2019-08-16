@@ -16,6 +16,8 @@
       // How do they look?
       slideFromDirection:'left', //left|right|top|bottom
 
+      border: 'none', // border: '1px solid black',
+
       levelCodeColor: '#ff49ad',
       levelNameColor: '#f5f5f5',
       levelAuthorColor: '#f5f5f5',
