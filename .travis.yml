@@ -20,7 +20,7 @@ before_deploy:
   - git tag $TRAVIS_TAG
   - cd MarioMaker2OCR/bin
   - mv Release MarioMaker2OCR
-  - zip -r MarioMaker2OCR_$VERSION_NUMBER.zip MarioMaker2OCR
+  - zip -r MarioMaker2OCR_$VERSION_NUMBER.zip MarioMaker2OCR -x "/Test/*"
   - cd ../../
   - export CHANGE_LOG=`git log $TRAVIS_COMMIT_RANGE --pretty='(%h) %s' | sed ':a;N;$!ba;s/\n/<br>/g'`
 
