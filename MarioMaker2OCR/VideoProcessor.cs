@@ -35,7 +35,7 @@ namespace MarioMaker2OCR
         private Mat levelDetailScreen;
         private string lastEvent;
 
-        private Dictionary<string, List<EventTemplate>> templates = new Dictionary<string, List<EventTemplate>>();
+        private Dictionary<string, List<AbstractTemplate>> templates = new Dictionary<string, List<AbstractTemplate>>();
 
 
         /// <summary>
@@ -85,21 +85,22 @@ namespace MarioMaker2OCR
             var originalLevelScreen = new Image<Bgr, byte>("referenceImage.jpg").Mat;
             levelDetailScreen = ImageLibrary.ChangeSize(originalLevelScreen, new Size(originalLevelScreen.Width, originalLevelScreen.Height), frameSize);
 
-            List<EventTemplate> clearDetailTemplates = new List<EventTemplate>();
-            List<EventTemplate> blackScreenTemplates = new List<EventTemplate>();
-            List<EventTemplate> postClearTemplates = new List<EventTemplate>();
+            List<AbstractTemplate> clearDetailTemplates = new List<AbstractTemplate>();
+            List<AbstractTemplate> blackScreenTemplates = new List<AbstractTemplate>();
+            List<AbstractTemplate> postClearTemplates = new List<AbstractTemplate>();
 
-
-            // Start Clear Detail screen templates
             clearDetailTemplates.Add(
-                new EventTemplate("./templates/480/worldrecord.png", "worldrecord", 0.6, new Rectangle[] {
-                    new Rectangle(new Point(445,85), new Size(115, 130)),
-                }, 1.31)
+                new EventColorTemplate("worldrecord", 353, .1, new Rectangle[] {
+                    new Rectangle(new Point(407,180), new Size(201, 45)),
+                    new Rectangle(new Point(407,80), new Size(201, 50))
+                })
             );
+
             clearDetailTemplates.Add(
-                new EventTemplate("./templates/480/firstclear.png", "firstclear", 0.6, new Rectangle[] {
-                    new Rectangle(new Point(445,85), new Size(115, 130)),
-                }, 1.31)
+                new EventColorTemplate("firstclear", 84, .1, new Rectangle[] {
+                    new Rectangle(new Point(407,180), new Size(201, 45)),
+                    new Rectangle(new Point(407,80), new Size(201, 50))
+                })
             );
 
             //Start Templates that run on black screen immediately following a clear
@@ -371,25 +372,41 @@ namespace MarioMaker2OCR
                         }
                         else if (flags.IsClear)
                         {
-
                             flags.IsClear = isClearFrame(hues);
                             if (!flags.IsClear) WaitForClearStats = true;
                         }
                         else if (WaitForClearStats && isClearWithStatsScreen(hues))
                         {
                             log.Info("Detected level clear.");
-                            // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
-                            // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
-                            Thread.Sleep(500);
-                            cap.Retrieve(currentFrame);
+
+                            // For NO_DEVICE, manually skip ahead the 500ms equivalent
+                            if (deviceId == NO_DEVICE)
+                            {
+                                double fps = cap.GetCaptureProperty(CapProp.Fps);
+                                int framesToSkip = (int)Math.Floor(.500 / (1 / fps));
+                                
+                                double i = cap.GetCaptureProperty(CapProp.PosFrames);
+                                cap.SetCaptureProperty(CapProp.PosFrames, i + framesToSkip);
+
+                                cap.Read(currentFrame);
+                                data = currentFrame.GetRawData();
+                            }
+                            else
+                            {
+                                // HACK: Apart from taking up more CPU to do a comparision like the Level Select screen this is the best solution imo
+                                // Match happens during transition, so 500ms is long enough to get to the screen, but not long enough to exit and miss it.
+                                Thread.Sleep(500);
+                                cap.Retrieve(currentFrame);
+                            }
 
                             ClearScreenEventArgs args = new ClearScreenEventArgs();
-                            args.frame = currentFrame.Clone().ToImage<Bgr, Byte>();
+                            args.frame = currentFrame.Clone().ToImage<Bgr, byte>();
 
                             // Check to see if this is the clear screen with comments on - things are positioned differently.
                             // Top of screen is yellow if comments are on
-                            Size topOfScreen = new Size(frameSize.Width, frameSize.Height / 6);
+                            Size topOfScreen = new Size(frameSize.Width, frameSize.Height / 8);
                             Dictionary<int, int> topHues = getHues(data, topOfScreen, skip);
+
                             if (isMostlyYellow(topHues)) args.commentsEnabled = true;
                             new Thread(new ParameterizedThreadStart(onClearScreen)).Start(args);
                         }
@@ -570,7 +587,7 @@ namespace MarioMaker2OCR
         {
             public Image<Bgr, byte> frame;
             public Point location;
-            public EventTemplate template;
+            public AbstractTemplate template;
         }
         public class LevelScreenEventArgs : TemplateMatchEventArgs
         {
@@ -611,7 +628,7 @@ namespace MarioMaker2OCR
                 LevelScreen?.Invoke(this, args);
             } else
             {
-                List<EventTemplate> ts;
+                List<AbstractTemplate> ts;
                 switch(this.lastEvent)
                 {
                     case "clear":
@@ -692,10 +709,10 @@ namespace MarioMaker2OCR
 
             e.clearTime = OCRLibrary.GetClearTimeFromFrame(e.frame, e.commentsEnabled);
 
-            Image<Gray, byte> grayscaleFrame = e.frame.Mat.ToImage<Gray, byte>().Resize(640, 480, Inter.Cubic);
+            Image<Bgr, byte> resizedFrame = e.frame.Mat.ToImage<Bgr, byte>().Resize(640, 480, Inter.Cubic);
             foreach (var tmpl in templates["clear"])
             {
-                var loc = tmpl.getLocation(grayscaleFrame);
+                var loc = tmpl.getLocation(resizedFrame);
                 if (loc != Point.Empty)
                 {
                     log.Info(String.Format("Detected {0}", tmpl.eventType));

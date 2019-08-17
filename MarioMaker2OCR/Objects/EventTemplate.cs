@@ -9,14 +9,23 @@ using System.Drawing;
 
 namespace MarioMaker2OCR.Objects
 {
-    public class EventTemplate : IDisposable
+    public class EventTemplate : AbstractTemplate, IDisposable
     {
         public Image<Gray, byte> template { get; }
-        public double threshold { get; }
-        public string eventType { get; }
         public string filename { get; }
         public Rectangle[] regions { get; }
         public double scale { get; }
+
+        public override double threshold { get; }
+        public override string eventType { get; }
+        public override Size size
+        {
+            get
+            {
+                if (template != null) return template.Size;
+                else return Size.Empty;
+            }
+        }
 
         bool disposed = false; 
         public void Dispose()
@@ -37,7 +46,6 @@ namespace MarioMaker2OCR.Objects
 
         public EventTemplate(string fn, string type, double thresh)
         {
-
             template = new Image<Gray, byte>(fn);
             threshold = thresh;
             eventType = type;
@@ -65,37 +73,41 @@ namespace MarioMaker2OCR.Objects
             this.scale = scale;
         }
 
-        public Point getLocation(Image<Gray, byte> frame)
+        public override Point getLocation(IInputArray frame)
         {
-            for (double i = 1; i <= scale; i = i + .05d)
+            if (frame is Image<Gray, byte>)
             {
-                if (regions == null || regions.Length == 0)
+                Image<Gray, byte> grayFrame = (Image<Gray, byte>)frame;
+
+                for (double i = 1; i <= scale; i = i + .05d)
                 {
-                    Point ret = getLocation(frame, Rectangle.Empty, i);
-                    if (!ret.IsEmpty)
+                    if (regions == null || regions.Length == 0)
                     {
-                        return ret;
-                    }
-                }
-                else
-                {
-                    foreach (Rectangle roi in regions)
-                    {
-                        Point ret = getLocation(frame, roi, i);
+                        Point ret = getLocation(grayFrame, Rectangle.Empty, i);
                         if (!ret.IsEmpty)
                         {
-                            ret.X += roi.X;
-                            ret.Y += roi.Y;
                             return ret;
+                        }
+                    }
+                    else
+                    {
+                        foreach (Rectangle roi in regions)
+                        {
+                            Point ret = getLocation(grayFrame, roi, i);
+                            if (!ret.IsEmpty)
+                            {
+                                ret.X += roi.X;
+                                ret.Y += roi.Y;
+                                return ret;
+                            }
                         }
                     }
                 }
             }
-
             return Point.Empty;
         }
 
-        public Point getLocation(Image<Gray, byte> frame, Rectangle roi, double scale)
+        private Point getLocation(Image<Gray, byte> frame, Rectangle roi, double scale)
         {
             Image<Gray, byte> templateResized;
             if (scale > 1)

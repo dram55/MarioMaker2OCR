@@ -144,7 +144,6 @@ namespace MarioMaker2OCR
                     WarpWorld = null;
                 }
                 processor = new VideoProcessor(deviceComboBox.SelectedIndex, SelectedResolution);
-                //processor = new VideoProcessor(new VideoCapture("D:/2019-08-11 04-23-08.flv"));
 
                 processor.TemplateMatch += broadcastTemplateMatch;
 
@@ -167,7 +166,6 @@ namespace MarioMaker2OCR
                 processor.ClearScreen += statsCallback;
 
                 processor.Start();
-                //processor.Start(true);
                 lockForm();
             }
             catch (Exception ex)
@@ -423,9 +421,8 @@ namespace MarioMaker2OCR
 
         private void previewMatch(object sender, VideoProcessor.TemplateMatchEventArgs e)
         {
-            var boundary = ImageLibrary.ChangeSize(new Rectangle(e.location, e.template.template.Size), processor.TEMPLATE_FRAME_SIZE, processor.frameSize);
+            var boundary = ImageLibrary.ChangeSize(new Rectangle(e.location, e.template.size), processor.TEMPLATE_FRAME_SIZE, processor.frameSize);
             previewer.SetLastMatch(e.frame, new Rectangle[] { boundary });
-            
         }
         private void previewNewFrame(object sender, VideoProcessor.NewFrameEventArgs e)
         {
