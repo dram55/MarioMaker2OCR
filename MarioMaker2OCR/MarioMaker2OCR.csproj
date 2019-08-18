@@ -405,6 +405,9 @@
     <Content Include="web\drambar\images\smw_clock.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="web\drambar\images\smw_clock_dark.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="web\drambar\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

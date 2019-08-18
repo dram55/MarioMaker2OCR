@@ -32,6 +32,7 @@ h4 {
   text-align: center;
   margin-bottom:8px;
   box-shadow: -2px 4px  5px rgba(0, 0, 0, .9) ;
+  max-width: 230px;
 }
 
 .level-code {
@@ -43,7 +44,7 @@ h4 {
   /**-webkit-text-stroke: .5px #000;**/
 }
 
-.level-name { color: #dedede; font-size: 1.2em;margin-bottom:.4em}
+.level-name { color: #dedede; font-size: 1.2em;margin-bottom:.4em; line-height: 1.2em;}
 
 .death-count {margin-left: auto;}
 .death-count img {margin-right:auto;}
