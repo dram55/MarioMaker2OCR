@@ -11,7 +11,8 @@
       isLevelAuthorVisible:true,
       isLevelCodeVisible:true,
 
-      // innerFadeAuthorAndName: 8000, // not yet supported.
+      innerFadeAuthorAndName: 0,    // fade between level name and level author
+                                    // set this to 0 to display both separately
 
       // How do they look?
       slideFromDirection:'left', //left|right|top|bottom
