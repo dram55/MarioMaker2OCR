@@ -41,6 +41,9 @@
                var visibleIndex = 0;
                var maxIndex = children.length;
 
+               // do not display animations if there aren't multiple elements
+               if (maxIndex <= 1) return;
+
                // hide children by default
                angular.forEach(jQuery(children), function(value, key) {
                   var child = angular.element(value);

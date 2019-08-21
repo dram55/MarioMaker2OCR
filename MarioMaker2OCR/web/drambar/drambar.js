@@ -164,12 +164,25 @@
          state.level = newLevel;
          state.deathCount = 0;
 
-         // For use in <inner-fade> directive
-         state.fadeItems = [newLevel.name, newLevel.author];
+         state.fadeItems = getInnerfadeItems(newLevel);
 
          startTimer();
          state.levelCleared = false;
       }
+
+      // For use in <inner-fade> directive
+      function getInnerfadeItems(newLevel) {
+         var fadeItems = [];
+         if (dramBarSettings.isLevelNameVisible) {
+            fadeItems.push(newLevel.name);
+         }
+         if (dramBarSettings.isLevelAuthorVisible) {
+            var author = '👤 ' + newLevel.author;
+            fadeItems.push(author);
+         }
+         return fadeItems;
+      }
+
       return state;
    }
 })();
