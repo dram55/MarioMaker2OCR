@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ICSharpCode.SharpZipLib.Zip;
+using System.IO;
 
 namespace MarioMaker2OCR.Test
 {
@@ -17,15 +19,14 @@ namespace MarioMaker2OCR.Test
         [TestMethod]
         public void TenMinuteGameplayTest()
         {
-            // Commented out for now since this is above githubs 100MB filesize limit - even when compressed. 
-            // Will make a smaller test in the near future.
-            //
-            // Here is the video: https://drive.google.com/file/d/1NMpA4z2AvedB4bbhtWvXrIlV4QuBxRTC/view?usp=sharing
-            //
-            //VideoCapture deathVideo = new VideoCapture(@"Test\testdata\video\720\Dram_Gameplay_Test_1.mp4");
-            VideoCapture deathVideo = new VideoCapture(@"");
-            return;
+            // Unzip video
+            FastZip fastZip = new FastZip();
+            string zip = @"Test\testdata\video\720\Dram_Video_Gameplay_1.zip";
+            string dir = @"Test\testdata\video\720\";
+            string videoFile = dir + "Dram_Video_Gameplay_1.mp4";
+            fastZip.ExtractZip(zip, dir, "");
 
+            VideoCapture deathVideo = new VideoCapture(videoFile);
 
             // Read first frame, for some reason the Bitmap is null - so we don't want this going to the VideoProcessor
             deathVideo.Read(new Mat());
@@ -74,7 +75,6 @@ namespace MarioMaker2OCR.Test
                 }
             };
 
-
             mockedVideoProcessor.Start(true);
 
             Assert.AreEqual(4, deathCount, "Death Check");
@@ -96,7 +96,13 @@ namespace MarioMaker2OCR.Test
             }
 
             Console.WriteLine("Unknown Template Count: " + unknownTemplateCount);
-            
+
+            try
+            {
+                File.Delete(videoFile);
+            }
+            catch(Exception ex)
+            {}
         }
     }
 }

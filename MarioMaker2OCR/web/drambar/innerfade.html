@@ -1,0 +1,15 @@
+<div class="inner-fade-container">
+   
+   <p class="inner-fade-size" style="opacity:0;">
+         {{innerfade.longestItem}}
+   </p>
+   <p class="inner-fade-item" ng-repeat="item in innerfade.items track by $index" 
+      style="position: absolute;
+             left: 0;
+             right: 0;
+             top: 9px;
+             margin-left: auto;
+             margin-right: auto;">
+      {{item}}
+   </p>
+</div>

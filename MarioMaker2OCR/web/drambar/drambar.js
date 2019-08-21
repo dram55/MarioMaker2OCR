@@ -164,6 +164,9 @@
          state.level = newLevel;
          state.deathCount = 0;
 
+         // For use in <inner-fade> directive
+         state.fadeItems = [newLevel.name, newLevel.author];
+
          startTimer();
          state.levelCleared = false;
       }

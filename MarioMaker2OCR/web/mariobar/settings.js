@@ -8,9 +8,11 @@
       isTimerVisible:true, 
       isDeathCountVisible:true,
       isLevelNameVisible:true,
-      isLevelAuthorVisible:false,
+      isLevelAuthorVisible:true,
       isLevelCodeVisible:true,
 
+      innerFadeAuthorAndName: 8000, // fade between level name and level author
+                                    // set this to 0 to display both separately
 
       // How do they look?
       slideFromDirection:'left', //left|right|top|bottom
@@ -34,7 +36,7 @@
       playTimerWarning:false,
       playTimerWarningAt:15, //minutes
 
-      // SMM Colors
+     // SMM Colors
 	  //
 	  //rgba(61, 80, 174, 1)   // Blue
 	  //rgba(20, 33, 112, 1)   // Dark Blue
@@ -45,7 +47,7 @@
 	  //rgba(250, 205, 0, 1)   // Yellow //#facd00
 	  //rgba(92, 28, 28, 1)    // Dark Brown //#5c1c1c
 
-      // 4th argument in rbga(0,0,0,X) is opacity.
+     // 4th argument in rbga(0,0,0,X) is opacity.
 	  // 0 = not visible.
 	  // 1 = opaque
    });

@@ -5,10 +5,12 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
    <title>Drambar</title>
+   <script src="/drambar/lib/jquery-3.4.1.min.js"></script>
    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.js"></script>
    <script src="https://cdn.rawgit.com/AngularClass/angular-websocket/v2.0.0/dist/angular-websocket.js"></script>
    <script src="/drambar/drambar.js"></script>
    <script src="/drambar/settings.js"></script>
+   <script src="/drambar/innerfade-directive.js"></script>
    
    <link rel="stylesheet" href="/drambar/style.css">
 </head>
@@ -18,10 +20,18 @@
          ng-class="((ctrl.state.hideCurrentLevel) ? 'slide-out-' : 'slide-in-')+ctrl.settings.slideFromDirection" 
          ng-style="{'font-size':ctrl.settings.fontSize, 'font-family':ctrl.settings.mainFont, 
          'background-color':ctrl.settings.backgroundColor, 'border':ctrl.settings.border}">
-         <h4 ng-if="ctrl.state.level.author && ctrl.settings.isLevelAuthorVisible" 
-         ng-style="{color:ctrl.settings.levelAuthorColor}" class="user-name">{{ctrl.state.level.author}}</h4>
-         <p class="level-name" ng-if="ctrl.settings.isLevelNameVisible" 
-            ng-style="{color:ctrl.settings.levelNameColor}">{{ctrl.state.level.name}}</p>
+
+            <div ng-if="!ctrl.settings.innerFadeAuthorAndName || ctrl.settings.innerFadeAuthorAndName <= 0">
+                  <h4 ng-if="ctrl.state.level.author && ctrl.settings.isLevelAuthorVisible" 
+                  ng-style="{color:ctrl.settings.levelAuthorColor}" class="user-name">{{ctrl.state.level.author}}</h4>
+                  <p class="level-name" ng-if="ctrl.settings.isLevelNameVisible" 
+                     ng-style="{color:ctrl.settings.levelNameColor}">{{ctrl.state.level.name}}</p>
+               </div>
+      
+               <div ng-if="ctrl.settings.innerFadeAuthorAndName > 0">
+                  <inner-fade items="ctrl.state.fadeItems" interval="ctrl.settings.innerFadeAuthorAndName"></inner-fade>
+               </div>
+
          <code ng-if="ctrl.state.level.code && ctrl.settings.isLevelCodeVisible" 
          class="level-code text-uppercase" ng-style="{color:ctrl.settings.levelCodeColor, 'font-family':ctrl.settings.levelCodeFont}">{{ctrl.state.level.code}}</code>
          <div class="timer-death-bar">
