@@ -15,8 +15,8 @@
    // Usage:
    // <inner-fade items="ctrl.listOfStrings" interval="8000"></inner-fade>
    //
-   innerFadeDirective.inject = ['$interval', '$timeout'];
-   function innerFadeDirective($interval, $timeout) {
+   innerFadeDirective.inject = ['$interval'];
+   function innerFadeDirective($interval) {
       return {
          restrict: 'E',
          templateUrl: '/drambar/innerfade.html',
@@ -28,15 +28,35 @@
          controllerAs: 'innerfade',
          bindToController: true,
          link: function innerFadeLink(scope, element) {
+            var intervalPromise;
 
-            // on items change
-            scope.$watchCollection('innerfade.items', function() {
-               if (scope.innerfade.items)
+            scope.$watchCollection('innerfade.items', function(newValue, oldValue) {
+               // Start the display when items are first detected
+               if (!oldValue && newValue.length > 0) {
+                  scope.stopDisplay()
+                  scope.startDisplay();
+               }
+               if (scope.innerfade.items) {
                   scope.innerfade.longestItem = scope.innerfade.items.reduce(function (a, b) { return a.length > b.length ? a : b; });
+
+                  // If interval hasn't been started even though there are items start it 
+                  // This condition can happen if you refresh browser while in a level
+                  if (!intervalPromise) {
+                     scope.startDisplay();
+                  }
+               }
             });
 
-            // wrap in $timeout to allow DOM to load children
-            $timeout(function(){
+            scope.stopDisplay = function() {
+               try {
+               $interval.cancel(intervalPromise);
+               }
+               catch(ex) {
+                  console.log("Attempted to stop the $interval - encountered error:" + ex);
+               }
+            }
+
+            scope.startDisplay = function() {
                var children = element.find("p.inner-fade-item");
                var visibleIndex = 0;
                var maxIndex = children.length;
@@ -55,7 +75,7 @@
                jQuery(children[0]).fadeTo(500, 1);
                
                // cycle through all elements - for each interval
-               $interval(function() {
+               intervalPromise = $interval(function() {
                   // Get next element index
                   var nextIndex = visibleIndex + 1;
                   if (nextIndex >= maxIndex)
@@ -71,8 +91,7 @@
                   visibleIndex = nextIndex;
          
                }, scope.innerfade.interval); // interval
-               
-            }, 100); // timeout
+            }
          }
       }
    }

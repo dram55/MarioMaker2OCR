@@ -61,7 +61,8 @@
          level: {},
          levelTimer: "",
          deathInProgress: false,
-         levelCleared: false
+         levelCleared: false,
+         fadeItems: []
       };
 
       // Timer functions
