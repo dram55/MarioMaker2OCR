@@ -109,6 +109,10 @@ The [OpenCV](https://opencv.org/) library is used for image processing and [Tess
 ### NuGet Packages
 https://github.com/dram55/MarioMaker2OCR/network/dependencies
 
+### Troubleshooting
+ - See list of known [issues](https://github.com/dram55/MarioMaker2OCR/issues).
+ - Must have Windows Media Player installed. This is not installed by default in Windows "N" or "KN" versions. ([issue 57](https://github.com/dram55/MarioMaker2OCR/issues/57))
+
 ## Contribution
 - [dram55](https://twitter.com/dram555) - Original OCR program to read level info to a file.
 - zi - (zi#7981 on discord) - Added preview window, websocket/http server broadcasting for all events, warp bar style html page, and various fixes/performance improvements. 
