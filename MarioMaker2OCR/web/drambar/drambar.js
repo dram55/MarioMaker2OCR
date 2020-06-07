@@ -85,7 +85,14 @@
             return;
          }
          var currentTime = new Date().getTime();
-         var totalSeconds = (currentTime - levelStartTime) / 1000;
+         var secondsInLevel = (currentTime - levelStartTime) / 1000;
+         var totalSeconds = secondsInLevel;
+
+         // Count Down
+         if (dramBarSettings.timerDirection == 1) {
+            totalSeconds = (dramBarSettings.playTimerWarningAt * 60) - secondsInLevel;
+         }
+
          var hours = Math.floor(totalSeconds / 3600);
          var minutes = (Math.floor(totalSeconds / 60) % 60);
          var seconds = Math.floor(totalSeconds % 60);
@@ -93,8 +100,16 @@
          if (hours > 0) state.levelTimer += hours.toString().padStart(2, '0') + ":";
          state.levelTimer += minutes.toString().padStart(2, '0');
          state.levelTimer += ":" + seconds.toString().padStart(2, '0');
-         if (dramBarSettings.playTimerWarning && (dramBarSettings.playTimerWarningAt * 60) == Math.floor(totalSeconds)) {
-            document.getElementById("timerAudio").play();
+         if (dramBarSettings.playTimerWarning && (dramBarSettings.playTimerWarningAt * 60) == Math.floor(secondsInLevel)) {
+             document.getElementById("timerAudio").play();
+         }
+
+         // Stop Time if count down
+         if (dramBarSettings.timerDirection == 1 && Math.floor(totalSeconds) == 0) {
+            pauseTimer();
+            if (dramBarSettings.playTimerWarning) {
+                document.getElementById("timerAudio").play();
+            }
          }
       }
 

@@ -34,7 +34,8 @@
 
       //Other options
       playTimerWarning:false,
-      playTimerWarningAt:15, //minutes
+      playTimerWarningAt: 15, //minutes
+      timerDirection: 0 // 0=count up // 1=count down
 
      // SMM Colors
 	  //
