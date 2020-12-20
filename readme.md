@@ -24,7 +24,7 @@ Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs
 
 ## How To Use
 ### Setup
-- If you are using OBS, download the [OBS-VirtualCam](https://obsproject.com/forum/resources/obs-virtualcam.539/) plugin.
+- If you are using OBS, download the [OBS-VirtualCam](https://obsproject.com/forum/resources/obs-virtualcam.949/) plugin.
     - Needed because this program can't access a capture card already in use by OBS.
 - In OBS, put a Filter -> Effect on your capture device, select the 'VirtualCam' effect.
 - Be sure to press the 'Start' button on the VirtualCam. This needs to be done everytime you start OBS.
@@ -33,7 +33,10 @@ Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs
 1) Open OBS before this program.
 1) In OBS, verify the VirtualCam is started. 
 1) Open the Mario Maker 2 OCR program.
-1) Select the capture device with Mario Maker 2 gameplay from the dropdown (use OBS VirtualCam from setup).
+1) Select the capture device with Mario Maker 2 gameplay from the dropdown 
+   - Make sure the capture device name matches the "Target Camera" name from Setup
+   - OBS has their own Virtual Camera now that shows up as "OBS Virtual Camera" that is not the device you want to use.
+   - If the camera does not show up in the OCR, try uninstalling and reinstalling the VirtualCameras
 1) Select a port number to host the web server.
 1) Select the resolution.
 1) Press **Start** button.
