@@ -24,8 +24,9 @@ Example of the program in use from [Karibukai Play](https://youtu.be/myG9h01B4Bs
 
 ## How To Use
 ### Setup
-- If you are using OBS, download the [OBS-VirtualCam](https://obsproject.com/forum/resources/obs-virtualcam.949/) plugin.
-    - Needed because this program can't access a capture card already in use by OBS.
+- OBS-VirtualCam - Needed because this program cannot access a capture card already in use by OBS.
+    - OBS 27 and under: https://obsproject.com/forum/resources/obs-virtualcam.949/
+    - OBS 28 and above: https://github.com/Avasam/obs-virtual-cam/releases 
 - In OBS, put a Filter -> Effect on your capture device, select the 'VirtualCam' effect.
 - Be sure to press the 'Start' button on the VirtualCam. This needs to be done everytime you start OBS.
 
