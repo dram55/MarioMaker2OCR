@@ -109,14 +109,15 @@ namespace MarioMaker2OCR
 
         public void Broadcast(string message)
         {
-            BroadcastAsync(Encoding.UTF8.GetBytes(message));
+            BroadcastAsync(message);
         }
 
         protected override async Task OnMessageReceivedAsync(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
         {
 
             //Effectively an echo server, anything one client sends gets sent to all connections. This allows other 'bots' to potentially interact and publish their own events.
-            await BroadcastAsync(rxBuffer.ToArray());
+            await BroadcastAsync(Encoding.UTF8.GetString(rxBuffer));
+            
         }
 
         protected override async Task OnClientConnectedAsync(IWebSocketContext context)
