@@ -284,8 +284,8 @@ namespace MarioMaker2OCR
         {
             // Since we are only targeting Windows users, forcing DShow should be a safe choice, this is required for SplitCam to be readable
             var newcap = new VideoCapture(device, VideoCapture.API.DShow);
-            newcap.SetCaptureProperty(CapProp.FrameHeight, captureResolution.Height);
-            newcap.SetCaptureProperty(CapProp.FrameWidth, captureResolution.Width);
+            newcap.Set(CapProp.FrameHeight, captureResolution.Height);
+            newcap.Set(CapProp.FrameWidth, captureResolution.Width);
 
             var info = getCaptureInfo(newcap);
             if(info.channels != 3)
@@ -306,7 +306,7 @@ namespace MarioMaker2OCR
             Mat tmp = new Mat();
             video.Read(tmp);
 
-            if (tmp.Bitmap == null)
+            if (tmp.IsEmpty)
             {
                 throw new Exception("Failed to get image from video device");
             }
@@ -349,8 +349,8 @@ namespace MarioMaker2OCR
                             cap.Read(currentFrame);
                             if (currentFrame.IsEmpty) return;
                             data = currentFrame.GetRawData();
-                            double fps = cap.GetCaptureProperty(CapProp.Fps);
-                            double i = cap.GetCaptureProperty(CapProp.PosFrames);
+                            double fps = cap.Get(CapProp.Fps);
+                            double i = cap.Get(CapProp.PosFrames);
                             if (i % (int)Math.Floor(fps / (1000/FRAME_BUFFER_INTERVAL)) == 0) frameBuffer_tick();
                         }
                         else
@@ -382,11 +382,11 @@ namespace MarioMaker2OCR
                             // For NO_DEVICE, manually skip ahead the 500ms equivalent
                             if (deviceId == NO_DEVICE)
                             {
-                                double fps = cap.GetCaptureProperty(CapProp.Fps);
+                                double fps = cap.Get(CapProp.Fps);
                                 int framesToSkip = (int)Math.Floor(.500 / (1 / fps));
                                 
-                                double i = cap.GetCaptureProperty(CapProp.PosFrames);
-                                cap.SetCaptureProperty(CapProp.PosFrames, i + framesToSkip);
+                                double i = cap.Get(CapProp.PosFrames);
+                                cap.Set(CapProp.PosFrames, i + framesToSkip);
 
                                 cap.Read(currentFrame);
                                 data = currentFrame.GetRawData();

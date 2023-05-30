@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Unosquare.Labs.EmbedIO;
-using Unosquare.Labs.EmbedIO.Modules;
+using EmbedIO;
+using EmbedIO.WebSockets;
 using Newtonsoft.Json;
 using MarioMaker2OCR.Objects;
+using EmbedIO.Files;
+using System.Threading.Tasks;
+using DirectShowLib;
+
 namespace MarioMaker2OCR
 {
     internal static class SMMServer
@@ -25,16 +29,15 @@ namespace MarioMaker2OCR
         public static void Start()
         {
             if (server != null) return;
-            server = new WebServer(String.Format("http://localhost:{0}/", port));
-
-            // FIXME: EmbedIO 3.0 is moving to a more general FileModule in-place of this one
-            server.RegisterModule(new StaticFilesModule(webPath));
-
             wss = new SMMWebSocketServer();
-            server.RegisterModule(new WebSocketsModule());
-            server.Module<WebSocketsModule>().RegisterWebSocketsServer<SMMWebSocketServer>("/wss", wss);
+            server = new WebServer(o => o
+                .WithUrlPrefix($"http://localhost:{port}/")
+                .WithMode(HttpListenerMode.EmbedIO))
+                .WithModule(wss)
+                .WithStaticFolder("/", webPath, true);
 
             server.RunAsync();
+
         }
 
         /// <summary>
@@ -85,10 +88,7 @@ namespace MarioMaker2OCR
         {
             try
             {
-                foreach (var ws in wss?.WebSockets)
-                {
-                    ws.WebSocket.SendAsync(Encoding.UTF8.GetBytes(message), true);
-                }
+                wss.Broadcast(message);
             }
             catch (Exception e)
             {
@@ -97,42 +97,41 @@ namespace MarioMaker2OCR
         }
     }
 
-    internal class SMMWebSocketServer : WebSocketsServer
+    internal class SMMWebSocketServer : WebSocketModule
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public SMMWebSocketServer() : base(true)
-        {
-        }
-        public override string ServerName => "SMM WebSocketServer";
 
-        protected override void OnMessageReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
+        public SMMWebSocketServer() : base("/wss", true)
         {
+
+        }
+
+        public void Broadcast(string message)
+        {
+            BroadcastAsync(Encoding.UTF8.GetBytes(message));
+        }
+
+        protected override async Task OnMessageReceivedAsync(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
+        {
+
             //Effectively an echo server, anything one client sends gets sent to all connections. This allows other 'bots' to potentially interact and publish their own events.
-            foreach (var ws in WebSockets)
-            {
-                if (ws != context) Send(ws, rxBuffer.ToArray());
-            }
+            await BroadcastAsync(rxBuffer.ToArray());
         }
 
-        protected override void OnClientConnected(IWebSocketContext context, System.Net.IPEndPoint localEndPoint, System.Net.IPEndPoint remoteEndPoint)
+        protected override async Task OnClientConnectedAsync(IWebSocketContext context)
         {
             // Send the cached level on connect - if available
             if (SMMServer.LastLevelTransmitted != null)
             {
                 string message = JsonConvert.SerializeObject(SMMServer.LastLevelTransmitted);
-                Send(context, message);
+                await SendAsync(context, message);
             }
         }
 
-        protected override void OnFrameReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
+        protected override Task OnClientDisconnectedAsync(IWebSocketContext context)
         {
-            // Do Nothing
-        }
-
-        protected override void OnClientDisconnected(IWebSocketContext context)
-        {
-            // Do Nothing
+            return Task.CompletedTask;
         }
     }
 }

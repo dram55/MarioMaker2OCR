@@ -128,4 +128,5 @@
         private System.Windows.Forms.TabPage tabLastMatch;
         private Emgu.CV.UI.ImageBox imgLastMatch;
     }
+
 }
